@@ -160,8 +160,6 @@ class CommonTsetlinMachine():
 		if self.first:
 			self.first = False
 
-			print("X", self.dim)
-
 			if len(X.shape) == 3:
 				self.dim = (X.shape[1], X.shape[2],  1)
 			elif len(X.shape) == 4:
