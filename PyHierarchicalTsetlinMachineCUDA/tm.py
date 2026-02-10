@@ -160,10 +160,14 @@ class CommonTsetlinMachine():
 		if self.first:
 			self.first = False
 
+			print("X", self.dim)
+
 			if len(X.shape) == 3:
 				self.dim = (X.shape[1], X.shape[2],  1)
 			elif len(X.shape) == 4:
 				self.dim = X.shape[1:]
+
+			print("X", self.dim)
 
 			if self.append_negated:
 				self.number_of_features = int(self.patch_dim[0]*self.patch_dim[1]*self.dim[2] + (self.dim[0] - self.patch_dim[0]) + (self.dim[1] - self.patch_dim[1]))*2
