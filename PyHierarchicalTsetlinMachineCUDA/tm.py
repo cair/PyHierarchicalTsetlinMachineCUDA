@@ -35,13 +35,22 @@ from time import time
 g = curandom.XORWOWRandomNumberGenerator() 
 
 class CommonTsetlinMachine():
-	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=(3, 10, 2, 4, 2), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
 		self.number_of_state_bits = number_of_state_bits
 		self.T = int(T)
 		self.s = s
 		self.q = q
+		self.hierarchy_structure = np.array(hierarchy_structure, dtype=np.uint32)
+		self.depth = len(hierarchy_structure)
+		self.hierarchy_size = np.array(hierarchy_structure, dtype=np.uint32)
+		size_previous_level = 1
+		for d in range(self.depth):
+			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1] * size_previous_level
+			size *= self.hierarchy_size[self.depth - d - 1]
+			print(self.hierarchy_size[self.depth - d - 1])
+
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.append_negated = append_negated
 		self.grid = grid
@@ -77,6 +86,8 @@ class CommonTsetlinMachine():
 			cuda.Context.synchronize()
 
 	def allocate_gpu_memory(self, number_of_examples):
+		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
+
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
