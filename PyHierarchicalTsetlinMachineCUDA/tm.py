@@ -45,12 +45,12 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure = np.array(hierarchy_structure, dtype=np.uint32)
 		self.depth = len(hierarchy_structure)
 		self.hierarchy_size = np.array(hierarchy_structure, dtype=np.uint32)
-		size_previous_level = 1
+		size_level = 1
 		print(self.depth)
 		for d in range(self.depth):
-			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1] * size_previous_level
-			size_previous_level *= self.hierarchy_size[self.depth - d - 1]
-			print(self.depth - d - 1, self.hierarchy_structure[self.depth - d - 1])
+			size_level *= self.hierarchy_structure[self.depth - d - 1]
+			self.hierarchy_size[self.depth - d - 1] = size_level
+			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.append_negated = append_negated
