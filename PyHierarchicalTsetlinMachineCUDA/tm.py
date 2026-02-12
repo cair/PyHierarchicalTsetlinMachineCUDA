@@ -53,10 +53,11 @@ class CommonTsetlinMachine():
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 
 		self.number_of_features = 1
-		for d in range(self.depth + (self.depth % 2) - 2, -1, 2):
-			self.number_of_features *= elf.hierarchy_structure[d]
+		for d in range(self.depth + (self.depth % 2) - 2, -1, -2):
+			print(d, self.hierarchy_structure[d])
+			self.number_of_features *= self.hierarchy_structure[d]
 		print(self.number_of_features)
-		
+
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.append_negated = append_negated
 		self.grid = grid
