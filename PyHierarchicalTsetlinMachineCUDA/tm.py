@@ -50,7 +50,7 @@ class CommonTsetlinMachine():
 		for d in range(self.depth):
 			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1] * size_previous_level
 			size_previous_level *= self.hierarchy_size[self.depth - d - 1]
-			print(self.hierarchy_size[self.depth - d - 1])
+			print(self.depth - d - 1, self.hierarchy_structure[self.depth - d - 1])
 
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.append_negated = append_negated
