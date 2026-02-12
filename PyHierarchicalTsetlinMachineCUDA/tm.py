@@ -36,6 +36,7 @@ g = curandom.XORWOWRandomNumberGenerator()
 
 class CommonTsetlinMachine():
 	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=(3, 10, 2, 4, 2), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+		print("HELLO1")
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
 		self.number_of_state_bits = number_of_state_bits
@@ -294,6 +295,7 @@ class MultiClassConvolutionalTsetlinMachine2D(CommonTsetlinMachine):
 	
 	def __init__(self, number_of_clauses, T, s, patch_dim, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		super().__init__(number_of_clauses, T, s, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+		print("HELLO")
 		self.patch_dim = patch_dim
 		self.negative_clauses = 1
 
