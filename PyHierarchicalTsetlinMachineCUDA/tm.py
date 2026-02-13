@@ -58,6 +58,7 @@ class CommonTsetlinMachine():
 			size_level *= self.hierarchy_structure[self.depth - d - 1]
 			self.hierarchy_size[self.depth - d - 1] = size_level
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
+		print(self.hierarchy_size)
 
 		self.number_of_features = 1
 		for d in range(self.depth + (self.depth % 2) - 2, -1, -2):
@@ -66,8 +67,8 @@ class CommonTsetlinMachine():
 		print(self.number_of_features)
 
 		if self.append_negated:
-			self.hierarchy_structure[-1] *= 2
-			self.hierarchy_size[-1] *= 2
+			self.hierarchy_structure[0] *= 2
+			self.hierarchy_size[0] *= 2
 
 		self.number_of_ta_chunks = int((self.hierarchy_structure[-1] - 1) / 32 + 1)
 
