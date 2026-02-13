@@ -79,7 +79,7 @@ class CommonTsetlinMachine():
 			self.number_of_feature_chunks *= self.hierarchy_structure[d]
 		print("FEATURE_CHUNKS", self.number_of_feature_chunks)
 		
-		print("TA_CHUNKS, TA_CHUNKS_PER_LEAF, FEATURES", self.number_of_ta_chunks, self.number_of_ta_chunks_per_leaf, self.hierarchy_structure[0])
+		print("TA_CHUNKS, TA_CHUNKS_PER_LEAF, FEATURES", self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.hierarchy_structure[0])
 		print(self.hierarchy_size)
 		print(self.hierarchy_structure)
 
