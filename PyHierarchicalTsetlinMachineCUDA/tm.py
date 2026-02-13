@@ -109,7 +109,8 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
 		self.hierarchy_size_gpu = cuda.mem_alloc(self.hierarchy_size.nbytes)
 
-		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_ta_chunks*self.number_of_state_bits*4)
+		#self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_ta_chunks*self.number_of_state_bits*4)
+		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4) # Maybe clause components can have weights as well???
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 
