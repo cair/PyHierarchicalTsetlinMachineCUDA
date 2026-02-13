@@ -44,7 +44,7 @@ class CommonTsetlinMachine():
 		self.q = q
 		self.hierarchy_structure = np.array(hierarchy_structure, dtype=np.uint32)
 		self.depth = len(hierarchy_structure)
-		self.hierarchy_size = np.array(hierarchy_structure, dtype=np.uint32)
+		self.hierarchy_size = np.empty(len(hierarchy_structure), dtype=np.uint32)
 		size_level = 1
 		print(self.depth)
 		for d in range(self.depth):
@@ -57,6 +57,14 @@ class CommonTsetlinMachine():
 			print(d, self.hierarchy_structure[d])
 			self.number_of_features *= self.hierarchy_structure[d]
 		print(self.number_of_features)
+
+		if self.append_negated:
+			self.hierarchy_structure[-1] *= 2
+			self.hierarchy_size[-1] *= 2
+
+		self.number_of_ta_chunks = int((self.hierarchy_structure[-1] - 1) / 32 + 1)
+
+		print("TA_CHUNKS", self.number_of_ta_chunks)
 
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.append_negated = append_negated
@@ -94,6 +102,7 @@ class CommonTsetlinMachine():
 
 	def allocate_gpu_memory(self, number_of_examples):
 		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
+		self.hierarchy_size_gpu = cuda.mem_alloc(self.hierarchy_size.nbytes)
 
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
