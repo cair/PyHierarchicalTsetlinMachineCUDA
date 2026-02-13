@@ -70,9 +70,9 @@ class CommonTsetlinMachine():
 			self.hierarchy_structure[0] *= 2
 			self.hierarchy_size[0] *= 2
 
-		self.number_of_ta_chunks = int((self.hierarchy_structure[-1] - 1) / 32 + 1)
+		self.number_of_ta_chunks = int((self.hierarchy_structure[0] - 1) / 32 + 1)
 
-		print("TA_CHUNKS, FEATURES", self.number_of_ta_chunks, self.hierarchy_structure[-1])
+		print("TA_CHUNKS, FEATURES", self.number_of_ta_chunks, self.hierarchy_structure[0])
 
 		self.X_train = np.array([])
 		self.Y_train = np.array([])
