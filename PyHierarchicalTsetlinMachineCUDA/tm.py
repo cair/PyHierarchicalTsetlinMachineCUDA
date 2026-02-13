@@ -50,11 +50,11 @@ class CommonTsetlinMachine():
 		self.grid = grid
 		self.block = block
 
-		self.hierarchy_size = np.empty(len(hierarchy_structure), dtype=np.uint32)
+		self.hierarchy_size = np.zeros(len(hierarchy_structure), dtype=np.uint32)
 
 		size_level = 1
 		print(self.depth)
-		for d in range(self.depth):
+		for d in range(self.depth-1):
 			size_level *= self.hierarchy_structure[self.depth - d - 1]
 			self.hierarchy_size[self.depth - d - 1] = size_level
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
@@ -75,7 +75,6 @@ class CommonTsetlinMachine():
 		print("TA_CHUNKS, FEATURES", self.number_of_ta_chunks, self.hierarchy_structure[0])
 		print(self.hierarchy_size)
 		print(self.hierarchy_structure)
-
 
 		self.X_train = np.array([])
 		self.Y_train = np.array([])
@@ -110,8 +109,8 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
 		self.hierarchy_size_gpu = cuda.mem_alloc(self.hierarchy_size.nbytes)
 
-		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
-		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
+		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_ta_chunks*self.number_of_state_bits*4)
+		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4) # Maybe clause components can have weights as well???
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 
 	def ta_action(self, clause, ta):
