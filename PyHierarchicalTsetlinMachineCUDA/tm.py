@@ -44,7 +44,14 @@ class CommonTsetlinMachine():
 		self.q = q
 		self.hierarchy_structure = np.array(hierarchy_structure, dtype=np.uint32)
 		self.depth = len(hierarchy_structure)
+
+		self.boost_true_positive_feedback = boost_true_positive_feedback
+		self.append_negated = append_negated
+		self.grid = grid
+		self.block = block
+
 		self.hierarchy_size = np.empty(len(hierarchy_structure), dtype=np.uint32)
+
 		size_level = 1
 		print(self.depth)
 		for d in range(self.depth):
@@ -65,11 +72,6 @@ class CommonTsetlinMachine():
 		self.number_of_ta_chunks = int((self.hierarchy_structure[-1] - 1) / 32 + 1)
 
 		print("TA_CHUNKS", self.number_of_ta_chunks)
-
-		self.boost_true_positive_feedback = boost_true_positive_feedback
-		self.append_negated = append_negated
-		self.grid = grid
-		self.block = block
 
 		self.X_train = np.array([])
 		self.Y_train = np.array([])
