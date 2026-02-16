@@ -203,9 +203,9 @@ code_update = """
 					}
 				}
 
-				if (clause_output) {
+				if (clause_output) { // FIX
 					for (int class_id = 0; class_id < CLASSES; ++class_id) {
-						int clause_weight = clause_weights[class_id*CLAUSES + clause];
+						int clause_weight = clause_weights[class_id*CLAUSES];
 						atomicAdd(&class_sum[class_id], clause_weight);					
 					}
 				}
