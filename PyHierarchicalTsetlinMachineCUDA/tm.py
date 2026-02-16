@@ -119,7 +119,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
 			print("Allocating memory for votes, depth %d, size %d" % (d, self.hierarchy_size[d]))
-			self.hierarchy_votes.append(cuda.mem_alloc(self.hierarchy_size[d]*4))
+			self.hierarchy_votes.append(cuda.mem_alloc(np.ulong(self.hierarchy_size[d]*4)))
 
 		#self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
