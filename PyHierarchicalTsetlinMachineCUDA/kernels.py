@@ -181,7 +181,7 @@ code_update = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			for (int component = index; clause < CLAUSES*COMPONENTS; clause += stride) {
+			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS*STATE_BITS];
 
 				int clause_output;
