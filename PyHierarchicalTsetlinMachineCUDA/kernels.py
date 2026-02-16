@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Ole-Christoffer Granmo
+# Copyright (c) 2026 Ole-Christoffer Granmo and the University of Agder
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -174,6 +174,44 @@ code_update = """
 				}
 			}
 		}
+
+		// Evaluate example
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			for (int component = index; clause < CLAUSES*COMPONENTS; clause += stride) {
+				unsigned int *ta_state = &global_ta_state[clause*LA_CHUNKS*STATE_BITS];
+
+				int clause_output;
+				for (int patch = 0; patch < PATCHES; ++patch) {
+					clause_output = 1;
+					for (int la_chunk = 0; la_chunk < LA_CHUNKS-1; ++la_chunk) {
+						if ((ta_state[la_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LA_CHUNKS*PATCHES) + patch*LA_CHUNKS + la_chunk]) != ta_state[la_chunk*STATE_BITS + STATE_BITS - 1]) {
+							clause_output = 0;
+							break;
+						}
+					}
+
+					if ((ta_state[(LA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LA_CHUNKS*PATCHES) + patch*LA_CHUNKS + LA_CHUNKS-1] & FILTER) != (ta_state[(LA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+						clause_output = 0;
+					}
+
+					if (clause_output) {
+						break;
+					}
+				}
+
+				if (clause_output) {
+					for (int class_id = 0; class_id < CLASSES; ++class_id) {
+						int clause_weight = clause_weights[class_id*CLAUSES + clause];
+						atomicAdd(&class_sum[class_id], clause_weight);					
+					}
+				}
+			}
+		}
+
 
 		// Evaluate example
 		__global__ void evaluate(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)

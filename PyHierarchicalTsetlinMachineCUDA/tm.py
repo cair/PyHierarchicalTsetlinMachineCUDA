@@ -116,10 +116,10 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
 		self.hierarchy_size_gpu = cuda.mem_alloc(self.hierarchy_size.nbytes)
 
+		# GPU memory for accumulating votes, level by level
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
-			print("Allocating memory for votes, depth %d, size %d" % (d, self.hierarchy_size[d]))
-			self.hierarchy_votes.append(cuda.mem_alloc(int(self.hierarchy_size[d])*4))
+			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
 
 		#self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
@@ -221,6 +221,7 @@ class CommonTsetlinMachine():
 			parameters = """
 	#define CLASSES %d
 	#define CLAUSES %d
+	#define COMPONENTS %d
 	#define FEATURES %d
 	#define STATE_BITS %d
 	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
@@ -233,7 +234,7 @@ class CommonTsetlinMachine():
 	#define PATCHES %d
 
 	#define NUMBER_OF_EXAMPLES %d
-""" % (self.number_of_outputs, self.number_of_clauses, self.number_of_features, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
+""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[0], self.number_of_features, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
 
 			mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 			self.prepare = mod_prepare.get_function("prepare")
