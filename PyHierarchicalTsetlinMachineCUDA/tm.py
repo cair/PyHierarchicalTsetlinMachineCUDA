@@ -93,6 +93,7 @@ class CommonTsetlinMachine():
 		self.X_test = np.array([])
 		self.ta_state = np.array([])
 		self.clause_weights = np.array([])
+		self.component_weights = np.array([])
 
 		self.first = True
 
@@ -125,7 +126,8 @@ class CommonTsetlinMachine():
 
 		#self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
-		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4) # Maybe clause components can have weights as well???
+		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
+		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 
 	def ta_action(self, clause, ta):
