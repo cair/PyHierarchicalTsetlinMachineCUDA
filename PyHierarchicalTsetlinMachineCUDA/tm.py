@@ -46,7 +46,7 @@ class CommonTsetlinMachine():
 		self.T = int(T)
 		self.s = s
 		self.q = q
-		self.hierarchy_structure = np.array(hierarchy_structure, dtype=np.uint32)
+		self.hierarchy_structure = hierarchy_structure
 		self.depth = len(hierarchy_structure)
 
 		self.boost_true_positive_feedback = boost_true_positive_feedback
@@ -118,9 +118,6 @@ class CommonTsetlinMachine():
 			cuda.Context.synchronize()
 
 	def allocate_gpu_memory(self, number_of_examples):
-		self.hierarchy_structure_gpu = cuda.mem_alloc(self.hierarchy_structure.nbytes)
-		self.hierarchy_size_gpu = cuda.mem_alloc(self.hierarchy_size.nbytes)
-
 		# GPU memory for accumulating votes, level by level
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
