@@ -58,14 +58,14 @@ class CommonTsetlinMachine():
 
 		size_level = 1
 		print(self.depth)
-		for d in range(self.depth-1):
+		for d in range(self.depth -1):
 			size_level *= self.hierarchy_structure[self.depth - d - 1][1]
 			self.hierarchy_size[self.depth - d - 1] = size_level
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print(self.hierarchy_size)
 
 		self.number_of_features = 1
-		for d in range(self.depth, -1, -1):
+		for d in range(self.depth - 1, -1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_features *= self.hierarchy_structure[d][1]
 		print(self.number_of_features)
@@ -78,7 +78,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_size[0] = self.number_of_ta_chunks_per_leaf * self.hierarchy_size[1]
 
 		self.number_of_feature_chunks = self.number_of_ta_chunks_per_leaf
-		for d in range(self.depth, 1, -1):
+		for d in range(self.depth - 1, 1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_feature_chunks *= self.hierarchy_structure[d][1]
 		
