@@ -77,12 +77,12 @@ class CommonTsetlinMachine():
 
 		self.hierarchy_size[0] = self.number_of_ta_chunks_per_leaf * self.hierarchy_size[1]
 
-		self.number_of_feature_chunks = self.number_of_ta_chunks_per_leaf
+		self.number_of_literal_chunks = self.number_of_ta_chunks_per_leaf
 		for d in range(self.depth - 1, 1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
-				self.number_of_feature_chunks *= self.hierarchy_structure[d][1]
+				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 		
-		print("FEATURE_CHUNKS", self.number_of_feature_chunks)
+		print("LITERAL_CHUNKS", self.number_of_literal_chunks)
 		
 		print("TA_CHUNKS, TA_CHUNKS_PER_LEAF, FEATURES", self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.hierarchy_structure[0])
 		print(self.hierarchy_size)
@@ -226,6 +226,7 @@ class CommonTsetlinMachine():
 	#define COMPONENTS %d
 	#define TA_CHUNKS_PER_LEAF %d
 	#define FEATURES %d
+	#define LITERAL_CHUNKS %d
 	#define STATE_BITS %d
 	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
 	#define S %f
@@ -237,7 +238,7 @@ class CommonTsetlinMachine():
 	#define PATCHES %d
 
 	#define NUMBER_OF_EXAMPLES %d
-""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.number_of_features, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
+""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.number_of_features, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
 
 			mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 			self.prepare = mod_prepare.get_function("prepare")
