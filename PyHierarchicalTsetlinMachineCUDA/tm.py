@@ -32,10 +32,14 @@ from pycuda.compiler import SourceModule
 
 from time import time
 
+OR_GROUP = "OR a group of children"
+OR_ALTERNATIVES = "Create alternatives from child"
+AND_GROUP = "AND a group of children"
+
 g = curandom.XORWOWRandomNumberGenerator() 
 
 class CommonTsetlinMachine():
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=(3, 10, 2, 4, 2), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=(((AND_GROUP, 3), (OR_ALTERNATIVES, 10), (OR_GROUP, 2), (OR_ALTERNATIVES, 4), (AND_GRP, 2))), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
 		self.number_of_state_bits = number_of_state_bits
@@ -55,28 +59,29 @@ class CommonTsetlinMachine():
 		size_level = 1
 		print(self.depth)
 		for d in range(self.depth-1):
-			size_level *= self.hierarchy_structure[self.depth - d - 1]
+			size_level *= self.hierarchy_structure[self.depth - d - 1][1]
 			self.hierarchy_size[self.depth - d - 1] = size_level
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print(self.hierarchy_size)
 
 		self.number_of_features = 1
-		for d in range(self.depth + (self.depth % 2) - 2, -1, -2):
-			print(d, self.hierarchy_structure[d])
-			self.number_of_features *= self.hierarchy_structure[d]
+		for d in range(self.depth, -1, -1):
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
+				self.number_of_features *= self.hierarchy_structure[d][1]
 		print(self.number_of_features)
 
 		if self.append_negated:
-			self.hierarchy_structure[0] *= 2
+			self.hierarchy_structure[0][1] *= 2
 
-		self.number_of_ta_chunks_per_leaf = int((self.hierarchy_structure[0] - 1) / 32 + 1)
+		self.number_of_ta_chunks_per_leaf = int((self.hierarchy_structure[0][1] - 1) / 32 + 1)
 
 		self.hierarchy_size[0] = self.number_of_ta_chunks_per_leaf * self.hierarchy_size[1]
 
 		self.number_of_feature_chunks = self.number_of_ta_chunks_per_leaf
-		for d in range(self.depth + (self.depth % 2) - 2, 1, -2):
-			print(d, self.hierarchy_structure[d])
-			self.number_of_feature_chunks *= self.hierarchy_structure[d]
+		for d in range(self.depth, 1, -1):
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
+				self.number_of_feature_chunks *= self.hierarchy_structure[d][1]
+		
 		print("FEATURE_CHUNKS", self.number_of_feature_chunks)
 		
 		print("TA_CHUNKS, TA_CHUNKS_PER_LEAF, FEATURES", self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.hierarchy_structure[0])
@@ -222,6 +227,7 @@ class CommonTsetlinMachine():
 	#define CLASSES %d
 	#define CLAUSES %d
 	#define COMPONENTS %d
+	#define TA_CHUNKS_PER_LEAF %d
 	#define FEATURES %d
 	#define STATE_BITS %d
 	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
@@ -234,7 +240,7 @@ class CommonTsetlinMachine():
 	#define PATCHES %d
 
 	#define NUMBER_OF_EXAMPLES %d
-""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[0], self.number_of_features, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
+""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[0], self.number_of_ta_chunks_per_leaf, self.number_of_features, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
 
 			mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 			self.prepare = mod_prepare.get_function("prepare")

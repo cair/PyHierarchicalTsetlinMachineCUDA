@@ -176,14 +176,18 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)
+		/* __global__ void evaluate_leaves(unsigned int *global_ta_state, int *clause_weights, int *component_output, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+			for (int component_patch = index; component < CLAUSES*COMPONENTS*PATCHES; component += stride) {
+				int patch = component_patch % PATCHES;
+				int component = component_patch / PATCHES;
+
 				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS*STATE_BITS];
 
+				// Identify correct feature patch...
 				int clause_output;
 				for (int patch = 0; patch < PATCHES; ++patch) {
 					clause_output = 1;
@@ -210,7 +214,7 @@ code_update = """
 					}
 				}
 			}
-		}
+		}*/
 
 
 		// Evaluate example
