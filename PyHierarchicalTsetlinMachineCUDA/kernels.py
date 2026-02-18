@@ -184,8 +184,8 @@ code_update = """
 			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
-/*				int component_output = 1;
-				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+				int component_output = 1;
+/*				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*LITERAL_CHUNKS + (component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
