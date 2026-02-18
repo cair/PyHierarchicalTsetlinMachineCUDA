@@ -198,7 +198,7 @@ code_update = """
 					}
 				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[((component / or_alternatives) % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[((component/or_alternatives) % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
 					component_output = 0;
 				}
 
@@ -255,31 +255,25 @@ code_update = """
 				global_component_output[component] = component_output;
 			}
 		}
+*/
 
-		__global__ void evaluate_or_alternatives(int alternatives, int *output, int *input, int number_of_inputs)
+		__global__ void evaluate_or_alternatives(int *child_input, int number_of_or_alternatives, *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_and_groups)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
-				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
-				int component_output = 1;
-				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						component_output = 0;
-						break;
-					}
+			// Add up the votes of each OR node
+			for (int or_alternatives_node = index; or_alternatives_node < number_of_or_alternatives_nodes; or_alternatives_node += stride) {
+				// Sum up votes from each or alternative
+				int or_alternatives_vote_sum = 0;
+				for (int or_alternative = 0; or_alternative > number_of_or_alternatives; ++or_alternative) {
+					or_alternatives_vote_sum += child_input[or_alternatives_node*number_of_or_alternatives + or_alternative];
 				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
-					component_output = 0;
-				}
-
-				global_component_output[component] = component_output;
+				// Store vote sum as node output
+				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
 			}
 		}
-	*/
 
 		// Evaluate example
 		__global__ void evaluate(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)
