@@ -39,7 +39,7 @@ AND_GROUP = "AND a group of children"
 g = curandom.XORWOWRandomNumberGenerator() 
 
 class CommonTsetlinMachine():
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 3), (OR_ALTERNATIVES, 10), (OR_GROUP, 2), (OR_ALTERNATIVES, 4), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 3), (OR_ALTERNATIVES, 10), (AND_GROUP, 2), (OR_ALTERNATIVES, 4), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
 		self.number_of_state_bits = number_of_state_bits
