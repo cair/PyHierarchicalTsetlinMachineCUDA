@@ -186,6 +186,79 @@ code_update = """
 
 				int component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*LITERAL_CHUNKS + (component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+						component_output = 0;
+						break;
+					}
+				}
+
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*LITERAL_CHUNKS + (component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+					component_output = 0;
+				}
+
+				global_component_output[component] = component_output;
+			}
+		}
+
+		// Evaluate example
+		__global__ void evaluate_and_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+				int component_output = 1;
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+						component_output = 0;
+						break;
+					}
+				}
+
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+					component_output = 0;
+				}
+
+				global_component_output[component] = component_output;
+			}
+		}
+
+		__global__ void evaluate_or_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+				int component_output = 1;
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+						component_output = 0;
+						break;
+					}
+				}
+
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+					component_output = 0;
+				}
+
+				global_component_output[component] = component_output;
+			}
+		}
+
+		__global__ void evaluate_or_alternatives(int alternatives, int *output, int *input, int number_of_inputs)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+				int component_output = 1;
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
@@ -428,7 +501,7 @@ code_encode = """
 							encoded_Xi[chunk_nr] |= (1 << chunk_pos);
 						}
 
-/*						// Encode y coordinate of patch into feature vector 
+						// Encode y coordinate of patch into feature vector 
 						for (int y_threshold = 0; y_threshold < dim_y - patch_dim_y; ++y_threshold) {
 							int patch_pos = class_features + y_threshold;
 
@@ -458,7 +531,7 @@ code_encode = """
 								encoded_Xi[chunk_nr] |= (1 << chunk_pos);
 							}
 						}
-*/
+
 
 						// Encode patch content into feature vector
 						for (int p_y = 0; p_y < patch_dim_y; ++p_y) {
