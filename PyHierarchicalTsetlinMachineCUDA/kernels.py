@@ -206,32 +206,6 @@ code_update = """
 			}
 		}
 
-		// Evaluate example
-/*		__global__ void evaluate_and_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
-		{
-			int index = blockIdx.x * blockDim.x + threadIdx.x;
-			int stride = blockDim.x * gridDim.x;
-
-			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
-				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
-				int component_output = 1;
-				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						component_output = 0;
-						break;
-					}
-				}
-
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(LITERAL_CHUNKS) + TA_CHUNKS_PER_LEAF-1] & FILTER) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
-					component_output = 0;
-				}
-
-				global_component_output[component] = component_output;
-			}
-		}
-*/
-
 /*		__global__ void evaluate_or_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -257,6 +231,24 @@ code_update = """
 		}
 */
 
+		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_factors)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes of each OR node
+			for (int and_group_node = index; and_group_node < number_of_and_group_nodes; and_group_node += stride) {
+				// Multiply and factors
+				int and_group_vote_product = 1;
+				for (int and_factor = 0; and_factor < number_of_and_factors; ++and_factor) {
+					and_group_vote_product *= child_input[and_group_node*number_of_and_factors + and_factor];
+				}
+
+				// Store and group product as node output
+				and_group_node_output[and_group_node] = and_group_vote_product;
+			}
+		}
+
 		__global__ void evaluate_or_alternatives(int *child_input, int number_of_or_alternatives, int *or_alternatives_node_output, int number_of_or_alternatives_nodes)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -266,7 +258,7 @@ code_update = """
 			for (int or_alternatives_node = index; or_alternatives_node < number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				// Sum up votes from each or alternative
 				int or_alternatives_vote_sum = 0;
-				for (int or_alternative = 0; or_alternative > number_of_or_alternatives; ++or_alternative) {
+				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					or_alternatives_vote_sum += child_input[or_alternatives_node*number_of_or_alternatives + or_alternative];
 				}
 
