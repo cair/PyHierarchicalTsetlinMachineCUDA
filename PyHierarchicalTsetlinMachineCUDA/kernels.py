@@ -257,7 +257,7 @@ code_update = """
 		}
 */
 
-		__global__ void evaluate_or_alternatives(int *child_input, int number_of_or_alternatives, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_and_groups)
+		__global__ void evaluate_or_alternatives(int *child_input, int number_of_or_alternatives, int *or_alternatives_node_output, int number_of_or_alternatives_nodes)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
