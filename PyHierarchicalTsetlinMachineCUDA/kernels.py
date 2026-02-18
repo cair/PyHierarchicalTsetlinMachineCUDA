@@ -201,7 +201,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_and_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
+/*		__global__ void evaluate_and_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -224,8 +224,9 @@ code_update = """
 				global_component_output[component] = component_output;
 			}
 		}
+*/
 
-		__global__ void evaluate_or_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
+/*		__global__ void evaluate_or_groups(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -272,6 +273,7 @@ code_update = """
 				global_component_output[component] = component_output;
 			}
 		}
+	*/
 
 		// Evaluate example
 		__global__ void evaluate(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)
