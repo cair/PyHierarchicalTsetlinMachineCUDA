@@ -101,6 +101,9 @@ class CommonTsetlinMachine():
 		self.prepare_encode = mod_encode.get_function("prepare_encode")
 		self.encode = mod_encode.get_function("encode")
 
+		self.prepare_encode_hierarchy = mod_encode.get_function("prepare_encode_hierarchy")
+		self.encode_hierarchy = mod_encode.get_function("encode_hierarchy")
+
 	def encode_X(self, X, encoded_X_gpu):
 		number_of_examples = X.shape[0]
 
