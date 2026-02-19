@@ -571,7 +571,7 @@ code_encode = """
 			for (unsigned long long i = index; i < number_of_examples; i += stride) {
 				Xi = &X[i*number_of_literals];
 				for (int j = 0; j < number_of_leaves; ++j) {
-					for (int k = 0; k < number_of_literals_per_leaf) {
+					for (int k = 0; k < number_of_literals_per_leaf; ++k) {
 						int leaf_chunk_nr = k / 32;
 						int leaf_chunk_pos = k % 32;
 
