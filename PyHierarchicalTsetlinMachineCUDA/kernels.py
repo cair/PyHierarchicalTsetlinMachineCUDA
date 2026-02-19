@@ -212,7 +212,7 @@ code_update = """
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes of each OR node
-			for (int or_group_node = index; or_group_node < number_of_or_group_nodes; or_group_node += stride) {
+			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Multiply or factors
 				int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_addends; ++or_addend) {
@@ -230,7 +230,7 @@ code_update = """
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes of each OR node
-			for (int and_group_node = index; and_group_node < number_of_and_group_nodes; and_group_node += stride) {
+			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_factors; ++and_factor) {
@@ -248,7 +248,7 @@ code_update = """
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes of each OR node
-			for (int or_alternatives_node = index; or_alternatives_node < number_of_or_alternatives_nodes; or_alternatives_node += stride) {
+			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				// Sum up votes from each or alternative
 				int or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
