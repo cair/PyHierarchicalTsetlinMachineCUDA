@@ -191,7 +191,7 @@ code_update = """
 				// Evaluate clause component
 				int component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
-					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector 
+					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[(component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
@@ -213,9 +213,10 @@ code_update = """
 
 			// Add up the votes of each OR node
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
-				// Multiply or factors
+				// Add or addends
 				int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_addends; ++or_addend) {
+					// Aggregate votes from each child node through addition
 					or_group_vote_sum += child_input[or_group_node*number_of_or_addends + or_addend];
 				}
 
@@ -234,6 +235,7 @@ code_update = """
 				// Multiply and factors
 				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_factors; ++and_factor) {
+					// Aggregate votes from each child node through multiplication
 					and_group_vote_product *= child_input[and_group_node*number_of_and_factors + and_factor];
 				}
 
@@ -252,6 +254,7 @@ code_update = """
 				// Sum up votes from each or alternative
 				int or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+					// Aggregate same input or alternatives through summation
 					or_alternatives_vote_sum += child_input[or_alternatives_node + or_alternative * number_of_or_alternatives];
 				}
 
