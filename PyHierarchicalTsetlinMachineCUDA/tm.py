@@ -72,10 +72,13 @@ class CommonTsetlinMachine():
 
 		if self.append_negated:
 			self.number_of_literals = self.number_of_features * 2
-			self.number_of_ta_chunks_per_leaf = int((self.hierarchy_structure[0][1]*2 - 1) / 32 + 1)
+			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
+			self.number_of_ta_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 		else:
 			self.number_of_literals = self.number_of_features
-			self.number_of_ta_chunks_per_leaf = int((self.hierarchy_structure[0][1] - 1) / 32 + 1)
+			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]
+			self.number_of_ta_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
+			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
 
 		self.hierarchy_size[0] = self.number_of_ta_chunks_per_leaf * self.hierarchy_size[1]
 
