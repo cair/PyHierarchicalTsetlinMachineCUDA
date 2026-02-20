@@ -554,7 +554,6 @@ code_encode = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-
 			for (unsigned long long i = index; i < number_of_examples * number_of_literal_chunks; i += stride) {
 				encoded_X[i] = 0;
 			}
