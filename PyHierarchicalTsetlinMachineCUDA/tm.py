@@ -73,11 +73,11 @@ class CommonTsetlinMachine():
 		if self.append_negated:
 			self.number_of_literals = self.number_of_features * 2
 			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
-			self.number_of_ta_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
+			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 		else:
 			self.number_of_literals = self.number_of_features
 			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]
-			self.number_of_ta_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
+			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
 
 		self.hierarchy_size[0] = self.number_of_ta_chunks_per_leaf * self.hierarchy_size[1]
@@ -123,7 +123,6 @@ class CommonTsetlinMachine():
 	
 			self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.hierarchy_size[0]), np.int32(number_of_examples), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
-
 			self.encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.number_of_literals, np.int32(self.hierarchy_size[1]), np.int32(self.number_of_literals_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(number_of_examples), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 		else:
@@ -133,8 +132,7 @@ class CommonTsetlinMachine():
 			cuda.Context.synchronize()
 
 			self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.hierarchy_size[0]), np.int32(number_of_examples), grid=self.grid, block=self.block)
-			cuda.Context.synchronize()
-			
+			cuda.Context.synchronize()	
 			self.encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.number_of_literals, np.int32(self.hierarchy_size[1]), np.int32(self.number_of_literals_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(number_of_examples), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 
