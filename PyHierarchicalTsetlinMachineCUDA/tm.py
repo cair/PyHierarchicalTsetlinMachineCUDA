@@ -104,7 +104,7 @@ class CommonTsetlinMachine():
 		self.prepare_encode_hierarchy = mod_encode.get_function("prepare_encode_hierarchy")
 		self.encode_hierarchy = mod_encode.get_function("encode_hierarchy")
 
-	def encode_X(self, X, encoded_X_gpu):
+	def encode_X(self, X, encoded_X_gpu, encoded_X_hierarchy_gpu):
 		number_of_examples = X.shape[0]
 
 		Xm = np.ascontiguousarray(X.flatten()).astype(np.uint32)
@@ -120,6 +120,12 @@ class CommonTsetlinMachine():
 			cuda.Context.synchronize()
 			self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
+		__global__ void prepare_encode_hierarchy(unsigned int *X, unsigned int *encoded_X, int number_of_literal_chunks, int number_of_examples)
+
+			self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.hierarchy_size[0], np.int32(number_of_examples), grid=self.grid, block=self.block)
+			cuda.Context.synchronize()
+			#self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
+			#cuda.Context.synchronize()
 
 	def allocate_gpu_memory(self, number_of_examples):
 		# GPU memory for accumulating votes, level by level
@@ -177,7 +183,10 @@ class CommonTsetlinMachine():
 		number_of_examples = X.shape[0]
 		
 		encoded_X_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
-		self.encode_X(X, encoded_X_gpu)
+		self.encode_X(X, encoded_X_gpu, encoded_X_gpu)
+
+		#encoded_X_hierarchy_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_ta_chunks*4))
+		#self.encoded_X_hierarchy_gpu(X, encoded_X_hierarchy_gpu)
 
 		parameters = """
 #define CLASSES %d
@@ -261,7 +270,8 @@ class CommonTsetlinMachine():
 			self.evaluate_update.prepare("PPPPi")
 
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
-		
+			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.hierarchy_size[0] * 4))
+
 			self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
 		
 		if incremental == False:
@@ -271,7 +281,7 @@ class CommonTsetlinMachine():
 		if (not np.array_equal(self.X_train, X)) or (not np.array_equal(self.encoded_Y_train, encoded_Y)):
 			self.X_train = X
 			self.encoded_Y_train = encoded_Y
-			self.encode_X(X, self.encoded_X_training_gpu)
+			self.encode_X(X, self.encoded_X_training_gpu, self.encoded_X_hierarchy_training_gpu)
 			cuda.memcpy_htod(self.Y_gpu, encoded_Y)
 
 		for epoch in range(epochs):
@@ -298,6 +308,9 @@ class CommonTsetlinMachine():
 
 			self.encoded_X_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encode_X(X, self.encoded_X_test_gpu)
+
+			self.encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.hierarchy_size[0] * 4))
+			self.encode_X(X, self.encoded_X_test_gpu, self.encoded_X_hierarchy_test_gpu)
 
 			parameters = """
 #define CLASSES %d
