@@ -309,6 +309,7 @@ class CommonTsetlinMachine():
 		if not np.array_equal(self.X_test, X):
 			self.X_test = X
 
+			self.encoded_X_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.hierarchy_size[0] * 4))
 			self.encode_X(X, self.encoded_X_test_gpu, self.encoded_X_hierarchy_test_gpu)
 
