@@ -116,16 +116,16 @@ class CommonTsetlinMachine():
 			self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(1), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 
-			self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.hierarchy_size[0], np.int32(number_of_examples), grid=self.grid, block=self.block)
-			cuda.Context.synchronize()
+			#self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.hierarchy_size[0], np.int32(number_of_examples), grid=self.grid, block=self.block)
+			#cuda.Context.synchronize()
 		else:
 			self.prepare_encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 			self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 
-			self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.hierarchy_size[0], np.int32(number_of_examples), grid=self.grid, block=self.block)
-			cuda.Context.synchronize()
+			#self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, self.hierarchy_size[0], np.int32(number_of_examples), grid=self.grid, block=self.block)
+			#cuda.Context.synchronize()
 
 			#self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
 			#cuda.Context.synchronize()
