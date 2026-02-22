@@ -558,7 +558,7 @@ code_encode = """
 				encoded_X[i] = 0;
 			}
 		}
-	
+
 		__global__ void encode_hierarchy(unsigned int *X, unsigned int *encoded_X, int number_of_literals, int number_of_leaves, int number_of_literals_per_leaf, int number_of_literal_chunks_per_leaf, int number_of_examples)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
