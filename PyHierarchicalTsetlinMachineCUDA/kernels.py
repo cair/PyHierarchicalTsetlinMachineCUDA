@@ -572,7 +572,7 @@ code_encode = """
 				printf("Number of leaves: %d\\n", number_of_leaves);
 			}
 
-			for (unsigned long long i = index; i < number_of_examples; i += stride) {
+			/* for (unsigned long long i = index; i < number_of_examples; i += stride) {
 				Xi = &X[i*number_of_literals];
 				for (int j = 0; j < number_of_leaves; ++j) {
 					for (int k = 0; k < number_of_literals_per_leaf; ++k) {
@@ -584,7 +584,7 @@ code_encode = """
 						}
 					}
 				}
-			}
+			} */
 		}
 	}
 """
