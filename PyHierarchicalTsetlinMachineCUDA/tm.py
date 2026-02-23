@@ -279,7 +279,7 @@ class CommonTsetlinMachine():
 
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
-			print("ALLOCATING", number_of_examples * self.hierarchy_size[0] * 4, number_of_examples, )
+			print("ALLOCATING TRAINING", number_of_examples * self.number_of_literal_chunks * 4, number_of_examples, self.number_of_literal_chunks, 4)
 			self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
 		
 		if incremental == False:
@@ -316,6 +316,7 @@ class CommonTsetlinMachine():
 
 			self.encoded_X_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
+			print("ALLOCATING TEST", number_of_examples * self.number_of_literal_chunks * 4, number_of_examples, self.number_of_literal_chunks, 4)
 			self.encode_X(X, self.encoded_X_test_gpu, self.encoded_X_hierarchy_test_gpu)
 
 			parameters = """
