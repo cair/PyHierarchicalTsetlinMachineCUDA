@@ -572,7 +572,7 @@ code_encode = """
 				printf("Number of leaves: %d\\n", number_of_leaves);
 			}
 
-			/* for (unsigned long long i = index; i < number_of_examples; i += stride) {
+			/for (unsigned long long i = index; i < number_of_examples; i += stride) {
 				Xi = &X[i*number_of_literals];
 				for (int j = 0; j < number_of_leaves; ++j) {
 					for (int k = 0; k < number_of_literals_per_leaf; ++k) {
@@ -580,11 +580,11 @@ code_encode = """
 						int leaf_chunk_pos = k % 32;
 
 						if (Xi[j*number_of_literals_per_leaf + k] == 1) {
-							encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);
+							/*encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);*/
 						}
 					}
 				}
-			} */
+			} 
 		}
 	}
 """
