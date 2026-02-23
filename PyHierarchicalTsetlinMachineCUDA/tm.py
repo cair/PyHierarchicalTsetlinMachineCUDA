@@ -78,7 +78,6 @@ class CommonTsetlinMachine():
 			self.number_of_literals = self.number_of_features
 			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
-			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
 
 		self.hierarchy_size[0] = self.number_of_literal_chunks_per_leaf * self.hierarchy_size[1]
 
@@ -279,8 +278,8 @@ class CommonTsetlinMachine():
 			self.evaluate_update.prepare("PPPPi")
 
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
-			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.hierarchy_size[0] * 4))
-
+			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
+			printf("ALLOCATING", number_of_examples * self.hierarchy_size[0] * 4, number_of_examples, )
 			self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
 		
 		if incremental == False:
@@ -316,7 +315,7 @@ class CommonTsetlinMachine():
 			self.X_test = X
 
 			self.encoded_X_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
-			self.encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.hierarchy_size[0] * 4))
+			self.encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
 			self.encode_X(X, self.encoded_X_test_gpu, self.encoded_X_hierarchy_test_gpu)
 
 			parameters = """

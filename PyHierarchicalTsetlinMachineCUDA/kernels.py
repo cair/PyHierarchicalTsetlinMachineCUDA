@@ -570,6 +570,7 @@ code_encode = """
 			if (index == 0) {
 				printf("Number of literals: %d\\n", number_of_literals);
 				printf("Number of leaves: %d\\n", number_of_leaves);
+				printf("Number of literals per leaf: %d\\n", number_of_literals_per_leaf);
 			}
 
 			/for (unsigned long long i = index; i < number_of_examples; i += stride) {
