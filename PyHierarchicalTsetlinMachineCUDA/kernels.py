@@ -615,13 +615,19 @@ code_encode = """
 						int leaf_chunk_nr = k / 32;
 						int leaf_chunk_pos = k % 32;
 
+						int counter = 0;
 						if (Xi[j*number_of_literals_per_leaf + k] == 1) {
-							if (index == 0) {
+							/*if (index == 0) {
 								printf("%d %d %d\\n", i, i*number_of_literal_chunks, j*number_of_literal_chunks_per_leaf + leaf_chunk_nr);
-								/*encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);*/
+								encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);
 							}
+							*/
 						}
+						counter++;
 					}
+				}
+				if (index == 0) {
+					printf("COUNTER %d\\n", counter);
 				}
 			} 
 		}
