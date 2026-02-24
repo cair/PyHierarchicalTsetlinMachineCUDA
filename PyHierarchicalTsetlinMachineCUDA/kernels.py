@@ -623,8 +623,8 @@ code_encode = """
 								encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);
 							}
 							*/
+							counter++;
 						}
-						counter++;
 					}
 				}
 				if (index == 0) {
