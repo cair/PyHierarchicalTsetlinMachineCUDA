@@ -278,8 +278,8 @@ class CommonTsetlinMachine():
 			self.evaluate_update = mod_update.get_function("evaluate")
 			self.evaluate_update.prepare("PPPPi")
 
-			self.convert_ta_states = mod_update.get_function("convert_ta_states")
-			self.update.prepare("PP")
+			#self.convert_ta_states = mod_update.get_function("convert_ta_states")
+			#self.update.prepare("PP")
 
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
