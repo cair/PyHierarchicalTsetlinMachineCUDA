@@ -608,7 +608,7 @@ code_encode = """
 			}
 
 			for (unsigned long long i = index; i < number_of_examples; i += stride) {
-				Xi = &X[i*number_of_literals];
+				Xi = &X[i*number_of_literals/2];
 				encoded_Xi = &encoded_X[i*number_of_literal_chunks];
 
 				int counter = 0;
