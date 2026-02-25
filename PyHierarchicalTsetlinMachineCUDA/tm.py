@@ -300,7 +300,7 @@ class CommonTsetlinMachine():
 			cuda.memcpy_htod(self.Y_gpu, encoded_Y)
 
 		for epoch in range(epochs):
-			for e in range(number_of_examples):
+			for e in range(1):#number_of_examples):
 				class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
 				cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
