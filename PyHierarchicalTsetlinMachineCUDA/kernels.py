@@ -215,7 +215,7 @@ code_update = """
 
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
-			/*// Evaluate each clause component (leaf) in separate threads
+			// Evaluate each clause component (leaf) in separate threads
 			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
@@ -234,8 +234,8 @@ code_update = """
 					component_output = 0;
 				}
 
-				global_component_output[component] = component_output;
-			}*/
+				//global_component_output[component] = component_output;
+			}
 		}
 
 		__global__ void evaluate_or_groups(int *child_input, int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_addends)
