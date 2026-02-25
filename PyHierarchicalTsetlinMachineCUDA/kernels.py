@@ -215,6 +215,10 @@ code_update = """
 
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
+			if (index == 0) {
+				printf("%d %d\\n", CLAUSES, COMPONENTS);
+			}
+
 			// Evaluate each clause component (leaf) in separate threads
 			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				// Get state of current clause component

@@ -142,6 +142,7 @@ class CommonTsetlinMachine():
 		# GPU memory for accumulating votes, level by level
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
+			print("Hierarchy size", d-1, self.number_of_clauses, int(self.hierarchy_size[d]), 4)
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
 
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
