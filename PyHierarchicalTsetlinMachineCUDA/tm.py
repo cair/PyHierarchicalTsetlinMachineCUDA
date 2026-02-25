@@ -39,7 +39,7 @@ AND_GROUP = "AND a group of children"
 g = curandom.XORWOWRandomNumberGenerator() 
 
 class CommonTsetlinMachine():
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP,28), (OR_ALTERNATIVES, 1), (AND_GROUP, 7), (OR_ALTERNATIVES, 1), (AND_GROUP, 4)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP,28), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
 		self.number_of_state_bits = number_of_state_bits
@@ -284,6 +284,9 @@ class CommonTsetlinMachine():
 			self.convert_ta_states = mod_update.get_function("convert_ta_states")
 			self.convert_ta_states.prepare("PP")
 
+			self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
+			self.evaluate_leaves.prepare("PPPPi")
+
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
 			print("ALLOCATING TRAINING", number_of_examples * self.number_of_literal_chunks * 4, number_of_examples, self.number_of_literal_chunks, 4)
@@ -305,6 +308,9 @@ class CommonTsetlinMachine():
 				cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 				self.convert_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
+				cuda.Context.synchronize()
+
+				self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.encoded_X_hierarchy_training_gpu, np.int32(e))
 				cuda.Context.synchronize()
 
 				self.evaluate_update.prepared_call(self.grid, self.block, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, np.int32(e))
