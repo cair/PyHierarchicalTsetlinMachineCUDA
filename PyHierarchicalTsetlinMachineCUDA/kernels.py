@@ -184,8 +184,8 @@ code_update = """
 
 			// Convert TA states
 			for (int j = index; j < CLAUSES; j += stride) {
-				//unsigned int *ta_state_flat = &global_ta_state_flat[j*TA_CHUNKS*STATE_BITS];
-				//unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[j*LITERAL_CHUNKS*STATE_BITS];
+				unsigned int *ta_state_flat = &global_ta_state_flat[j*TA_CHUNKS*STATE_BITS];
+				unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[j*LITERAL_CHUNKS*STATE_BITS];
 
 				for (int k = 0; k < FEATURES; ++k) {
 					int ta_chunk_flat = k / 32;
@@ -197,12 +197,11 @@ code_update = """
 					int ta_pos_hierarchy = leaf_literal % 32;
 
 					for (int l = 0; l < STATE_BITS; ++l) {
-						/*if ((ta_state_flat[ta_chunk_flat*STATE_BITS + l] & (1 << ta_pos_flat)) == 1) {
+						if ((ta_state_flat[ta_chunk_flat*STATE_BITS + l] & (1 << ta_pos_flat)) == 1) {
 							ta_state_hierarchy[leaf*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_hierarchy*STATE_BITS + l] |= (1 << ta_pos_hierarchy);
 						} else {
 							ta_state_hierarchy[leaf*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_hierarchy*STATE_BITS + l] &= ~(1 << ta_pos_hierarchy);
 						}
-						*/
 					}
 				}
 			}
