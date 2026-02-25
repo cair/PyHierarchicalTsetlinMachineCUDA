@@ -4,7 +4,7 @@ from time import time
 
 from keras.datasets import mnist
 
-factor = 10
+factor = 1
 
 s = 10.0
 
