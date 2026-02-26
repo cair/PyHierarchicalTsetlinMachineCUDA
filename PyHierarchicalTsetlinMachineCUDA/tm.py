@@ -145,6 +145,7 @@ class CommonTsetlinMachine():
 		for d in range(1, self.depth):
 			print("Hierarchy size", d-1, self.number_of_clauses, int(self.hierarchy_size[d]), 4)
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
+		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
 
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
