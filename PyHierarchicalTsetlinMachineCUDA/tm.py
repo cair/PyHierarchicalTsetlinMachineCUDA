@@ -145,6 +145,8 @@ class CommonTsetlinMachine():
 		for d in range(1, self.depth):
 			print("Hierarchy size", d-1, self.number_of_clauses, int(self.hierarchy_size[d]), 4)
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
+		print("Hierarchy size", self.depth, self.number_of_clauses, int(self.hierarchy_size[d]), 4)
+		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4)) 
 
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
@@ -297,6 +299,9 @@ class CommonTsetlinMachine():
 			self.evaluate_and_groups_final = mod_update.get_function("evaluate_and_groups_final")
 			self.evaluate_and_groups_final.prepare("PiiPP")
 
+			self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
+			self.evaluate_and_groups.prepare("PPii")
+
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
 			print("ALLOCATING TRAINING", number_of_examples * self.number_of_literal_chunks * 4, number_of_examples, self.number_of_literal_chunks, 4)
@@ -326,7 +331,10 @@ class CommonTsetlinMachine():
 				self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.encoded_X_hierarchy_training_gpu, np.int32(e))
 				cuda.Context.synchronize()
 
-				self.evaluate_and_groups_final.prepared_call(self.grid, self.block, self.hierarchy_votes[0], self.hierarchy_size[1], self.hierarchy_structure[1][1], self.clause_weights_gpu, self.class_sum_gpu)
+				#self.evaluate_and_groups_final.prepared_call(self.grid, self.block, self.hierarchy_votes[0], self.hierarchy_size[1], self.hierarchy_structure[1][1], self.clause_weights_gpu, self.class_sum_gpu)
+				#cuda.Context.synchronize()
+
+				self.evaluate_and_groupsl.prepared_call(self.grid, self.block, self.hierarchy_votes[0], self.hierarchy_votes[1], self.hierarchy_size[1], self.hierarchy_structure[1][1])
 				cuda.Context.synchronize()
 
 				class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
