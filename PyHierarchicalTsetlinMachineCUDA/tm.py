@@ -83,6 +83,7 @@ class CommonTsetlinMachine():
 
 		self.number_of_literal_chunks = self.number_of_literal_chunks_per_leaf
 		for d in range(self.depth - 1, 1, -1):
+			print("HELLO", d)
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 		
