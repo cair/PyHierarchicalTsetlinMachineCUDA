@@ -280,6 +280,66 @@ code_update = """
 			}
 		}
 
+		// Evaluate example
+		__global__ void evaluate_leaves_compare(unsigned int *global_ta_state_flat, unsigned int *global_ta_state, int *component_weights, int *global_component_output, int *X, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
+
+			//if (index == 0) {
+			//	printf("%d %d\\n", CLAUSES, COMPONENTS);
+			//}
+
+			// Evaluate each clause component (leaf) in separate threads
+			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+				// Get state of current clause component
+				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+				// Evaluate clause component
+				int component_output = 1;
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[(component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+						component_output = 0;
+						break;
+					}
+				}
+
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[(component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+					component_output = 0;
+				}
+
+				ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
+
+				int clause_output;
+				for (int patch = 0; patch < PATCHES; ++patch) {
+					clause_output = 1;
+					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS-1; ++ta_chunk) {
+						if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+							clause_output = 0;
+							break;
+						}
+					}
+
+					if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + TA_CHUNKS-1] & FILTER) != (ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+						clause_output = 0;
+					}
+
+					if (clause_output) {
+						break;
+					}
+				}
+
+				if (clause_output != component_output) {
+					printf("ERROR CLAUSE VS COMPONENT\\n");
+				}
+
+				global_component_output[component] = component_output;
+			}
+		}
+
 		__global__ void evaluate_or_groups(int *child_input, int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
