@@ -725,7 +725,7 @@ code_encode = """
 						int leaf_chunk_nr = k / 32;
 						int leaf_chunk_pos = k % 32;
 
-						if (((encoded_Xi[literal_chunk_nr] & (1 << literal_chunk_pos)) > 0) != (encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0))  {
+						if (((encoded_Xi[literal_chunk_nr] & (1 << literal_chunk_pos)) > 0) != ((encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0))  {
 							printf("ENCODING ERROR!\\n");
 						}	
 					}
