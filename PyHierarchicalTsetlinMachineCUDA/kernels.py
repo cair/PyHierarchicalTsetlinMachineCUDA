@@ -735,7 +735,7 @@ code_encode = """
 							if (Xi[j*number_of_literals_per_leaf + k] != 
 								((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
 							) {
-								printf("HIERARCHY ENCODING ERROR\\n");
+								//printf("HIERARCHY ENCODING ERROR\\n");
 							}
 
 							if (Xi[j*number_of_literals_per_leaf + k] != 
