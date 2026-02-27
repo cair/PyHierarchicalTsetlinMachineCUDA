@@ -313,7 +313,7 @@ code_update = """
 
 				int clause = component;
 
-				ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
+				ta_state = &global_ta_state_flat[clause*TA_CHUNKS*STATE_BITS];
 
 				int clause_output;
 				for (int patch = 0; patch < PATCHES; ++patch) {
