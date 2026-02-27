@@ -287,7 +287,7 @@ class CommonTsetlinMachine():
 			self.evaluate_update = mod_update.get_function("evaluate")
 			self.evaluate_update.prepare("PPPPi")
 
-			self.evaluate_update_compare = mod_update.get_function("evaluate")
+			self.evaluate_update_compare = mod_update.get_function("evaluate_compare")
 			self.evaluate_update_compare.prepare("PPPPiP")
 
 			self.convert_ta_states = mod_update.get_function("convert_ta_states")

@@ -397,8 +397,6 @@ code_update = """
 
 				if (clause_output != child_input[clause]) {
 					printf("ERROR %d %d %d!\\n", clause, clause_output, child_input[clause]);
-				} else {
-					printf("CORRECT %d %d %d!\\n", clause, clause_output, child_input[clause]);
 				}
 			}
 		}
