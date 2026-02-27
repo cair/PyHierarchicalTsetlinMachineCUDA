@@ -334,7 +334,6 @@ class CommonTsetlinMachine():
 				#self.evaluate_and_groups_final.prepared_call(self.grid, self.block, self.hierarchy_votes[0], self.hierarchy_size[1], self.hierarchy_structure[1][1], self.clause_weights_gpu, self.class_sum_gpu)
 				#cuda.Context.synchronize()
 
-				print("EVALUATE AND GROUPS", self.hierarchy_size[1], self.hierarchy_structure[1][1])
 				self.evaluate_and_groups.prepared_call(self.grid, self.block, self.hierarchy_votes[0], self.hierarchy_votes[1], self.hierarchy_size[1], self.hierarchy_structure[1][1])
 				cuda.Context.synchronize()
 
