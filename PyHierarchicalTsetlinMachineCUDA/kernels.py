@@ -361,6 +361,47 @@ code_update = """
 		}
 
 		// Evaluate example
+		__global__ void evaluate_compare(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example, int *child_input)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			for (int clause = index; clause < CLAUSES; clause += stride) {
+				unsigned int *ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
+
+				int clause_output;
+				for (int patch = 0; patch < PATCHES; ++patch) {
+					clause_output = 1;
+					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS-1; ++ta_chunk) {
+						if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+							clause_output = 0;
+							break;
+						}
+					}
+
+					if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & X[(unsigned long long)example*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + TA_CHUNKS-1] & FILTER) != (ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
+						clause_output = 0;
+					}
+
+					if (clause_output) {
+						break;
+					}
+				}
+
+				if (clause_output) {
+					for (int class_id = 0; class_id < CLASSES; ++class_id) {
+						int clause_weight = clause_weights[class_id*CLAUSES + clause];
+						atomicAdd(&class_sum[class_id], clause_weight);					
+					}
+				}
+
+				if (clause_output != child_input[clause]) {
+					printf("ERROR %d %d %d!\n\n", clause, clause_output, child_input[clause]);
+				}
+			}
+		}
+
+		// Evaluate example
 		__global__ void evaluate(unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
