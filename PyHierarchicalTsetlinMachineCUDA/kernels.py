@@ -310,7 +310,7 @@ code_update = """
 				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
-					and_group_vote_product *= child_input[and_group_node*number_of_and_factors + and_factor];
+					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 				}
 
 				// Store and group product as node output
