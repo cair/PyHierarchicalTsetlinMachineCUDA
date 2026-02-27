@@ -311,6 +311,8 @@ code_update = """
 					component_output = 0;
 				}
 
+				int clause = component;
+
 				ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
 
 				int clause_output;
