@@ -295,7 +295,7 @@ code_update = """
 			// Convert TA states
 			for (int j = index; j < CLAUSES; j += stride) {
 				unsigned int *ta_state_flat = &global_ta_state_flat[j*TA_CHUNKS*STATE_BITS];
-				unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[j*LITERAL_CHUNKS*STATE_BITS];
+				unsigned int *ta_state_hierarchy = &global_ta_state[j*LITERAL_CHUNKS*STATE_BITS];
 
 				for (int k = 0; k < FEATURES; ++k) {
 					int ta_chunk_flat = k / 32;
