@@ -292,6 +292,29 @@ code_update = """
 
 			int *Xi = &X_hierarchy[(unsigned long long)example*LITERAL_CHUNKS];
 
+			// Convert TA states
+			for (int j = index; j < CLAUSES; j += stride) {
+				unsigned int *ta_state_flat = &global_ta_state_flat[j*TA_CHUNKS*STATE_BITS];
+				unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[j*LITERAL_CHUNKS*STATE_BITS];
+
+				for (int k = 0; k < FEATURES; ++k) {
+					int ta_chunk_flat = k / 32;
+					int ta_pos_flat = k % 32;
+
+					int leaf = k / LITERALS_PER_LEAF;
+					int leaf_literal = k % LITERALS_PER_LEAF; 
+					int ta_chunk_hierarchy = leaf_literal / 32;
+					int ta_pos_hierarchy = leaf_literal % 32;
+
+					for (int l = 0; l < STATE_BITS; ++l) {
+						if (((ta_state_flat[ta_chunk_flat*STATE_BITS + l] & (1 << ta_pos_flat)) > 0) != ((ta_state_hierarchy[leaf*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_hierarchy*STATE_BITS + l] & (1 << ta_pos_hierarchy)) > 0)) {
+							printf("ERROR\\n");
+							return;
+						}
+					}
+				}
+			}
+
 			// Evaluate each clause component (leaf) in separate threads
 			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				// Get state of current clause component
@@ -335,7 +358,7 @@ code_update = """
 				}
 
 				if (clause_output != component_output) {
-					printf("ERROR CLAUSE VS COMPONENT\\n");
+					//printf("ERROR CLAUSE VS COMPONENT\\n");
 				}
 
 				global_component_output[component] = component_output;
