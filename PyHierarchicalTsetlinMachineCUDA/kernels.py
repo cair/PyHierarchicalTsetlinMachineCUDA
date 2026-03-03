@@ -338,7 +338,7 @@ code_update = """
 					}
 
 					if (X[(unsigned long long)example*(TA_CHUNKS*PATCHES) + ta_chunk] != Xi[(component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk]) {
-						printf("INPUT ERROR\\n");
+						printf("INPUT ERROR %d %d\\n", (component % LITERAL_CHUNKS)*TA_CHUNKS_PER_LEAF + ta_chunk, ta_chunk);
 					}
 				}
 
