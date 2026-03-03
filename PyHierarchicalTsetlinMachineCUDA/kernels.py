@@ -362,6 +362,7 @@ code_update = """
 					printf("TA_CHUNKS %d %d\\n", TA_CHUNKS_PER_LEAF, TA_CHUNKS);
 					printf("FEATURES %d\\n", FEATURES);
 					printf("LITERAL_CHUNKS %d\\n", LITERAL_CHUNKS);
+					printf("TA_CHUNKS %d %d\\n", TA_CHUNKS_PER_LEAF, TA_CHUNKS);
 
 					ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
