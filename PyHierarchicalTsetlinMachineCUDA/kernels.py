@@ -406,7 +406,7 @@ code_update = """
 					printf("OUTPUT: %d %d\\n", component_output, clause_output);
 				}
 
-				global_component_output[component] = component_output;
+				//global_component_output[component] = component_output;
 			}
 		}
 
