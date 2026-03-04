@@ -461,24 +461,17 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups_final(int *child_input, int number_of_and_group_factors, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes of each OR node
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				// Multiply and factors
-				int and_group_vote_product = 1;
-				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
-					// Aggregate votes from each child node through multiplication
-					and_group_vote_product *= child_input[clause*number_of_and_group_factors + and_factor];
-				}
-
-				if (and_group_vote_product) {
+				if (child_input[clause]) {
 					for (int class_id = 0; class_id < CLASSES; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], clause_weight * and_group_vote_product);					
+						atomicAdd(&class_sum[class_id], clause_weight * child_input[clause]);					
 					}
 				}
 			}
