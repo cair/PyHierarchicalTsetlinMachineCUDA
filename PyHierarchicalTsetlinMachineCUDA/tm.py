@@ -59,7 +59,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_size[self.depth] = 1
 		print(self.depth)
 		for d in range(self.depth - 1):
-			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d - 1]
+			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print(self.hierarchy_size)
 
