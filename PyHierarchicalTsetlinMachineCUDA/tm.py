@@ -64,6 +64,25 @@ class CommonTsetlinMachine():
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print(self.hierarchy_size)
 
+		self.literal_groups_covered = [0] * self.depth
+		self.literal_groups_covered[self.depth - 1] = 1
+		for d in range(1, self.depth):
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
+				self.literal_groups_covered[self.depth - d - 1] = self.literal_groups_covered[self.depth - d] * self.hierarchy_structure[d][1]
+			else:
+				self.literal_groups_covered[self.depth - d - 1] = self.literal_groups_covered[self.depth - d]
+
+		print("LITERAL GROUPS COVERED", self.literal_groups_covered)
+
+
+		self.literal_groups_covered[self.depth] = 1
+		print(self.depth)
+		for d in range(self.depth - 1):
+			print(self.hierarchy_size[self.depth - d])
+			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
+			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
+		print(self.hierarchy_size)
+
 		self.number_of_features = 1
 		for d in range(self.depth - 1, -1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
@@ -82,15 +101,16 @@ class CommonTsetlinMachine():
 		self.hierarchy_size[0] = self.number_of_literal_chunks_per_leaf * self.hierarchy_size[1]
 
 		self.literal_split = [0] * (self.depth - 1)
-		previous_number_of_literal_chunks = self.hierarchy_size[0]
+		previous_number_of_leaves = self.hierarchy_size[1]
 		for d in range(self.depth-1):
 			if self.hierarchy_structure[self.depth - d - 1][0] == AND_GROUP or self.hierarchy_structure[self.depth - d - 1][0] == OR_GROUP:
-				self.literal_split[d] = previous_number_of_literal_chunks // self.hierarchy_structure[self.depth - d - 1][1]
+				self.literal_split[d] = previous_number_of_leaves // self.hierarchy_structure[self.depth - d - 1][1]
 				previous_number_of_literal_chunks = self.literal_split[d]
 			else:
 				self.literal_split[d] = 0
 
 		print("LITERAL SPLIT", self.literal_split)
+		print("NUMBER OF LITERAL CHUNKS", self.hierarchy_size[0])
 
 		self.number_of_literal_chunks = self.number_of_literal_chunks_per_leaf
 		for d in range(self.depth - 1, 0, -1):
