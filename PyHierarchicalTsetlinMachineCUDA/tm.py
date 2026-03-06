@@ -70,7 +70,7 @@ class CommonTsetlinMachine():
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.literal_groups_split[d] = self.literal_groups_split[d - 1] * self.hierarchy_structure[d][1]
 			else:
-				self.literal_groups_split[self.depth - d - 1] = 0s
+				self.literal_groups_split[self.depth - d - 1] = 0
 		print("LITERAL GROUPS SPLIT", self.literal_groups_split)
 
 		self.number_of_features = 1
