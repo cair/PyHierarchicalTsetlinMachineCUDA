@@ -269,7 +269,7 @@ code_update = """
 
 					component_remainder = component_remainder - ta_chunk_index[d] * (LITERAL_CHUNKS / literal_groups_index[d]);
 
-					if (clause == -1) {
+					if (clause == 0) {
 						printf("%d: %d %d %d %d (%d %d)\\n", component, d, component_remainder, ta_chunk_index[d], literal_groups_index[d], LITERAL_CHUNKS, LITERAL_CHUNKS / literal_groups_index[d]);
 					}
 				}
