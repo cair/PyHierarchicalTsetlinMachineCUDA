@@ -262,7 +262,7 @@ code_update = """
 				previous_size = ta_chunks_size[d];
 
 				if (clause == 0) {
-					printf("%d: %d %d\\n", depthm component, ta_chunks_size[d]);
+					printf("%d: %d %d\\n", depth, component, ta_chunks_size[d]);
 				}
 			}
 
