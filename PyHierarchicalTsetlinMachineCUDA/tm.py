@@ -71,7 +71,7 @@ class CommonTsetlinMachine():
 		for d in range(1, self.depth):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.literal_groups_index[d-1] = previous_literal_group_index * self.hierarchy_structure[d][1]
-				previous_literal_group_index = self.literal_groups_index[d]
+				previous_literal_group_index = self.literal_groups_index[d-1]
 			else:
 				self.literal_groups_index[d-1] = 1
 
