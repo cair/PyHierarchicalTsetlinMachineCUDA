@@ -260,7 +260,7 @@ code_update = """
 			for (int d = 1; d < depth-1; ++d) {
 				ta_chunks_size[d] = ta_chunks_size[d-1] * literal_groups_index[d-1];
 
-				if (index == -1) {
+				if (index == 0) {
 					printf("%d: %d\\n", d, ta_chunks_size[d]);
 				}
 			}
@@ -283,8 +283,8 @@ code_update = """
 
 					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d];
 
-					if (clause == -1 && component == 27) {
-						printf("%d: %d (%d %d) (%d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index);
+					if (clause == 0 && component == 27) {
+						printf("%d: %d (%d %d) (%d = %d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF);
 					}
 				}
 
@@ -292,13 +292,13 @@ code_update = """
 				int component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base_index + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[(component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
 					}
 				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base_index + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[(component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF)) * TA_CHUNKS_PER_LEAF + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
 					component_output = 0;
 				}
 
