@@ -266,10 +266,11 @@ code_update = """
 				int component_remainder = component;
 				for (int d = 0; d < depth-1; ++d) {
 					ta_chunk_index[d] = component_remainder / (LITERAL_CHUNKS / literal_groups_index[d]);
+
 					component_remainder = component_remainder - ta_chunk_index[d] * (LITERAL_CHUNKS / literal_groups_index[d]);
 
 					if (clause == 0) {
-						printf("%d: %d %d %d %d\\n", component, d, component_remainder, ta_chunk_index[d], literal_groups_index[d]);
+						printf("%d: %d %d %d %d (%d %d)\\n", component, d, component_remainder, ta_chunk_index[d], literal_groups_index[d], LITERAL_CHUNKS, LITERAL_CHUNKS / literal_groups_index[d]);
 					}
 				}
 
