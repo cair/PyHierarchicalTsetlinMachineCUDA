@@ -287,7 +287,7 @@ code_update = """
 					component_output = 0;
 				}
 
-				global_component_output[component] = component_output;
+				global_component_output[clause_component] = component_output;
 			}
 		}
 
