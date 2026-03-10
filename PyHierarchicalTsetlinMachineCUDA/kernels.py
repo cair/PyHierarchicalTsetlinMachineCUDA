@@ -256,14 +256,14 @@ code_update = """
 			int ta_chunks_index[DEPTH-1];
 			int ta_chunks_size[DEPTH-1];
 
-			ta_chunks_size[0] = 1;
+			/*ta_chunks_size[0] = 1;
 			for (int d = 1; d < depth-1; ++d) {
 				ta_chunks_size[d] = ta_chunks_size[d-1] * literal_groups_index[d-1];
 
 				if (index == -1) {
 					printf("%d: %d\\n", d, ta_chunks_size[d]);
 				}
-			}
+			}*/
 
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
@@ -275,7 +275,7 @@ code_update = """
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
-				int component_remainder = component;
+				/*int component_remainder = component;
 				int ta_chunk_base_index = 0;
 				for (int d = 0; d < depth-1; ++d) {
 					ta_chunks_index[d] = component_remainder % literal_groups_index[d];
@@ -286,7 +286,7 @@ code_update = """
 					if (clause == -1 && component == 27) {
 						printf("%d: %d (%d %d) (%d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index);
 					}
-				}
+				}*/
 
 				// Evaluate clause component
 				int component_output = 1;
