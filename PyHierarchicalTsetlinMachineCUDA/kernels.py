@@ -283,7 +283,7 @@ code_update = """
 
 					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d];
 
-					if (clause == 0 && component == 27) {
+					if (clause == -1 && component == 27) {
 						printf("%d: %d (%d %d) (%d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index);
 					}
 				}
