@@ -276,12 +276,15 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
 				int component_remainder = component;
+				int ta_chunk_base_index = 0;
 				for (int d = 0; d < depth-1; ++d) {
 					ta_chunks_index[d] = component_remainder % literal_groups_index[d];
 					component_remainder = component_remainder / literal_groups_index[d];
 
-					if (clause == -1) {
-						printf("%d: %d %d %d\\n", d, component, ta_chunks_index[d], component_remainder);
+					ta_chunk_base_index += ta_chunk_size[d] * ta_chunks_index[d];
+
+					if (clause == 0) {
+						printf("%d: %d %d %d (%d)\\n", d, component, ta_chunks_index[d], component_remainder, ta_chunk_base_index);
 					}
 				}
 
