@@ -281,7 +281,7 @@ code_update = """
 					ta_chunks_index[d] = component_remainder % literal_groups_index[d];
 					component_remainder = component_remainder / literal_groups_index[d];
 
-					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d] * LITERAL_CHUNKS_PER_LEAF;
+					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d] * TA_CHUNKS_PER_LEAF;
 
 					if (clause == 0) {
 						printf("%d: %d (%d %d) (%d = %d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF);
