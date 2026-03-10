@@ -255,23 +255,23 @@ code_update = """
 
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
-			if (index == 0) {
-				for (int d = 0; d < depth-1; ++d) {
-					printf("%d %d\\n", d, literal_groups_index[d]);
-				}
-
-			}
 
 			// Evaluate each clause component (leaf) in separate threads
-			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
+			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				int clause = clause_component / COMPONENTS;
+				int component = clause_component % COMPONENTS;
+
 				// Get state of current clause component
-				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
 				int remainder = component;
 				for (int d = 0; d < depth-1; ++d) {
 					ta_chunk_index[d] = remainder % literal_groups_index[d];
 					remainder /= literal_groups_index[d];
-					printf("%d: %d %d\\n", component, d, ta_chunk_index[d]);
+
+					if (clause == 0) {
+						printf("%d: %d %d\\n", component, d, ta_chunk_index[d]);
+					}
 				}
 
 				// Evaluate clause component
