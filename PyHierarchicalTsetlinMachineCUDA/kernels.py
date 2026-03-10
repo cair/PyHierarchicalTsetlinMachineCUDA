@@ -253,7 +253,18 @@ code_update = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			int ta_chunk_index[DEPTH-1];
+			int ta_chunks_index[DEPTH-1];
+			int ta_chunks_size[DEPTH-1];
+
+			int previous_size = 1;
+			for (int d = 0; d < depth-1; ++d) {
+				ta_chunks_size[d] = previous_size * literal_groups_index[d];
+				previous_size = ta_chunks_size[d];
+
+				if (clause == 0) {
+					printf("%d: %d %d\\n", depth component, ta_chunks_size[d]);
+				}
+			}
 
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
@@ -267,11 +278,11 @@ code_update = """
 
 				int component_remainder = component;
 				for (int d = 0; d < depth-1; ++d) {
-					ta_chunk_index[d] = component_remainder % literal_groups_index[d];
+					ta_chunks_index[d] = component_remainder % literal_groups_index[d];
 					component_remainder = component_remainder / literal_groups_index[d];
 
 					if (clause == 0) {
-						printf("%d: %d %d %d\\n", d, component, ta_chunk_index[d], component_remainder);
+						printf("%d: %d %d %d\\n", d, component, ta_chunks_index[d], component_remainder);
 					}
 				}
 
