@@ -67,12 +67,13 @@ class CommonTsetlinMachine():
 		print("HIERARCHY SIZE", self.hierarchy_size)
 
 		self.literal_groups_index = [0] * self.depth
-		self.literal_groups_index[0] = 1
-		previous_literal_group_index = self.literal_groups_index[0]
-		for d in range(1, self.depth):
+		previous_literal_group_index = 1
+		for d in range(self.depth):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.literal_groups_index[d] = previous_literal_group_index * self.hierarchy_structure[d][1]
 				previous_literal_group_index = self.literal_groups_index[d]
+			else:
+				self.literal_groups_index[d] = 1
 
 		print("LITERAL GROUPS INDEX", self.literal_groups_index)
 
@@ -284,6 +285,7 @@ class CommonTsetlinMachine():
 			parameters = """
 	#define CLASSES %d
 	#define CLAUSES %d
+	#define DEPTH %d
 	#define COMPONENTS %d
 	#define LITERALS_PER_LEAF %d
 	#define TA_CHUNKS_PER_LEAF %d
@@ -300,7 +302,7 @@ class CommonTsetlinMachine():
 	#define PATCHES %d
 
 	#define NUMBER_OF_EXAMPLES %d
-""" % (self.number_of_outputs, self.number_of_clauses, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_features, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
+""" % (self.number_of_outputs, self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_features, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
 		
 			print("NUMBER OF LITERAL CHUNKS", self.number_of_literal_chunks)
 			print(parameters)

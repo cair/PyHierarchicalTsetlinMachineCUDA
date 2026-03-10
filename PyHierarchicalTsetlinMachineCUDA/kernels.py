@@ -251,10 +251,12 @@ code_update = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
+			int ta_chunk_index[DEPTH-1];
+
 			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
 			if (index == 0) {
-				for (int d = 0; d < depth; ++d) {
+				for (int d = 0; d < depth-1; ++d) {
 					printf("%d %d\\n", d, literal_groups_index[d]);
 				}
 
@@ -264,6 +266,13 @@ code_update = """
 			for (int component = index; component < CLAUSES*COMPONENTS; component += stride) {
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+				int remainder = component;
+				for (int d = 0; d < depth-1; ++d) {
+					ta_chunk_index[d] = remainder % literal_groups_index[d];
+					remainder /= literal_groups_index[d];
+					printf("%d: %d %d\\n", component, d, ta_chunk_index[d]);
+				}
 
 				// Evaluate clause component
 				int component_output = 1;
