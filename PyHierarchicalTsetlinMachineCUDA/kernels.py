@@ -256,7 +256,10 @@ code_update = """
 			int ta_chunks_index[DEPTH-1];
 			int ta_chunks_size[DEPTH-1];
 
-			ta_chunks_size[0] = 1;
+			ta_chunks_size[0] = hierarchy_structure_factors[0];
+			if (index == 0) {
+				printf("*%d: %d\\n", d, ta_chunks_size[0]);
+			}
 			for (int d = 1; d < depth-1; ++d) {
 				ta_chunks_size[d] = ta_chunks_size[d-1] * hierarchy_structure_factors[d-1];
 
