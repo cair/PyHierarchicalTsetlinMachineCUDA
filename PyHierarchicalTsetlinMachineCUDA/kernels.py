@@ -261,7 +261,7 @@ code_update = """
 				printf("*%d: %d\\n", 0, ta_chunks_size[0]);
 			}
 			for (int d = 1; d < depth-1; ++d) {
-				ta_chunks_size[d] = ta_chunks_size[d-1] * hierarchy_structure_factors[d-1];
+				ta_chunks_size[d] = ta_chunks_size[d-1] * hierarchy_structure_factors[d];
 
 				if (index == 0) {
 					printf("*%d: %d\\n", d, ta_chunks_size[d]);
