@@ -72,7 +72,7 @@ class CommonTsetlinMachine():
 		for d in range(1, self.depth):
 			self.hierarchy_structure_factors[d-1] = self.hierarchy_structure[d][1]
 			if self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.hiearchy_structure_alternatives[d-1] = 1 
+				self.hierarchy_structure_alternatives[d-1] = 1 
 
 		print("LITERAL GROUPS INDEX", self.literal_groups_index)
 
