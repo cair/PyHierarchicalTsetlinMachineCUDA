@@ -262,7 +262,7 @@ code_update = """
 					ta_chunks_size[d] = previous_ta_chunk_size * hierarchy_structure_factors[d];
 					previous_ta_chunk_size = ta_chunks_size[d];
 				} else {
-					ta_chunks_size[d] = 0;
+					ta_chunks_size[d] = 1;
 				}
 
 				if (index == 0) {
@@ -282,12 +282,14 @@ code_update = """
 
 				int component_remainder = component;
 				int ta_chunk_base_index = 0;
+				int size = 1;
 				for (int d = 0; d < depth-1; ++d) {
 					ta_chunks_index[d] = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
 					if (hierarchy_structure_alternatives[d] == 0) {
-						ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d] * TA_CHUNKS_PER_LEAF;
+						ta_chunk_base_index += size * ta_chunks_index[d] * TA_CHUNKS_PER_LEAF;
+						size *= hierarchy_structure_factors[d];
 					}
 
 					if (clause == -1) {
