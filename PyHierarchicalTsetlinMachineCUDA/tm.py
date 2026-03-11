@@ -40,7 +40,7 @@ g = curandom.XORWOWRandomNumberGenerator()
 
 class CommonTsetlinMachine():
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 14), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (OR_ALTERNATIVES, 5), (AND_GROUP, 14), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (OR_ALTERNATIVES, 2), (AND_GROUP, 14), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 7), (AND_GROUP, 2), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
@@ -67,12 +67,12 @@ class CommonTsetlinMachine():
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print("HIERARCHY SIZE", self.hierarchy_size)
 
-		self.literal_groups_index = [0] * (self.depth - 1)
+		self.hiearchy_structure_factors = [0] * (self.depth - 1)
+		self.hiearchy_structure_alternatives = [0] * (self.depth - 1)
 		for d in range(1, self.depth):
-			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
-				self.literal_groups_index[d-1] = self.hierarchy_structure[d][1]
-			else:
-				self.literal_groups_index[d-1] = 1
+			self.hierarchy_structure_factors[d-1] = self.hierarchy_structure[d][1]
+			if self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
+				self.hiearchy_structure_alternatives[d-1] = 1 
 
 		print("LITERAL GROUPS INDEX", self.literal_groups_index)
 
@@ -80,7 +80,7 @@ class CommonTsetlinMachine():
 		for d in range(self.depth - 1, -1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_features *= self.hierarchy_structure[d][1]
-				
+
 		print("NUMBER OF FEATURES", self.number_of_features)
 
 		if self.append_negated:
@@ -178,8 +178,11 @@ class CommonTsetlinMachine():
 		print("Hierarchy size", self.depth-1, self.number_of_clauses, int(self.hierarchy_size[self.depth-1]), 4)
 		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
 
-		self.literal_groups_index_gpu = cuda.mem_alloc(self.depth*4)
-		cuda.memcpy_htod(self.literal_groups_index_gpu, np.array(self.literal_groups_index, dtype=np.int32))
+		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
+		cuda.memcpy_htod(self.hierarchy_structure_factors_gpu, np.array(self.hierarchy_structure_factors, dtype=np.int32))
+
+		self.hierarchy_structure_alternatives_gpu = cuda.mem_alloc((self.depth-1)*4)
+		cuda.memcpy_htod(self.hierarchy_structure_alternatives_gpu, np.array(self.hierarchy_structure_alternatives, dtype=np.int32))
 
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
@@ -331,7 +334,7 @@ class CommonTsetlinMachine():
 			self.compare_ta_states.prepare("PP")
 
 			self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
-			self.evaluate_leaves.prepare("PPPiPPi")
+			self.evaluate_leaves.prepare("PPPiPPPi")
 
 			self.evaluate_leaves_compare = mod_update.get_function("evaluate_leaves_compare")
 			self.evaluate_leaves_compare.prepare("PPPPPPi")
@@ -368,7 +371,7 @@ class CommonTsetlinMachine():
 				#self.compare_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
 				#cuda.Context.synchronize()
 
-				self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.depth, self.literal_groups_index_gpu, self.encoded_X_hierarchy_training_gpu, np.int32(e))
+				self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.encoded_X_hierarchy_training_gpu, np.int32(e))
 				cuda.Context.synchronize()
 
 				for d in range(1, self.depth):

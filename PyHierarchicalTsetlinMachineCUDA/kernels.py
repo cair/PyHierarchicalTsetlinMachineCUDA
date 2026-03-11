@@ -248,7 +248,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *literal_groups_index, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -283,7 +283,7 @@ code_update = """
 
 					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d] * TA_CHUNKS_PER_LEAF;
 
-					if (clause == 0) {
+					if (clause == -1) {
 						printf("%d: %d (%d %d) (%d = %d) %d\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF, component_remainder);
 					}
 				}
