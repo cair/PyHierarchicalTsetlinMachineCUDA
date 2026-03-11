@@ -261,7 +261,7 @@ code_update = """
 				ta_chunks_size[d] = ta_chunks_size[d-1] * literal_groups_index[d-1];
 
 				if (index == 0) {
-					printf("%d: %d\\n", d, ta_chunks_size[d]);
+					printf("*%d: %d\\n", d, ta_chunks_size[d]);
 				}
 			}
 
