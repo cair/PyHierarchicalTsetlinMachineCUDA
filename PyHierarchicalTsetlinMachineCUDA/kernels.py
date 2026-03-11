@@ -260,7 +260,7 @@ code_update = """
 			for (int d = 1; d < depth-1; ++d) {
 				ta_chunks_size[d] = ta_chunks_size[d-1] * literal_groups_index[d-1];
 
-				if (index == -1) {
+				if (index == 0) {
 					printf("%d: %d\\n", d, ta_chunks_size[d]);
 				}
 			}
@@ -283,7 +283,7 @@ code_update = """
 
 					ta_chunk_base_index += ta_chunks_size[d] * ta_chunks_index[d] * TA_CHUNKS_PER_LEAF;
 
-					if (clause == -1) {
+					if (clause == 0) {
 						printf("%d: %d (%d %d) (%d = %d)\\n", d, component, ta_chunks_index[d], ta_chunks_size[d], ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF);
 					}
 				}
