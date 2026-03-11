@@ -276,7 +276,7 @@ code_update = """
 					}
 
 					if (clause == -1 && d == depth-2) {
-						printf("%d: %d (%d %d) (%d = %d) %d\\n", d, component, ta_chunks_index, ta_chunks_size[d], ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF, component_remainder);
+						printf("%d: %d (%d) (%d = %d) %d\\n", d, component, ta_chunks_index, ta_chunk_base_index, (component % (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF))*TA_CHUNKS_PER_LEAF, component_remainder);
 					}
 				}
 
