@@ -448,7 +448,7 @@ class CommonTsetlinMachine():
 			mod = SourceModule(parameters + kernels.code_header + kernels.code_evaluate, no_extern_c=True)
 			self.evaluate = mod.get_function("evaluate")
 
-		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
+		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
 		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
 
 		for e in range(number_of_examples):
