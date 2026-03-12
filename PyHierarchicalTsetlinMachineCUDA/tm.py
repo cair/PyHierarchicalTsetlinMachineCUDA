@@ -478,17 +478,21 @@ class CommonTsetlinMachine():
 				else:
 					printf("Unknown node type!")
 					sys.exit()
+			
+			cuda.memcpy_dtoh(class_sum[e,:], self.class_sum_gpu)
 
 			self.evaluate_final.prepared_call(self.grid, self.block, self.hierarchy_votes[self.depth-1], self.clause_weights_gpu, self.class_sum_gpu)
 			cuda.Context.synchronize()
 
-		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
-		class_sum_gpu = cuda.mem_alloc(class_sum.nbytes)
-		cuda.memcpy_htod(class_sum_gpu, class_sum)
 
-		self.evaluate(self.ta_state_gpu, self.clause_weights_gpu, class_sum_gpu, self.encoded_X_test_gpu, grid=self.grid, block=self.block)
-		cuda.Context.synchronize()
-		cuda.memcpy_dtoh(class_sum, class_sum_gpu)
+
+		#class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
+		#class_sum_gpu = cuda.mem_alloc(class_sum.nbytes)
+		#cuda.memcpy_htod(class_sum_gpu, class_sum)
+
+		#self.evaluate(self.ta_state_gpu, self.clause_weights_gpu, class_sum_gpu, self.encoded_X_test_gpu, grid=self.grid, block=self.block)
+		#cuda.Context.synchronize()
+		#cuda.memcpy_dtoh(class_sum, class_sum_gpu)
 		
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
