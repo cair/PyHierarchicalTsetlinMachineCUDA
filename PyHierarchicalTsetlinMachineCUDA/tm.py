@@ -479,10 +479,11 @@ class CommonTsetlinMachine():
 					printf("Unknown node type!")
 					sys.exit()
 			
-			cuda.memcpy_dtoh(class_sum[e,:], self.class_sum_gpu)
-
 			self.evaluate_final.prepared_call(self.grid, self.block, self.hierarchy_votes[self.depth-1], self.clause_weights_gpu, self.class_sum_gpu)
 			cuda.Context.synchronize()
+
+			cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
+			class_sum[e,:] = class_sum_example
 
 		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
 		class_sum_gpu = cuda.mem_alloc(class_sum.nbytes)
