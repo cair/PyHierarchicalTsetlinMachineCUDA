@@ -15,9 +15,9 @@ epochs = 250
 
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
 
-X_train = np.where(X_train.reshape((X_train.shape[0], 28*28)) > 75, 1, 0)[0:1000]
+X_train = np.where(X_train.reshape((X_train.shape[0], 28*28)) > 75, 1, 0)#[0:1000]
 Y_train = Y_train[0:1000]
-X_test = np.where(X_test.reshape((X_test.shape[0], 28*28)) > 75, 1, 0)[0:1000]
+X_test = np.where(X_test.reshape((X_test.shape[0], 28*28)) > 75, 1, 0)#[0:1000]
 Y_test = Y_test[0:1000]
 
 tm = MultiClassTsetlinMachine(int(factor*2000), T, s)
