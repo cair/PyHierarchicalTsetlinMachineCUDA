@@ -643,13 +643,13 @@ code_evaluate = """
 					}
 				}
 
-				if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER) > 0) {
+			/*	if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER) > 0) {
 					all_exclude = 0;
 				}
 
 				if (all_exclude) {
 					continue;
-				}
+				}*/
 
 				for (unsigned long long e = 0; e < NUMBER_OF_EXAMPLES; ++e) {
 					int clause_output;

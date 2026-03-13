@@ -449,49 +449,49 @@ class CommonTsetlinMachine():
 			self.evaluate = mod.get_function("evaluate")
 
 		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
-		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		# class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
 
-		for e in range(number_of_examples):
-			class_sum_example[:] = 0
+		# for e in range(number_of_examples):
+		# 	class_sum_example[:] = 0
 
-			cuda.memcpy_htod(self.class_sum_gpu, class_sum_example)
+		# 	cuda.memcpy_htod(self.class_sum_gpu, class_sum_example)
 			
-			self.convert_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
-			cuda.Context.synchronize()
+		# 	self.convert_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
+		# 	cuda.Context.synchronize()
 
-			#self.compare_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
-			#cuda.Context.synchronize()
+		# 	#self.compare_ta_states.prepared_call(self.grid, self.block, self.ta_state_gpu, self.ta_state_hierarchy_gpu)
+		# 	#cuda.Context.synchronize()
 
-			self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.encoded_X_hierarchy_test_gpu, np.int32(e))
-			cuda.Context.synchronize()
+		# 	self.evaluate_leaves.prepared_call(self.grid, self.block, self.ta_state_hierarchy_gpu, self.component_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.encoded_X_hierarchy_test_gpu, np.int32(e))
+		# 	cuda.Context.synchronize()
 
-			for d in range(1, self.depth):
-				if (self.hierarchy_structure[d][0] == AND_GROUP):
-					self.evaluate_and_groups.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
-					cuda.Context.synchronize()
-				elif self.hierarchy_structure[d][0] == OR_GROUP:
-					self.evaluate_or_groups.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
-					cuda.Context.synchronize()
-				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-					self.evaluate_or_alternatives.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
-					cuda.Context.synchronize()
-				else:
-					printf("Unknown node type!")
-					sys.exit()
+		# 	for d in range(1, self.depth):
+		# 		if (self.hierarchy_structure[d][0] == AND_GROUP):
+		# 			self.evaluate_and_groups.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
+		# 			cuda.Context.synchronize()
+		# 		elif self.hierarchy_structure[d][0] == OR_GROUP:
+		# 			self.evaluate_or_groups.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
+		# 			cuda.Context.synchronize()
+		# 		elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
+		# 			self.evaluate_or_alternatives.prepared_call(self.grid, self.block, self.hierarchy_votes[d-1], self.hierarchy_votes[d], self.hierarchy_size[d + 1], self.hierarchy_structure[d][1])
+		# 			cuda.Context.synchronize()
+		# 		else:
+		# 			printf("Unknown node type!")
+		# 			sys.exit()
 			
-			self.evaluate_final.prepared_call(self.grid, self.block, self.hierarchy_votes[self.depth-1], self.clause_weights_gpu, self.class_sum_gpu)
-			cuda.Context.synchronize()
+		# 	self.evaluate_final.prepared_call(self.grid, self.block, self.hierarchy_votes[self.depth-1], self.clause_weights_gpu, self.class_sum_gpu)
+		# 	cuda.Context.synchronize()
 
-			cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
-			class_sum[:, e] = class_sum_example
+		# 	cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
+		# 	class_sum[:, e] = class_sum_example
 
-		# class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
-		# class_sum_gpu = cuda.mem_alloc(class_sum.nbytes)
-		# cuda.memcpy_htod(class_sum_gpu, class_sum)
+		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs*number_of_examples)).astype(np.int32)
+		class_sum_gpu = cuda.mem_alloc(class_sum.nbytes)
+		cuda.memcpy_htod(class_sum_gpu, class_sum)
 
-		# self.evaluate(self.ta_state_gpu, self.clause_weights_gpu, class_sum_gpu, self.encoded_X_test_gpu, grid=self.grid, block=self.block)
-		# cuda.Context.synchronize()
-		# cuda.memcpy_dtoh(class_sum, class_sum_gpu)
+		self.evaluate(self.ta_state_gpu, self.clause_weights_gpu, class_sum_gpu, self.encoded_X_test_gpu, grid=self.grid, block=self.block)
+		cuda.Context.synchronize()
+		cuda.memcpy_dtoh(class_sum, class_sum_gpu)
 		
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
