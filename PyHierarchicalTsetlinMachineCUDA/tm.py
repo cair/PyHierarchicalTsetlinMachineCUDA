@@ -322,6 +322,11 @@ class CommonTsetlinMachine():
 			self.update = mod_update.get_function("update")
 			self.update.prepare("PPPPPPi")
 
+		__global__ void update_weights(curandState *state, int *clause_weights, int *clause_output, int *class_sum, int *y, int example)
+
+			self.update_weights = mod_update.get_function("update_weights")
+			self.update_weights.prepare("PPPPPi")
+
 			self.evaluate_update = mod_update.get_function("evaluate")
 			self.evaluate_update.prepare("PPPPi")
 
@@ -417,6 +422,9 @@ class CommonTsetlinMachine():
 
 				#self.evaluate_update.prepared_call(self.grid, self.block, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, np.int32(e))
 				#cuda.Context.synchronize()
+
+				self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
+				cuda.Context.synchronize()
 
 				self.update.prepared_call(self.grid, self.block, g.state, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, self.Y_gpu, np.int32(e))
 				cuda.Context.synchronize()
