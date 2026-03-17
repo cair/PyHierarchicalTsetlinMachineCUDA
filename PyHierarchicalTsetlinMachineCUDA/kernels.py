@@ -682,7 +682,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
