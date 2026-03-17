@@ -721,7 +721,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], &ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
+					update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
 				}
 			}
 		
