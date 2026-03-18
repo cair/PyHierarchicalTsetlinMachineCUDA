@@ -184,10 +184,12 @@ code_update = """
 			}
 		}
 
-		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum)
+		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum, int *update_clause)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
+			(*update_clause) = 0;
+
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
 			}
@@ -196,6 +198,7 @@ code_update = """
 		
 			int absolute_prediction_error = abs(y - class_sum);
 			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+				(*update_clause) = 1;
 				if (target*sign > 0) {
 					if (clause_output && abs(*clause_weight) < INT_MAX) {
 						(*clause_weight) += sign;
@@ -729,7 +732,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights(curandState *state, int *clause_weights, int *clause_output, int *class_sum, int *y, int example)
+		__global__ void update_weights(curandState *state, int *clause_weights, int *clause_output, int *class_sum, int *y, int example, int *update_clause)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -745,7 +748,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*CLASSES + class_id], local_class_sum);
+					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*CLASSES + class_id], local_class_sum, &update_clause[clause]);
 				}
 			}
 		
