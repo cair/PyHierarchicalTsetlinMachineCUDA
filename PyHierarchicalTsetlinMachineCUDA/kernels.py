@@ -746,7 +746,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					int target = 1 - 2*(local_class_sum > y);
+					int target = 1 - 2*(local_class_sum > y[example*CLASSES + class_id]);
 			
 					if (target == -1 && curand_uniform(&localState) > 1.0*Q/max(1, CLASSES-1)) {
 						continue;
