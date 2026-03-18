@@ -219,48 +219,40 @@ code_update = """
 		__device__ inline void update_component_hierarchy(curandState *localState, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
-			
-			/*
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
-				return;
-			}
-			*/
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
-			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
-				if (target*sign > 0) {
-					// Type I Feedback
-					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
-						// Generate random bit values
-						unsigned int la_feedback = 0;
-						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 1.0/S) {
-								la_feedback |= (1 << b);
-							}
-						}
-
-						if (component_output) {
-							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
-								inc(ta_state, 0, ta_chunk, X[ta_chunk]);
-							#else
-								inc(ta_state, 0, ta_chunk, X[ta_chunk] & (~la_feedback));
-							#endif
-
-							dec(ta_state, 0, ta_chunk, (~X[ta_chunk]) & la_feedback);
-						} else {
-							dec(ta_state, 0, ta_chunk, la_feedback);
+			if (target*sign > 0) {
+				// Type I Feedback
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
+					// Generate random bit values
+					unsigned int la_feedback = 0;
+					for (int b = 0; b < INT_SIZE; ++b) {
+						if (curand_uniform(localState) <= 1.0/S) {
+							la_feedback |= (1 << b);
 						}
 					}
-				} else if (target*sign < 0 && component_output) {
-					// Type II Feedback
 
-					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
-						inc(ta_state, 0, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
+					if (component_output) {
+						#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
+							inc(ta_state, 0, ta_chunk, X[ta_chunk]);
+						#else
+							inc(ta_state, 0, ta_chunk, X[ta_chunk] & (~la_feedback));
+						#endif
+
+						dec(ta_state, 0, ta_chunk, (~X[ta_chunk]) & la_feedback);
+					} else {
+						dec(ta_state, 0, ta_chunk, la_feedback);
 					}
 				}
-			//}
+			} else if (target*sign < 0 && component_output) {
+				// Type II Feedback
+
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
+					inc(ta_state, 0, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
+				}
+			}
 		}
 
 		// Copy 
@@ -703,10 +695,6 @@ code_update = """
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
-				if (!update_clause[clause]) {
-					continue;
-				}
-
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
@@ -724,6 +712,10 @@ code_update = """
 				}
 
 				for (unsigned long long class_id = 0; class_id < CLASSES; ++class_id) {
+					if (!update_clause[class_id*CLAUSES + clause]) {
+						continue;
+					}
+
 					int local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
@@ -754,7 +746,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*CLASSES + class_id], local_class_sum, &update_clause[clause]);
+					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*CLASSES + class_id], local_class_sum, &update_clause[class_id * CLAUSES + clause]);
 				}
 			}
 		

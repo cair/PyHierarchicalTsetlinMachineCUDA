@@ -185,7 +185,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure_alternatives_gpu = cuda.mem_alloc((self.depth-1)*4)
 		cuda.memcpy_htod(self.hierarchy_structure_alternatives_gpu, np.array(self.hierarchy_structure_alternatives, dtype=np.int32))
 
-		self.update_clause_gpu = cuda.mem_alloc(self.number_of_clauses*4)
+		self.update_clause_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
