@@ -220,14 +220,16 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
+			/*
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
 			}
+			*/
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					// Type I Feedback
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
@@ -258,7 +260,7 @@ code_update = """
 						inc(ta_state, 0, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
-			}
+			//}
 		}
 
 		// Copy 
@@ -686,7 +688,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example, int *update_clause)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -700,6 +702,10 @@ code_update = """
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
+
+				if (!update_clause[clause]) {
+					continue;
+				}
 
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];

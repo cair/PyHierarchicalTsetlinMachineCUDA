@@ -185,6 +185,8 @@ class CommonTsetlinMachine():
 		self.hierarchy_structure_alternatives_gpu = cuda.mem_alloc((self.depth-1)*4)
 		cuda.memcpy_htod(self.hierarchy_structure_alternatives_gpu, np.array(self.hierarchy_structure_alternatives, dtype=np.int32))
 
+		self.update_clause_gpu = cuda.mem_alloc(self.number_of_clauses*4)
+
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
@@ -327,10 +329,10 @@ class CommonTsetlinMachine():
 			self.update.prepare("PPPPPPi")
 
 			self.update_hierarchy = mod_update.get_function("update_hierarchy")
-			self.update_hierarchy.prepare("PPPPiPPPPPi")
+			self.update_hierarchy.prepare("PPPPiPPPPPiP")
 
 			self.update_weights = mod_update.get_function("update_weights")
-			self.update_weights.prepare("PPPPPi")
+			self.update_weights.prepare("PPPPPiP")
 
 			self.evaluate_update = mod_update.get_function("evaluate")
 			self.evaluate_update.prepare("PPPPi")
@@ -427,13 +429,13 @@ class CommonTsetlinMachine():
 				#self.evaluate_update.prepared_call(self.grid, self.block, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, np.int32(e))
 				#cuda.Context.synchronize()
 
-				self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
+				self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e), self.update_clause_gpu)
 				cuda.Context.synchronize()
 
 				#self.update.prepared_call(self.grid, self.block, g.state, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, self.Y_gpu, np.int32(e))
 				#cuda.Context.synchronize()
 
-				self.update_hierarchy.prepared_call(self.grid, self.block, g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.class_sum_gpu, self.encoded_X_hierarchy_training_gpu, self.Y_gpu, np.int32(e))
+				self.update_hierarchy.prepared_call(self.grid, self.block, g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.class_sum_gpu, self.encoded_X_hierarchy_training_gpu, self.Y_gpu, np.int32(e), self.update_clause_gpu)
 				cuda.Context.synchronize()
 
 		self.ta_state = np.array([])
