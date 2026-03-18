@@ -683,7 +683,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example, int *clause_output)
+		__global__ void update_hierarchy(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -697,10 +697,6 @@ code_update = """
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
-
-				if (component_output[clause_component] != clause_output[clause]) {
-					printf("ERROR! %d=%d %d=%d\\n", clause_component, component_output[clause_component], clause, clause_output[clause]);
-				}
 
 				// Get state of current clause component
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
