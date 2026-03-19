@@ -762,6 +762,8 @@ code_update = """
 			/* Copy state to local memory for efficiency */  
 			curandState localState = state[index];
 
+			int *Xi_hierarchy = &X_hierarchy[(unsigned long long)example*LITERAL_CHUNKS];
+
 			// Calculate clause output first
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				unsigned int *ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
@@ -796,7 +798,7 @@ code_update = """
 							}
 						}
 
-						update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state_hierarchy, component_output[clause_component], &Xi_hierarchy[example * LITERAL_CHUNKS + ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
+						update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state_hierarchy, component_output[clause_component], &Xi_hierarchy[ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
 					}
 				}
 			}
