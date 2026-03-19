@@ -781,7 +781,7 @@ code_update = """
 
 					for (int component = 0; component < COMPONENTS; ++component) {
 						int clause_component = clause * COMPONENTS + component;
-						int *ta_state_hierarchy = &global_ta_state_hierarchy[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+						unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 	
 						int component_remainder = component;
 						int ta_chunk_base = 0;
