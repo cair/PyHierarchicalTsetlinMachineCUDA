@@ -754,7 +754,7 @@ code_update = """
 
 
 		// Update state of Tsetlin Automata team
-		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example)
+		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example, int *X_hierarchy, unsigned int *global_ta_state_hierarchy, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
