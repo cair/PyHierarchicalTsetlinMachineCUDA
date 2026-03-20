@@ -793,7 +793,7 @@ code_update = """
 					
 					update_clause(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, clause_output, clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)], y[example*CLASSES + class_id], local_class_sum);
 
-					int *Xi_hierarchy = &X_hierarcy[(unsigned long long)example*LITERAL_CHUNKS];
+					int *Xi_hierarchy = &X_hierarchy[(unsigned long long)example*LITERAL_CHUNKS];
 
 					for (int component = 0; component < COMPONENTS; ++component) {
 						// Get state of current clause component
