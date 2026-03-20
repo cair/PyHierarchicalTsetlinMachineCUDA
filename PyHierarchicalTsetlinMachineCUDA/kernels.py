@@ -130,14 +130,14 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			/*if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
+			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
-			}*/
+			}
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
-			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					/*if (clause_output && abs(*clause_weight) < INT_MAX) {
 						(*clause_weight) += sign;
@@ -181,7 +181,7 @@ code_update = """
 						inc(ta_state, 0, ta_chunk, (~X[clause_patch*TA_CHUNKS + ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
-			//}
+			}
 		}
 
 		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum)
@@ -776,18 +776,6 @@ code_update = """
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
-					}
-
-					int target = 1 - 2*(class_sum > y);
-			
-					if (target == -1 && curand_uniform(&localState) > 1.0*Q/max(1, CLASSES-1)) {
-						continue;
-					}
-
-					int sign = (clause_weights[class_id*CLAUSES + clause] >= 0) - (clause_weights[class_id*CLAUSES + clause] < 0);
-					int absolute_prediction_error = abs(y - class_sum);
-					if (curand_uniform(&localState) > 1.0*absolute_prediction_error/(2*THRESHOLD)) {
-						continue;
 					}
 
 					update_clause(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, clause_output, clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)], y[example*CLASSES + class_id], local_class_sum);
