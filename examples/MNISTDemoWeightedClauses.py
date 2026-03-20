@@ -6,7 +6,7 @@ from keras.datasets import mnist
 
 factor = 1
 
-s = 15.0
+s = 20.0
 
 T = int(factor*50*10)
 
