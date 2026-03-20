@@ -148,9 +148,9 @@ code_update = """
 						// Generate random bit values
 						unsigned int la_feedback = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							//if (curand_uniform(localState) <= 1.0/S) {
+							if (curand_uniform(localState) <= 1.0/S) {
 								la_feedback |= (1 << b);
-							//}
+							}
 						}
 
 
@@ -228,9 +228,9 @@ code_update = """
 					// Generate random bit values
 					unsigned int la_feedback = 0;
 					for (int b = 0; b < INT_SIZE; ++b) {
-						//if (curand_uniform(localState) <= 1.0/S) {
+						if (curand_uniform(localState) <= 1.0/S) {
 							la_feedback |= (1 << b);
-						//}
+						}
 					}
 
 					if (component_output) {
@@ -754,7 +754,7 @@ code_update = """
 
 
 		// Update state of Tsetlin Automata team
-		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example, unsigned int *global_ta_state_hierarchy, int *X_hierarchy, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *component_output)
+		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example, unsigned int *global_ta_state_hierarchy, int *X_hierarchy, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *component_output, int *update_clause)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -766,6 +766,10 @@ code_update = """
 
 			// Calculate clause output first
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
+				if (!update_clause[clause]) {
+					continue;
+				}
+
 				unsigned int *ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
 
 				unsigned int clause_output;
