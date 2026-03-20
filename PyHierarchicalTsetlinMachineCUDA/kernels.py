@@ -130,9 +130,10 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
+/*			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
 			}
+*/
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
@@ -776,6 +777,12 @@ code_update = """
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
+					}
+
+					int target = 1 - 2*(class_sum > y);
+			
+					if (target == -1 && curand_uniform(&localState) > 1.0*Q/max(1, CLASSES-1)) {
+						continue;
 					}
 
 					update_clause(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, clause_output, clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)], y[example*CLASSES + class_id], local_class_sum);
