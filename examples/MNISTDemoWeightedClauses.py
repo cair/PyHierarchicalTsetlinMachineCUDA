@@ -22,8 +22,8 @@ Y_test = Y_test#[0:1000]
 
 tm = MultiClassTsetlinMachine(int(factor*2000), T, s)
 
-print("\nAccuracy over 100 epochs:\n")
-for i in range(100):
+print("\nAccuracy over 500 epochs:\n")
+for i in range(500):
 	start_training = time()
 	tm.fit(X_train, Y_train, epochs=1, incremental=True)
 	stop_training = time()
