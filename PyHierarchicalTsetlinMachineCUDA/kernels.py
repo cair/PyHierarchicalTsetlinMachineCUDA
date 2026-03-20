@@ -137,7 +137,7 @@ code_update = """
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					if (clause_output && abs(*clause_weight) < INT_MAX) {
 						(*clause_weight) += sign;
@@ -148,9 +148,9 @@ code_update = """
 						// Generate random bit values
 						unsigned int la_feedback = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 1.0/S) {
+							//if (curand_uniform(localState) <= 1.0/S) {
 								la_feedback |= (1 << b);
-							}
+							//}
 						}
 
 
@@ -180,7 +180,7 @@ code_update = """
 						inc(ta_state, 0, ta_chunk, (~X[clause_patch*TA_CHUNKS + ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
-			}
+			//}
 		}
 
 		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum, int *update_clause)
@@ -228,9 +228,9 @@ code_update = """
 					// Generate random bit values
 					unsigned int la_feedback = 0;
 					for (int b = 0; b < INT_SIZE; ++b) {
-						if (curand_uniform(localState) <= 1.0/S) {
+						//if (curand_uniform(localState) <= 1.0/S) {
 							la_feedback |= (1 << b);
-						}
+						//}
 					}
 
 					if (component_output) {
