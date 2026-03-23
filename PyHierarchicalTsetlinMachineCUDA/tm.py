@@ -41,7 +41,7 @@ g = curandom.XORWOWRandomNumberGenerator()
 class CommonTsetlinMachine():
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 14), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (OR_ALTERNATIVES, 3), (AND_GROUP, 14), (OR_ALTERNATIVES, 2), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (OR_ALTERNATIVES, 3), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
