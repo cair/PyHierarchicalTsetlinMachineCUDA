@@ -526,10 +526,10 @@ code_update = """
 				int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
-					//or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
-					if (child_input[or_group_node*number_of_or_group_addends + or_addend]) {
-						or_group_vote_sum = 1; 
-					}
+					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
+					//if (child_input[or_group_node*number_of_or_group_addends + or_addend]) {
+					//	or_group_vote_sum = 1; 
+					//}
 				}
 
 				// Store or group vote sum as node output
@@ -584,11 +584,11 @@ code_update = """
 				int or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
-					// or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
-					if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative]) {
-						or_alternatives_vote_sum = 1;
-					}
+					//if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative]) {
+					//	or_alternatives_vote_sum = 1;
+					//}
 				}
 
 				// Store vote sum as node output
