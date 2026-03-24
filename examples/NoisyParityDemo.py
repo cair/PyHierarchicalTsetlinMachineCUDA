@@ -6,8 +6,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 ensembles = 10
 epochs = 4000
 
-#train_data = np.loadtxt("./examples/NoisyParityTrainingData.txt").astype(np.uint32)
-train_data = np.loadtxt("./examples/NoisyParityTestingData.txt").astype(np.uint32)
+train_data = np.loadtxt("./examples/NoisyParityTrainingData.txt").astype(np.uint32)
 X_train = train_data[:,0:-1]
 Y_train = train_data[:,-1]
 
