@@ -130,14 +130,15 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
+/*			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
 			}
+*/
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					/*if (clause_output && abs(*clause_weight) < INT_MAX) {
 						(*clause_weight) += sign;
@@ -152,7 +153,6 @@ code_update = """
 								la_feedback |= (1 << b);
 							}
 						}
-
 
 						if (clause_output) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
@@ -181,7 +181,7 @@ code_update = """
 						inc(ta_state, 0, ta_chunk, (~X[clause_patch*TA_CHUNKS + ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
-			}
+			//}
 		}
 
 		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum)
@@ -220,6 +220,7 @@ code_update = """
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
 				return;
 			}
+			
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
@@ -526,6 +527,9 @@ code_update = """
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
+					//if (child_input[or_group_node*number_of_or_group_addends + or_addend]) {
+					//	or_group_vote_sum = 1; 
+					//}
 				}
 
 				// Store or group vote sum as node output
@@ -581,6 +585,10 @@ code_update = """
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+
+					//if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative]) {
+					//	or_alternatives_vote_sum = 1;
+					//}
 				}
 
 				// Store vote sum as node output
@@ -754,7 +762,7 @@ code_update = """
 
 
 		// Update state of Tsetlin Automata team
-		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example)
+		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example, int *X_hierarchy, unsigned int *global_ta_state_hierarchy, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -777,8 +785,44 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
+
+					int target = 1 - 2*(local_class_sum > y[example*CLASSES + class_id]);
+			
+					if (target == -1 && curand_uniform(&localState) > 1.0*Q/max(1, CLASSES-1)) {
+						continue;
+					}
+
+					int sign = (clause_weights[class_id*CLAUSES + clause] >= 0) - (clause_weights[class_id*CLAUSES + clause] < 0);
+		
+					int absolute_prediction_error = abs(y[example*CLASSES + class_id] - local_class_sum);
+					if (curand_uniform(&localState) > 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+						continue;
+					}
+					
 					update_clause(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, clause_output, clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)], y[example*CLASSES + class_id], local_class_sum);
-				}
+
+					int *Xi_hierarchy = &X_hierarchy[(unsigned long long)example*LITERAL_CHUNKS];
+
+					for (int component = 0; component < COMPONENTS; ++component) {
+						// Get state of current clause component
+						unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[(clause * COMPONENTS + component)*TA_CHUNKS_PER_LEAF*STATE_BITS];
+
+						int component_remainder = component;
+						int ta_chunk_base = 0;
+						int size = 1;
+						for (int d = 0; d < depth-1; ++d) {
+							int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
+							component_remainder = component_remainder / hierarchy_structure_factors[d];
+
+							if (hierarchy_structure_alternatives[d] == 0) {
+								ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+								size *= hierarchy_structure_factors[d];
+							}
+						}
+
+						update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state_hierarchy, component_output[clause * COMPONENTS + component], &Xi_hierarchy[ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
+					}
+				}	
 			}
 		
 			state[index] = localState;
@@ -859,7 +903,8 @@ code_prepare = """
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < CLASSES; ++class_id) {
 					#if NEGATIVE_CLAUSES == 1
-						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
+						//clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
+						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
 					#else
 						clause_weights[class_id*CLAUSES + clause] = 1;
 					#endif
@@ -1044,7 +1089,7 @@ code_encode = """
 			}
 		}
 
-		__global__ void encode_compare(unsigned int *X, unsigned int *encoded_X, unsigned int *encoded_X_hierarchy, int number_of_ta_chunks, int number_of_literals, int number_of_literal_chunks, int number_of_leaves, int number_of_literals_per_leaf, int number_of_literal_chunks_per_leaf, int number_of_examples)
+		__global__ void encode_compare(unsigned int *X, unsigned int *encoded_X, unsigned int *encoded_X_hierarchy, int number_of_ta_chunks, int number_of_features, int number_of_literal_chunks, int number_of_leaves, int number_of_features_per_leaf, int number_of_literal_chunks_per_leaf, int number_of_examples)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -1054,49 +1099,74 @@ code_encode = """
 			unsigned int *Xi;
 
 			if (index == 0) {
-				printf("Number of literals: %d\\n", number_of_literals);
+				printf("Number of features: %d\\n", number_of_features);
 				printf("Number of literal chunks: %d\\n", number_of_literal_chunks);
 				printf("Number of leaves: %d\\n", number_of_leaves);
-				printf("Number of literals per leaf: %d\\n", number_of_literals_per_leaf);
+				printf("Number of features per leaf: %d\\n", number_of_features_per_leaf);
 			}
 
 			for (unsigned long long i = index; i < number_of_examples; i += stride) {
 				encoded_Xi = &encoded_X[i*number_of_ta_chunks];
 				encoded_Xi_hierarchy = &encoded_X_hierarchy[i*number_of_literal_chunks];
-				Xi = &X[i*number_of_literals];
+				Xi = &X[i*number_of_features];
 
-				for (int j = 0; j < number_of_leaves; ++j) {
-					for (int k = 0; k < number_of_literals_per_leaf; ++k) {
-						int literal = j*number_of_literals_per_leaf + k;
-						int literal_chunk_nr = literal / 32;
-						int literal_chunk_pos = literal % 32;
+				for (int j = 0; j < number_of_features / number_of_features_per_leaf; ++j) {
+					for (int k = 0; k < number_of_features_per_leaf; ++k) {
+						int feature = j*number_of_features_per_leaf + k;
+						int feature_chunk_nr = feature / 32;
+						int feature_chunk_pos = feature % 32;
 
 						int leaf_chunk_nr = k / 32;
 						int leaf_chunk_pos = k % 32;
 
 						if (
-							((encoded_Xi[literal_chunk_nr] & (1 << literal_chunk_pos)) > 0)
+							((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
 							!=
 							((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
 						) {
-							if (Xi[j*number_of_literals_per_leaf + k] != 
+							if (Xi[j*number_of_features_per_leaf + k] != 
 								((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
 							) {
 								printf("HIERARCHY ENCODING ERROR\\n");
 							}
 
-							if (Xi[j*number_of_literals_per_leaf + k] != 
-								((encoded_Xi[literal_chunk_nr] & (1 << literal_chunk_pos)) > 0)
+							if (Xi[j*number_of_features_per_leaf + k] != 
+								((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
 							) {
 								printf("FLAT ENCODING ERROR\\n");
 							}
-						}	
+						}
+
+						feature = j*number_of_features_per_leaf + k;
+						feature_chunk_nr = (feature + number_of_features) / 32;
+						feature_chunk_pos = (feature + number_of_features) % 32;
+
+						leaf_chunk_nr = (k +  number_of_features_per_leaf) / 32;
+						leaf_chunk_pos = (k + number_of_features_per_leaf) % 32;
+
+						if (
+							((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
+							!=
+							((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
+						) {
+							if (Xi[j*number_of_features_per_leaf + k] == 
+								((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
+							) {
+								printf("HIERARCHY ENCODING ERROR\\n");
+							}
+
+							if (Xi[j*number_of_features_per_leaf + k] == 
+								((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
+							) {
+								printf("FLAT ENCODING ERROR\\n");
+							}
+						}
 					}
 				}
 			}
 		}
 
-		__global__ void encode_hierarchy(unsigned int *X, unsigned int *encoded_X, int number_of_literals, int number_of_literal_chunks, int number_of_leaves, int number_of_literals_per_leaf, int number_of_literal_chunks_per_leaf, int number_of_examples)
+		__global__ void encode_hierarchy(unsigned int *X, unsigned int *encoded_X, int number_of_features, int number_of_literal_chunks, int number_of_leaves, int number_of_features_per_leaf, int number_of_literal_chunks_per_leaf, int append_negated, int number_of_examples)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -1105,22 +1175,26 @@ code_encode = """
 			unsigned int *encoded_Xi;
 
 			if (index == 0) {
-				printf("Number of literals: %d\\n", number_of_literals);
+				printf("Number of features: %d\\n", number_of_features);
 				printf("Number of literal chunks: %d\\n", number_of_literal_chunks);
 				printf("Number of leaves: %d\\n", number_of_leaves);
-				printf("Number of literals per leaf: %d\\n", number_of_literals_per_leaf);
+				printf("Number of features per leaf: %d\\n", number_of_features_per_leaf);
+				printf("Append negated: %d\\n", append_negated);
 			}
 
 			for (unsigned long long i = index; i < number_of_examples; i += stride) {
-				Xi = &X[i*number_of_literals];
+				Xi = &X[i*number_of_features];
 				encoded_Xi = &encoded_X[i*number_of_literal_chunks];
 
-				for (int j = 0; j < number_of_leaves; ++j) {
-					for (int k = 0; k < number_of_literals_per_leaf; ++k) {
-						int leaf_chunk_nr = k / 32;
-						int leaf_chunk_pos = k % 32;
-
-						if (Xi[j*number_of_literals_per_leaf + k] == 1) {
+				for (int j = 0; j < number_of_features / number_of_features_per_leaf; ++j) {
+					for (int k = 0; k < number_of_features_per_leaf; ++k) {
+						if (Xi[j*number_of_features_per_leaf + k] == 1) {
+							int leaf_chunk_nr = k / 32;
+							int leaf_chunk_pos = k % 32;
+							encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);
+						} else if (append_negated) {
+							int leaf_chunk_nr = (k + number_of_features_per_leaf) / 32;
+							int leaf_chunk_pos = (k + number_of_features_per_leaf) % 32;
 							encoded_Xi[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] |= (1 << leaf_chunk_pos);
 						}
 					}

@@ -41,7 +41,7 @@ g = curandom.XORWOWRandomNumberGenerator()
 class CommonTsetlinMachine():
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 14), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (OR_ALTERNATIVES, 3), (AND_GROUP, 14), (OR_ALTERNATIVES, 2), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 7), (AND_GROUP, 2), (AND_GROUP, 2)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 14*7), (OR_ALTERNATIVES, 4), (AND_GROUP, 8)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 #	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=((AND_GROUP, 28), (AND_GROUP, 28)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_clause_chunks = (number_of_clauses-1)/32 + 1
@@ -60,9 +60,10 @@ class CommonTsetlinMachine():
 		self.hierarchy_size = [0] * (self.depth + 1)
 
 		self.hierarchy_size[self.depth] = 1
+		print("HIERARCHY STRUCTURE", self.hierarchy_structure)
 		print(self.depth)
 		for d in range(self.depth - 1):
-			print(self.hierarchy_size[self.depth - d])
+			print(d, self.hierarchy_size[self.depth - d])
 			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
 			print(self.depth - d - 1, self.hierarchy_size[self.depth - d - 1])
 		print("HIERARCHY SIZE", self.hierarchy_size)
@@ -77,19 +78,20 @@ class CommonTsetlinMachine():
 		print("HIERARCHY STRUCTURE FACTORS", self.hierarchy_structure_factors)
 		print("HIERARCHY STRUCTURE ALTERNATIVES", self.hierarchy_structure_alternatives)
 
-		self.number_of_features = 1
+		self.number_of_features_hierarchy = 1
 		for d in range(self.depth - 1, -1, -1):
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
-				self.number_of_features *= self.hierarchy_structure[d][1]
+				self.number_of_features_hierarchy *= self.hierarchy_structure[d][1]
 
-		print("NUMBER OF FEATURES", self.number_of_features)
+		print("NUMBER OF FEATURES", self.number_of_features_hierarchy)
 
+		self.number_of_features_per_leaf = self.hierarchy_structure[0][1]
 		if self.append_negated:
-			self.number_of_literals = self.number_of_features * 2
-			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]*2
+			self.number_of_literals = self.number_of_features_hierarchy * 2
+			self.number_of_literals_per_leaf = self.number_of_features_per_leaf * 2
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 		else:
-			self.number_of_literals = self.number_of_features
+			self.number_of_literals = self.number_of_features_hierarchy
 			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 
@@ -144,13 +146,6 @@ class CommonTsetlinMachine():
 		X_gpu = cuda.mem_alloc(Xm.nbytes)
 		cuda.memcpy_htod(X_gpu, Xm)
 
-		if self.append_negated:
-			Xm_hierarchical = np.ascontiguousarray(np.hstack((X, 1 - X)).flatten()).astype(np.uint32)
-		else:
-			Xm_hierarchical = np.ascontiguousarray(X.flatten()).astype(np.uint32)
-		X_hierarchical_gpu = cuda.mem_alloc(Xm_hierarchical.nbytes)
-		cuda.memcpy_htod(X_hierarchical_gpu, Xm_hierarchical)
-
 		if self.append_negated:			
 			self.prepare_encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(1), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
@@ -162,12 +157,12 @@ class CommonTsetlinMachine():
 			self.encode(X_gpu, encoded_X_gpu, np.int32(number_of_examples), np.int32(self.dim[0]), np.int32(self.dim[1]), np.int32(self.dim[2]), np.int32(self.patch_dim[0]), np.int32(self.patch_dim[1]), np.int32(0), np.int32(0), grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 
-		self.prepare_encode_hierarchy(X_hierarchical_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_literal_chunks), np.int32(number_of_examples), grid=self.grid, block=self.block)
+		self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_literal_chunks), np.int32(number_of_examples), grid=self.grid, block=self.block)
 		cuda.Context.synchronize()	
-		self.encode_hierarchy(X_hierarchical_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_literals), np.int32(self.number_of_literal_chunks), np.int32(self.hierarchy_size[1]), np.int32(self.number_of_literals_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(number_of_examples), grid=self.grid, block=self.block)
+		self.encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_features_hierarchy), np.int32(self.number_of_literal_chunks), np.int32(self.hierarchy_size[1]), np.int32(self.number_of_features_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(self.append_negated), np.int32(number_of_examples), grid=self.grid, block=self.block)
 		cuda.Context.synchronize()
 
-		self.encode_compare(X_hierarchical_gpu, encoded_X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_ta_chunks), np.int32(self.number_of_literals), np.int32(self.number_of_literal_chunks), np.int32(self.hierarchy_size[1]), np.int32(self.number_of_literals_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(number_of_examples), grid=self.grid, block=self.block)
+		self.encode_compare(X_gpu, encoded_X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_ta_chunks), np.int32(self.number_of_features_hierarchy), np.int32(self.number_of_literal_chunks), np.int32(self.hierarchy_size[1]), np.int32(self.number_of_features_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(number_of_examples), grid=self.grid, block=self.block)
 		cuda.Context.synchronize()
 
 	def allocate_gpu_memory(self, number_of_examples):
@@ -324,7 +319,7 @@ class CommonTsetlinMachine():
 
 			mod_update = SourceModule(parameters + kernels.code_header + kernels.code_update, no_extern_c=True)
 			self.update = mod_update.get_function("update")
-			self.update.prepare("PPPPPPi")
+			self.update.prepare("PPPPPPiPPPiPP")
 
 			self.update_hierarchy = mod_update.get_function("update_hierarchy")
 			self.update_hierarchy.prepare("PPPPiPPPPPi")
@@ -427,13 +422,43 @@ class CommonTsetlinMachine():
 				#self.evaluate_update.prepared_call(self.grid, self.block, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, np.int32(e))
 				#cuda.Context.synchronize()
 
-				self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
-				cuda.Context.synchronize()
-
-				#self.update.prepared_call(self.grid, self.block, g.state, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, self.Y_gpu, np.int32(e))
+				#self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
 				#cuda.Context.synchronize()
 
-				self.update_hierarchy.prepared_call(self.grid, self.block, g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.hierarchy_votes[0], self.depth, self.hierarchy_structure_factors_gpu, self.hierarchy_structure_alternatives_gpu, self.class_sum_gpu, self.encoded_X_hierarchy_training_gpu, self.Y_gpu, np.int32(e))
+				# self.update.prepared_call(
+				# 	self.grid,
+				# 	self.block,
+				# 	g.state,
+				# 	self.ta_state_gpu,
+				# 	self.clause_weights_gpu,
+				# 	self.class_sum_gpu,
+				# 	self.encoded_X_training_gpu,
+				# 	self.Y_gpu,
+				# 	np.int32(e),
+				# 	self.encoded_X_hierarchy_training_gpu,
+				# 	self.ta_state_hierarchy_gpu,
+				# 	self.hierarchy_votes[0],
+				# 	self.depth,
+				# 	self.hierarchy_structure_factors_gpu,
+				# 	self.hierarchy_structure_alternatives_gpu
+				# )
+				# cuda.Context.synchronize()
+
+				self.update_hierarchy.prepared_call(
+					self.grid,
+					self.block,
+					g.state,
+					self.ta_state_hierarchy_gpu,
+					self.clause_weights_gpu,
+					self.hierarchy_votes[0],
+					self.depth,
+					self.hierarchy_structure_factors_gpu,
+					self.hierarchy_structure_alternatives_gpu,
+					self.class_sum_gpu,
+					self.encoded_X_hierarchy_training_gpu,
+					self.Y_gpu,
+					np.int32(e)
+				)
 				cuda.Context.synchronize()
 
 		self.ta_state = np.array([])
@@ -601,8 +626,8 @@ class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 		return (self.score(X) >= 0).astype(np.uint32).transpose()
 
 class MultiClassTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
-		super().__init__(number_of_clauses, T, s, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+	def __init__(self, number_of_clauses, T, s, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
 		self.negative_clauses = 1
 
 	def fit(self, X, Y, epochs=100, incremental=False):

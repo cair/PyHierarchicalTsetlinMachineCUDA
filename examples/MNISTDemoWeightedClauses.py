@@ -1,14 +1,14 @@
 from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
 import numpy as np
 from time import time
-
+import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 
 factor = 1
 
 s = 10.0
 
-T = int(factor*50*10)
+T = int(factor*50*10)*4096
 
 ensembles = 10
 epochs = 250
@@ -20,10 +20,10 @@ Y_train = Y_train#[0:1000]
 X_test = np.where(X_test.reshape((X_test.shape[0], 28*28)) > 75, 1, 0)#[0:1000]
 Y_test = Y_test#[0:1000]
 
-tm = MultiClassTsetlinMachine(int(factor*2000), T, s)
+tm = MultiClassTsetlinMachine(int(factor*2000), T, s, hierarchy_structure=((tm.AND_GROUP, 28*7), (tm.OR_ALTERNATIVES, 8), (tm.AND_GROUP, 4)))
 
-print("\nAccuracy over 100 epochs:\n")
-for i in range(100):
+print("\nAccuracy over 500 epochs:\n")
+for i in range(500):
 	start_training = time()
 	tm.fit(X_train, Y_train, epochs=1, incremental=True)
 	stop_training = time()
