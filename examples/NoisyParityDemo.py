@@ -6,11 +6,11 @@ from time import time
 ensembles = 10
 epochs = 4000
 
-train_data = np.loadtxt("examples/NoisyXORTrainingData.txt").astype(np.uint32)
+train_data = np.loadtxt("./examples/NoisyXORTrainingData.txt").astype(np.uint32)
 X_train = train_data[:,0:-1]
 Y_train = train_data[:,-1]
 
-test_data = np.loadtxt("examples/NoisyParityTestingData.txt").astype(np.uint32)
+test_data = np.loadtxt("./examples/NoisyParityTestingData.txt").astype(np.uint32)
 X_test = test_data[:,0:-1]
 Y_test = test_data[:,-1]
 
