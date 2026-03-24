@@ -83,11 +83,11 @@ class CommonTsetlinMachine():
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_features.number_of_features_hierarchy *= self.hierarchy_structure[d][1]
 
-		print("NUMBER OF FEATURES", self..number_of_features_hierarchy)
+		print("NUMBER OF FEATURES", self.number_of_features_hierarchy)
 
 		self.number_of_features_per_leaf = self.hierarchy_structure[0][1]
 		if self.append_negated:
-			self.number_of_literals = self..number_of_features_hierarchy * 2
+			self.number_of_literals = self.number_of_features_hierarchy * 2
 			self.number_of_literals_per_leaf = self.number_of_features_per_leaf * 2
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 		else:
