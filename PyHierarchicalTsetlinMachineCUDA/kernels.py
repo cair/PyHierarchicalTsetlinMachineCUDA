@@ -1136,12 +1136,12 @@ code_encode = """
 							}
 						}
 
-						int feature = j*number_of_features_per_leaf + k;
-						int feature_chunk_nr = (feature + number_of_features) / 32;
-						int feature_chunk_pos = (feature + number_of_features) % 32;
+						feature = j*number_of_features_per_leaf + k;
+						feature_chunk_nr = (feature + number_of_features) / 32;
+						feature_chunk_pos = (feature + number_of_features) % 32;
 
-						int leaf_chunk_nr = (k +  number_of_features_per_leaf) / 32;
-						int leaf_chunk_pos = (k + number_of_features_per_leaf) % 32;
+						leaf_chunk_nr = (k +  number_of_features_per_leaf) / 32;
+						leaf_chunk_pos = (k + number_of_features_per_leaf) % 32;
 
 						if (
 							((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
