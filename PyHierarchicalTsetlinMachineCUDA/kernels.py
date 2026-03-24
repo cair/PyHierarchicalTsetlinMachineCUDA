@@ -1148,11 +1148,11 @@ code_encode = """
 							!=
 							((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
 						) {
-							if (Xi[j*number_of_features_per_leaf + k] == 
+							/*if (Xi[j*number_of_features_per_leaf + k] == 
 								((encoded_Xi_hierarchy[j*number_of_literal_chunks_per_leaf + leaf_chunk_nr] & (1 << leaf_chunk_pos)) > 0)
 							) {
 								printf("HIERARCHY ENCODING ERROR\\n");
-							}
+							}*/
 
 							if (Xi[j*number_of_features_per_leaf + k] == 
 								((encoded_Xi[feature_chunk_nr] & (1 << feature_chunk_pos)) > 0)
