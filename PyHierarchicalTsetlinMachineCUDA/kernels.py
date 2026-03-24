@@ -1111,7 +1111,7 @@ code_encode = """
 
 				for (int j = 0; j < number_of_features / number_of_features_per_leaf; ++j) {
 					for (int k = 0; k < number_of_features_per_leaf; ++k) {
-						int feature = j*number_of_feature_per_leaf + k;
+						int feature = j*number_of_features_per_leaf + k;
 						int feature_chunk_nr = feature / 32;
 						int feature_chunk_pos = feature % 32;
 
