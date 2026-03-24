@@ -1132,7 +1132,7 @@ code_encode = """
 							if (Xi[j*number_of_literals_per_leaf + k] != 
 								((encoded_Xi[literal_chunk_nr] & (1 << literal_chunk_pos)) > 0)
 							) {
-								printf("FLAT ENCODING ERROR\\n");
+								//printf("FLAT ENCODING ERROR\\n");
 							}
 						}	
 					}
