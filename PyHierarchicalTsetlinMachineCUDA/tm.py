@@ -98,7 +98,7 @@ class CommonTsetlinMachine():
 
 
 	def cuda_modules(self):
-					parameters = """
+		parameters = """
 	#define CLASSES %d
 	#define CLAUSES %d
 	#define DEPTH %d
