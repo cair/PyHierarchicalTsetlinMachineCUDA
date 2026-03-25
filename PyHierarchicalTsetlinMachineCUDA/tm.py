@@ -94,16 +94,6 @@ class CommonTsetlinMachine():
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 
-		# Structure for initializing training and test data
-		self.X_train = np.array([])
-		self.Y_train = np.array([])
-		self.X_test = np.array([])
-		
-		# Structure for storing Tsetlin machine state
-		self.ta_state = np.array([])
-		self.clause_weights = np.array([])
-		self.component_weights = np.array([])
-
 		# Is this the first time fit is called?
 		self.first = True
 
@@ -157,36 +147,26 @@ class CommonTsetlinMachine():
 		return (ta_state[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
 	def get_state(self):
-		if np.array_equal(self.clause_weights, np.array([])):
-			self.ta_state = np.empty(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits).astype(np.uint32)
-			cuda.memcpy_dtoh(self.ta_state, self.ta_state_gpu)
-			self.clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
-			cuda.memcpy_dtoh(self.clause_weights, self.clause_weights_gpu)
-		return((self.ta_state, self.clause_weights, self.number_of_outputs, self.number_of_clauses, self.number_of_features, self.dim, self.patch_dim, self.number_of_patches, self.number_of_state_bits, self.number_of_ta_chunks, self.append_negated, self.min_y, self.max_y))
+		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
+		cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
+		cuda.memcpy_dtoh(self.clause_weights, self.clause_weights_gpu)
+		return((self.ta_state_hierarchy, self.clause_weights, self.number_of_outputs, self.number_of_clauses, self.hierarchy_structure, self.boost_true_positive_feedback, self.number_of_state_bits, self.append_negated, self.min_y, self.max_y))
 
 	def set_state(self, state):
 		self.number_of_outputs = state[2]
 		self.number_of_clauses = state[3]
-		self.number_of_features = state[4]
-		self.dim = state[5]
-		self.patch_dim = state[6]
-		self.number_of_patches = state[7]
-		self.number_of_state_bits = state[8]
-		self.number_of_ta_chunks = state[9]
-		self.append_negated = state[10]
-		self.min_y = state[11]
-		self.max_y = state[12]
+		self.hierarchy_structure = state[4]
+		self.boost_true_positive_feedback = state[5]
+		self.number_of_state_bits = state[6]
+		self.append_negated = state[7]
+		self.min_y = state[8]
+		self.max_y = state[9]
 		
-		self.ta_state_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits*4)
+		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
-		cuda.memcpy_htod(self.ta_state_gpu, state[0])
+		cuda.memcpy_htod(self.ta_state_hierarchy_gpu, state[0])
 		cuda.memcpy_htod(self.clause_weights_gpu, state[1])
-
-		self.X_train = np.array([])
-		self.Y_train = np.array([])
-		self.X_test = np.array([])
-		self.ta_state = np.array([])
-		self.clause_weights = np.array([])
 
 	# Transform input data for processing at next layer
 	def transform(self, X):
@@ -231,19 +211,6 @@ class CommonTsetlinMachine():
 		if self.first:
 			self.first = False
 
-			if len(X.shape) == 3:
-				self.dim = (X.shape[1], X.shape[2],  1)
-			elif len(X.shape) == 4:
-				self.dim = X.shape[1:]
-
-			if self.append_negated:
-				self.number_of_features = int(self.patch_dim[0]*self.patch_dim[1]*self.dim[2] + (self.dim[0] - self.patch_dim[0]) + (self.dim[1] - self.patch_dim[1]))*2
-			else:
-				self.number_of_features = int(self.patch_dim[0]*self.patch_dim[1]*self.dim[2] + (self.dim[0] - self.patch_dim[0]) + (self.dim[1] - self.patch_dim[1]))
-
-			self.number_of_patches = int((self.dim[0] - self.patch_dim[0] + 1)*(self.dim[1] - self.patch_dim[1] + 1))
-			self.number_of_ta_chunks = int((self.number_of_features-1)/32 + 1)
-		
 			parameters = """
 	#define CLASSES %d
 	#define CLAUSES %d
@@ -266,8 +233,6 @@ class CommonTsetlinMachine():
 	#define NUMBER_OF_EXAMPLES %d
 """ % (self.number_of_outputs, self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_features, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.number_of_patches, number_of_examples)
 		
-			print("NUMBER OF LITERAL CHUNKS", self.number_of_literal_chunks)
-			print(parameters)
 			mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 			self.prepare_weights = mod_prepare.get_function("prepare_weights")
 			self.prepare_hierarchy = mod_prepare.get_function("prepare_hierarchy")
@@ -288,23 +253,8 @@ class CommonTsetlinMachine():
 			self.update_weights = mod_update.get_function("update_weights")
 			self.update_weights.prepare("PPPPPi")
 
-			self.evaluate_update = mod_update.get_function("evaluate")
-			self.evaluate_update.prepare("PPPPi")
-
-			self.evaluate_update_compare = mod_update.get_function("evaluate_compare")
-			self.evaluate_update_compare.prepare("PPPPiP")
-
-			self.convert_ta_states = mod_update.get_function("convert_ta_states")
-			self.convert_ta_states.prepare("PP")
-
-			self.compare_ta_states = mod_update.get_function("compare_ta_states")
-			self.compare_ta_states.prepare("PP")
-
 			self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
 			self.evaluate_leaves.prepare("PPPiPPPi")
-
-			self.evaluate_leaves_compare = mod_update.get_function("evaluate_leaves_compare")
-			self.evaluate_leaves_compare.prepare("PPPPPPi")
 
 			self.evaluate_final = mod_update.get_function("evaluate_final")
 			self.evaluate_final.prepare("PPP")
@@ -323,7 +273,6 @@ class CommonTsetlinMachine():
 
 			self.encoded_X_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_patches * self.number_of_ta_chunks*4))
 			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
-			print("ALLOCATING TRAINING", number_of_examples * self.number_of_literal_chunks * 4, number_of_examples, self.number_of_literal_chunks, 4)
 			self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
 		
 		if incremental == False:
