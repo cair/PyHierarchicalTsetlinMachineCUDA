@@ -33,7 +33,7 @@ from pycuda.compiler import SourceModule
 from time import time
 
 OR_GROUP = "OR a group of children"
-OR_ALTERNATIVES = "Create alternatives from child"
+OR_ALTERNATIVES = "Create multiple OR alternatives for a sub hierarchy"
 AND_GROUP = "AND a group of children"
 
 g = curandom.XORWOWRandomNumberGenerator() 
@@ -115,13 +115,16 @@ class CommonTsetlinMachine():
 	def encode_X(self, X, encoded_X_gpu, encoded_X_hierarchy_gpu):
 		number_of_examples = X.shape[0]
 
+		# Allocates GPU memory for input data
 		Xm = np.ascontiguousarray(X.flatten()).astype(np.uint32)
 		X_gpu = cuda.mem_alloc(Xm.nbytes)
 		cuda.memcpy_htod(X_gpu, Xm)
 
+		# Prepares for leaf encoding of the input data
 		self.prepare_encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_literal_chunks), np.int32(number_of_examples), grid=self.grid, block=self.block)
 		cuda.Context.synchronize()	
 		
+		# Encodes the input data split across the leaves
 		self.encode_hierarchy(X_gpu, encoded_X_hierarchy_gpu, np.int32(self.number_of_features_hierarchy), np.int32(self.number_of_literal_chunks), np.int32(self.hierarchy_size[1]), np.int32(self.number_of_features_per_leaf), np.int32(self.number_of_literal_chunks_per_leaf), np.int32(self.append_negated), np.int32(number_of_examples), grid=self.grid, block=self.block)
 		cuda.Context.synchronize()
 
@@ -146,12 +149,12 @@ class CommonTsetlinMachine():
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 
-	def ta_action(self, clause, ta):
-		self.ta_state = np.empty(self.number_of_clauses*self.number_of_ta_chunks*self.number_of_state_bits, dtype=np.uint32)
-		cuda.memcpy_dtoh(self.ta_state, self.ta_state_gpu)
-		ta_state = self.ta_state.reshape((self.number_of_clauses, self.number_of_ta_chunks, self.number_of_state_bits))
+	def ta_action(self, clause, leaf, ta):
+		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
+		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+		ta_state_hierarchy = self.ta_state_hierarchy.reshape((self.number_of_clauses, self.hierarchy_size[1], self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
 
-		return (ta_state[clause, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
+		return (ta_state[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
 	def get_state(self):
 		if np.array_equal(self.clause_weights, np.array([])):
