@@ -81,11 +81,11 @@ code_update = """
 			} 
 		}
 
-		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum)
+		__device__ inline void update_clause_weight(curandState *localState, int number_of_outputs, int *clause_weight, int clause_output, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
+			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
 
@@ -113,11 +113,11 @@ code_update = """
 			}
 		}
 
-		__device__ inline void update_component_hierarchy(curandState *localState, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, int class_sum)
+		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
+			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
 			
@@ -291,7 +291,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int *child_input, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -299,7 +299,7 @@ code_update = """
 			// Add up the votes from each clause
 			for (int clause = index; clause < CLAUSES; clause += stride) {
 				if (child_input[clause]) {
-					for (int class_id = 0; class_id < CLASSES; ++class_id) {
+					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
 						atomicAdd(&class_sum[class_id], clause_weight * child_input[clause]);					
 					}
@@ -346,7 +346,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
@@ -370,7 +370,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*number_of_outputs + class_id], local_class_sum);
+					update_clause_weight(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
