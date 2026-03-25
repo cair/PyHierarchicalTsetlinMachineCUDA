@@ -4,7 +4,7 @@ from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 
-factor = 1
+factor = 10
 
 s = 10.0
 
