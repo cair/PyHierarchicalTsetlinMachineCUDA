@@ -94,13 +94,72 @@ class CommonTsetlinMachine():
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 
-		# Is this the first time fit is called?
-		self.first = True
+		self.cuda_modules()
+
+
+	def cuda_modules(self):
+					parameters = """
+	#define CLASSES %d
+	#define CLAUSES %d
+	#define DEPTH %d
+	#define COMPONENTS %d
+	#define LITERALS_PER_LEAF %d
+	#define TA_CHUNKS_PER_LEAF %d
+	#define LITERAL_CHUNKS %d
+	#define STATE_BITS %d
+	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
+	#define S %f
+	#define THRESHOLD %d
+	#define Q %f
+
+	#define NEGATIVE_CLAUSES %d
+
+	#define NUMBER_OF_EXAMPLES %d
+""" % (self.number_of_outputs, self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, number_of_examples)
+		
+		mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
+		self.prepare_weights = mod_prepare.get_function("prepare_weights")
+		self.prepare_hierarchy = mod_prepare.get_function("prepare_hierarchy")
+
+		self.allocate_gpu_memory(number_of_examples)
+
+		self.prepare_weights(g.state, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
+		cuda.Context.synchronize()
+
+		self.prepare_hierarchy(g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
+		cuda.Context.synchronize()
+
+		mod_update = SourceModule(parameters + kernels.code_header + kernels.code_update, no_extern_c=True)
+		
+		self.update_hierarchy = mod_update.get_function("update_hierarchy")
+		self.update_hierarchy.prepare("PPPPiPPPPPi")
+
+		self.update_weights = mod_update.get_function("update_weights")
+		self.update_weights.prepare("PPPPPi")
+
+		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
+		self.evaluate_leaves.prepare("PPPiPPPi")
+
+		self.evaluate_final = mod_update.get_function("evaluate_final")
+		self.evaluate_final.prepare("PPP")
+
+		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
+		self.evaluate_and_groups.prepare("PPii")
+
+		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
+		self.propagate_and_group_false_truth_values.prepare("PPii")
+
+		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
+		self.evaluate_or_groups.prepare("PPii")
+
+		self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
+		self.evaluate_or_alternatives.prepare("PPii")
 
 		# CUDA modules for encoding input data
 		mod_encode = SourceModule(kernels.code_encode, no_extern_c=True)
 		self.prepare_encode_hierarchy = mod_encode.get_function("prepare_encode_hierarchy")
 		self.encode_hierarchy = mod_encode.get_function("encode_hierarchy")
+
 
 	def encode_X(self, X, encoded_X_hierarchy_gpu):
 		number_of_examples = X.shape[0]
@@ -147,6 +206,7 @@ class CommonTsetlinMachine():
 		return (ta_state[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
 	def get_state(self):
+		# To be updated
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
 		cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
 		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
@@ -154,6 +214,7 @@ class CommonTsetlinMachine():
 		return((self.ta_state_hierarchy, self.clause_weights, self.number_of_outputs, self.number_of_clauses, self.hierarchy_structure, self.boost_true_positive_feedback, self.number_of_state_bits, self.append_negated, self.min_y, self.max_y))
 
 	def set_state(self, state):
+		# To be updated
 		self.number_of_outputs = state[2]
 		self.number_of_clauses = state[3]
 		self.hierarchy_structure = state[4]
@@ -175,75 +236,15 @@ class CommonTsetlinMachine():
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		number_of_examples = X.shape[0]
 
-		if self.first:
-			self.first = False
-
-			parameters = """
-	#define CLASSES %d
-	#define CLAUSES %d
-	#define DEPTH %d
-	#define COMPONENTS %d
-	#define LITERALS_PER_LEAF %d
-	#define TA_CHUNKS_PER_LEAF %d
-	#define LITERAL_CHUNKS %d
-	#define STATE_BITS %d
-	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
-	#define S %f
-	#define THRESHOLD %d
-	#define Q %f
-
-	#define NEGATIVE_CLAUSES %d
-
-	#define NUMBER_OF_EXAMPLES %d
-""" % (self.number_of_outputs, self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, number_of_examples)
-		
-			mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
-			self.prepare_weights = mod_prepare.get_function("prepare_weights")
-			self.prepare_hierarchy = mod_prepare.get_function("prepare_hierarchy")
-
-			self.allocate_gpu_memory(number_of_examples)
-
-			self.prepare_weights(g.state, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
-			cuda.Context.synchronize()
-
-			self.prepare_hierarchy(g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
-			cuda.Context.synchronize()
-
-			mod_update = SourceModule(parameters + kernels.code_header + kernels.code_update, no_extern_c=True)
-			
-			self.update_hierarchy = mod_update.get_function("update_hierarchy")
-			self.update_hierarchy.prepare("PPPPiPPPPPi")
-
-			self.update_weights = mod_update.get_function("update_weights")
-			self.update_weights.prepare("PPPPPi")
-
-			self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
-			self.evaluate_leaves.prepare("PPPiPPPi")
-
-			self.evaluate_final = mod_update.get_function("evaluate_final")
-			self.evaluate_final.prepare("PPP")
-
-			self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
-			self.evaluate_and_groups.prepare("PPii")
-
-			self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
-			self.propagate_and_group_false_truth_values.prepare("PPii")
-
-			self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
-			self.evaluate_or_groups.prepare("PPii")
-
-			self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
-			self.evaluate_or_alternatives.prepare("PPii")
-
-			self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
-			self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
-		
 		if incremental == False:
 			self.prepare_weights(g.state, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
 
 			self.prepare_hierarchy(g.state, self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
 			cuda.Context.synchronize()
+
+		self.encoded_X_hierarchy_training_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
+		self.Y_gpu = cuda.mem_alloc(encoded_Y.nbytes)
 
 		self.encode_X(X, self.encoded_X_hierarchy_training_gpu)
 		cuda.memcpy_htod(self.Y_gpu, encoded_Y)
