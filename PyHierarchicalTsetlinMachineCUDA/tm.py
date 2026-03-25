@@ -422,8 +422,8 @@ class CommonTsetlinMachine():
 				#self.evaluate_update.prepared_call(self.grid, self.block, self.ta_state_gpu, self.clause_weights_gpu, self.class_sum_gpu, self.encoded_X_training_gpu, np.int32(e))
 				#cuda.Context.synchronize()
 
-				#self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
-				#cuda.Context.synchronize()
+				self.update_weights.prepared_call(self.grid, self.block, g.state, self.clause_weights_gpu, self.hierarchy_votes[self.depth-1], self.class_sum_gpu, self.Y_gpu, np.int32(e))
+				cuda.Context.synchronize()
 
 				# self.update.prepared_call(
 				# 	self.grid,
