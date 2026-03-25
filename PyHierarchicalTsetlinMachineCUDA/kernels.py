@@ -126,64 +126,6 @@ code_update = """
 			}
 		}
 
-		__device__ inline void update_clause(curandState *localState, int *clause_weight, unsigned int *ta_state, int clause_output, int clause_patch, int *X, int y, int class_sum)
-		{
-			int target = 1 - 2*(class_sum > y);
-			
-/*			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, CLASSES-1)) {
-				return;
-			}
-*/
-
-			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
-		
-			int absolute_prediction_error = abs(y - class_sum);
-			//if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
-				if (target*sign > 0) {
-					/*if (clause_output && abs(*clause_weight) < INT_MAX) {
-						(*clause_weight) += sign;
-					}*/
-
-					// Type I Feedback
-					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS; ++ta_chunk) {
-						// Generate random bit values
-						unsigned int la_feedback = 0;
-						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 1.0/S) {
-								la_feedback |= (1 << b);
-							}
-						}
-
-						if (clause_output) {
-							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
-								inc(ta_state, 0, ta_chunk, X[clause_patch*TA_CHUNKS + ta_chunk]);
-							#else
-								inc(ta_state, 0, ta_chunk, X[clause_patch*TA_CHUNKS + ta_chunk] & (~la_feedback));
-							#endif
-
-							dec(ta_state, 0, ta_chunk, (~X[clause_patch*TA_CHUNKS + ta_chunk]) & la_feedback);
-						} else {
-							dec(ta_state, 0, ta_chunk, la_feedback);
-						}
-					}
-				} else if (target*sign < 0 && clause_output) {
-					// Type II Feedback
-
-					/*(*clause_weight) -= sign;
-					#if NEGATIVE_CLAUSES == 0
-						if (*clause_weight < 1) {
-							*clause_weight = 1;
-						}
-					#endif
-					*/
-
-					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS; ++ta_chunk) {
-						inc(ta_state, 0, ta_chunk, (~X[clause_patch*TA_CHUNKS + ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
-					}
-				}
-			//}
-		}
-
 		__device__ inline void update_clause_weight(curandState *localState, int *clause_weight, int clause_output, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
@@ -755,74 +697,6 @@ code_update = """
 					}
 					update_clause_weight(&localState, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*CLASSES + class_id], local_class_sum);
 				}
-			}
-		
-			state[index] = localState;
-		}
-
-
-		// Update state of Tsetlin Automata team
-		__global__ void update(curandState *state, unsigned int *global_ta_state, int *clause_weights, int *class_sum, int *X, int *y, int example, int *X_hierarchy, unsigned int *global_ta_state_hierarchy, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives)
-		{
-			int index = blockIdx.x * blockDim.x + threadIdx.x;
-			int stride = blockDim.x * gridDim.x;
-
-			/* Copy state to local memory for efficiency */  
-			curandState localState = state[index];
-
-			// Calculate clause output first
-			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
-				unsigned int *ta_state = &global_ta_state[clause*TA_CHUNKS*STATE_BITS];
-
-				unsigned int clause_output;
-				int clause_patch;
-				calculate_clause_output(&localState, ta_state, &clause_output, &clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)]);
-
-				for (unsigned long long class_id = 0; class_id < CLASSES; ++class_id) {
-					int local_class_sum = class_sum[class_id];
-					if (local_class_sum > THRESHOLD) {
-						local_class_sum = THRESHOLD;
-					} else if (local_class_sum < -THRESHOLD) {
-						local_class_sum = -THRESHOLD;
-					}
-
-					int target = 1 - 2*(local_class_sum > y[example*CLASSES + class_id]);
-			
-					if (target == -1 && curand_uniform(&localState) > 1.0*Q/max(1, CLASSES-1)) {
-						continue;
-					}
-
-					int sign = (clause_weights[class_id*CLAUSES + clause] >= 0) - (clause_weights[class_id*CLAUSES + clause] < 0);
-		
-					int absolute_prediction_error = abs(y[example*CLASSES + class_id] - local_class_sum);
-					if (curand_uniform(&localState) > 1.0*absolute_prediction_error/(2*THRESHOLD)) {
-						continue;
-					}
-					
-					update_clause(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state, clause_output, clause_patch, &X[(unsigned long long)example*(TA_CHUNKS*PATCHES)], y[example*CLASSES + class_id], local_class_sum);
-
-					int *Xi_hierarchy = &X_hierarchy[(unsigned long long)example*LITERAL_CHUNKS];
-
-					for (int component = 0; component < COMPONENTS; ++component) {
-						// Get state of current clause component
-						unsigned int *ta_state_hierarchy = &global_ta_state_hierarchy[(clause * COMPONENTS + component)*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
-						int component_remainder = component;
-						int ta_chunk_base = 0;
-						int size = 1;
-						for (int d = 0; d < depth-1; ++d) {
-							int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
-							component_remainder = component_remainder / hierarchy_structure_factors[d];
-
-							if (hierarchy_structure_alternatives[d] == 0) {
-								ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-								size *= hierarchy_structure_factors[d];
-							}
-						}
-
-						update_component_hierarchy(&localState, &clause_weights[class_id*CLAUSES + clause], ta_state_hierarchy, component_output[clause * COMPONENTS + component], &Xi_hierarchy[ta_chunk_base], y[example*CLASSES + class_id], local_class_sum);
-					}
-				}	
 			}
 		
 			state[index] = localState;
