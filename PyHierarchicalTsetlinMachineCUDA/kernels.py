@@ -145,7 +145,10 @@ code_update = """
 				} else if (target*sign < 0 && clause_output) {
 					// Type II Feedback
 
-					(*clause_weight) -= sign;
+					if (*clause_weight < -1 || *clause_weight > 1) {
+						(*clause_weight) -= sign;
+					}
+
 					#if NEGATIVE_CLAUSES == 0
 						if (*clause_weight < 1) {
 							*clause_weight = 1;
@@ -777,8 +780,8 @@ code_prepare = """
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < CLASSES; ++class_id) {
 					#if NEGATIVE_CLAUSES == 1
-						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
-						//clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
+						//clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
+						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
 					#else
 						clause_weights[class_id*CLAUSES + clause] = 1;
 					#endif
