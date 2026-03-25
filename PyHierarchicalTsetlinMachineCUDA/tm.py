@@ -49,6 +49,7 @@ class CommonTsetlinMachine():
 		self.number_of_state_bits = number_of_state_bits
 		self.T = int(T)
 		self.s = s
+		self.tm_type = tm_type
 		self.q = q
 		self.hierarchy_structure = hierarchy_structure
 		self.depth = len(hierarchy_structure)
