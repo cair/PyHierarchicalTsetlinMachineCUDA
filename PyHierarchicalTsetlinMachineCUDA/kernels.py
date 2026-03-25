@@ -26,16 +26,7 @@ code_header = """
 	
 	#define INT_SIZE 32ULL
 
-	#define TA_CHUNKS (((FEATURES-1)/INT_SIZE + 1))
-	#define CLAUSE_CHUNKS ((CLAUSES-1)/INT_SIZE + 1)
-
 	#define LITERAL_LEAVES (LITERAL_CHUNKS / TA_CHUNKS_PER_LEAF)
-
-	#if (FEATURES % 32 != 0)
-	#define FILTER (~(0xffffffff << (FEATURES % INT_SIZE)))
-	#else
-	#define FILTER 0xffffffff
-	#endif
 
 	#if (LITERALS_PER_LEAF % 32 != 0)
 	#define FILTER_HIERARCHICAL (~(0xffffffff << (LITERALS_PER_LEAF % INT_SIZE)))
@@ -596,52 +587,7 @@ code_transform = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			for (int j = index; j < CLAUSES; j += stride) {
-				unsigned int *ta_state = &global_ta_state[j*TA_CHUNKS*STATE_BITS];
-
-				int all_exclude = 1;
-				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS-1; ++ta_chunk) {
-					if (ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] > 0) {
-						all_exclude = 0;
-						break;
-					}
-				}
-
-				if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER) > 0) {
-					all_exclude = 0;
-				}
-
-				if (all_exclude) {
-					for (unsigned long long e = 0; e < NUMBER_OF_EXAMPLES; ++e) {
-						transformed_X[e*CLAUSES + j] = 0;
-					}
-					
-					continue;
-				}
-
-				for (int e = 0; e < NUMBER_OF_EXAMPLES; ++e) {
-					int clause_output;
-					for (int patch = 0; patch < PATCHES; ++patch) {
-						clause_output = 1;
-						for (int ta_chunk = 0; ta_chunk < TA_CHUNKS-1; ++ta_chunk) {
-							if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & X[e*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-								clause_output = 0;
-								break;
-							}
-						}
-
-						if ((ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & X[e*(TA_CHUNKS*PATCHES) + patch*TA_CHUNKS + TA_CHUNKS-1] & FILTER) != (ta_state[(TA_CHUNKS-1)*STATE_BITS + STATE_BITS - 1] & FILTER)) {
-							clause_output = 0;
-						}
-
-						if (clause_output) {
-							break;
-						}
-					}
-
-					transformed_X[e*CLAUSES + j] = clause_output;
-				}
-			}
+			// To be updated
 		}
 	}
 """
