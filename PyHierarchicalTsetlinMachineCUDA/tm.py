@@ -88,29 +88,11 @@ class CommonTsetlinMachine():
 		# Calculates the number of literal chunks for the full hierarchy
 		self.hierarchy_size[0] = self.number_of_literal_chunks_per_leaf * self.hierarchy_size[1]
 
-		self.literal_split = [0] * (self.depth - 1)
-		previous_number_of_leaves = self.hierarchy_size[1]
-		for d in range(self.depth-1):
-			if self.hierarchy_structure[self.depth - d - 1][0] == AND_GROUP or self.hierarchy_structure[self.depth - d - 1][0] == OR_GROUP:
-				self.literal_split[d] = previous_number_of_leaves // self.hierarchy_structure[self.depth - d - 1][1]
-				previous_number_of_literal_chunks = self.literal_split[d]
-			else:
-				self.literal_split[d] = 0
-
-		print("LITERAL SPLIT", self.literal_split)
-		print("NUMBER OF LITERAL CHUNKS", self.hierarchy_size[0])
-
+		# Calculates number of literal chunks overall for the feature vector (ignores OR alternatives)
 		self.number_of_literal_chunks = self.number_of_literal_chunks_per_leaf
 		for d in range(self.depth - 1, 0, -1):
-			print("HELLO", d)
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
-		
-		print("LITERAL_CHUNKS", self.number_of_literal_chunks)
-		
-		print("TA_CHUNKS, LITERAL_CHUNKS_PER_LEAF, FEATURES", self.hierarchy_size[0], self.number_of_literal_chunks_per_leaf, self.hierarchy_structure[0])
-		print(self.hierarchy_size)
-		print(self.hierarchy_structure)
 
 		self.X_train = np.array([])
 		self.Y_train = np.array([])
