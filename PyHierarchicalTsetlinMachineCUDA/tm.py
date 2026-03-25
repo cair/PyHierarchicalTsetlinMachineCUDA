@@ -74,6 +74,7 @@ class CommonTsetlinMachine():
 			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_features_hierarchy *= self.hierarchy_structure[d][1]
 
+		# Calculates literal chunks per leaf
 		self.number_of_features_per_leaf = self.hierarchy_structure[0][1]
 		if self.append_negated:
 			self.number_of_literals = self.number_of_features_hierarchy * 2
@@ -81,9 +82,10 @@ class CommonTsetlinMachine():
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 		else:
 			self.number_of_literals = self.number_of_features_hierarchy
-			self.number_of_literals_per_leaf = self.hierarchy_structure[0][1]
+			self.number_of_literals_per_leaf = self.number_of_features_per_leaf
 			self.number_of_literal_chunks_per_leaf = int((self.number_of_literals_per_leaf - 1) / 32 + 1)
 
+		# Calculates the number of literal chunks for the full hierarchy
 		self.hierarchy_size[0] = self.number_of_literal_chunks_per_leaf * self.hierarchy_size[1]
 
 		self.literal_split = [0] * (self.depth - 1)
