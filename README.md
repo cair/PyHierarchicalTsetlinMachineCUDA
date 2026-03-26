@@ -52,6 +52,7 @@ for i in range(500):
 #### Output
 
 ```bash
+python ./examples/NoisyParityData.py
 python ./examples/NoisyParityDemo.py
 
 ...
