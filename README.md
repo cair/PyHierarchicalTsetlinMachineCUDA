@@ -55,9 +55,10 @@ for i in range(500):
 python ./examples/NoisyParityData.py
 python ./examples/NoisyParityDemo.py
 
+#1 Accuracy: 58.54% Training: 22.36s Testing: 1.39s
+#2 Accuracy: 61.03% Training: 22.40s Testing: 1.39s
+#3 Accuracy: 72.43% Training: 22.42s Testing: 1.39s
 ...
-#86 Accuracy: 99.80% Training: 24.39s Testing: 1.52s
-#87 Accuracy: 99.92% Training: 24.41s Testing: 1.52s
 #88 Accuracy: 99.87% Training: 24.39s Testing: 1.51s
 #89 Accuracy: 99.38% Training: 24.40s Testing: 1.52s
 #90 Accuracy: 99.94% Training: 24.39s Testing: 1.52s
