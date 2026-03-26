@@ -401,7 +401,7 @@ code_prepare = """
 						if (tm_type == COALESCED_TM) {
 							clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
 						} else {
-							if (class_id*CLAUSES <= clause && clause < (class_id+1)*CLAUSES) {
+							if (class_id*CLAUSES/number_of_outputs <= clause && clause < (class_id+1)*CLAUSES/number_of_outputs) {
 								clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
 							} else {
 								clause_weights[class_id*CLAUSES + clause] = 0;
