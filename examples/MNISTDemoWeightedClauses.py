@@ -4,11 +4,11 @@ from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 
-factor = 1
+factor = 10
 
 s = 10.0
 
-T = int(factor*50*10)*4096
+T = int(factor*5*10)
 
 ensembles = 10
 epochs = 250
@@ -20,7 +20,7 @@ Y_train = Y_train#[0:1000]
 X_test = np.where(X_test.reshape((X_test.shape[0], 28*28)) > 75, 1, 0)#[0:1000]
 Y_test = Y_test#[0:1000]
 
-tm = MultiClassTsetlinMachine(int(factor*2000), T, s, hierarchy_structure=((tm.AND_GROUP, 28*7), (tm.OR_ALTERNATIVES, 8), (tm.AND_GROUP, 4)))
+tm = MultiClassTsetlinMachine(int(factor*2000), T, s, tm_type=tm.WEIGHTED_TM, hierarchy_structure=((tm.AND_GROUP, 28*7), (tm.AND_GROUP, 4)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
