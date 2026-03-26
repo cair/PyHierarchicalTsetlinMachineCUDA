@@ -108,10 +108,10 @@ code_update = """
 
 					if (*clause_weight < -1 || *clause_weight > 1 || tm_type == COALESCED_TM) {
 						(*clause_weight) -= sign;
+					}
 
-						if ((*clause_weight) == 0) {
-							(*clause_weight) -= sign;
-						}
+					if (tm_type == COALESCED_TM && *clause_weight == 0) {
+						(*clause_weight) -= sign;
 					}
 
 					#if NEGATIVE_CLAUSES == 0
