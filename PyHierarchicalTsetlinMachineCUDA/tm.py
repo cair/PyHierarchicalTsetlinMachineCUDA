@@ -493,12 +493,12 @@ class MultiClassTsetlinMachine:
 				index = np.arange(balanced_X.shape[0])
 				np.random.shuffle(index)
 
-				self.tms[i].fit(balanced_X, balanced_Y, epochs=1, incremental=incremental)
+				self.tms[i].fit(balanced_X[index], balanced_Y[index], epochs=1, incremental=incremental)
 
 		return
 
 	def score(self, X):
-		class_sums = np.empty((self.number_of_outputs, X.shape[0])).astype(np.int32)
+		class_sums = np.empty((self.number_of_outputs, X.shape[0]), dtype=np.int32)
 		for i in range(self.number_of_outputs):
 			class_sums[i,:] = self.tms[i].score(X)
 
