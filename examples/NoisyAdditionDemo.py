@@ -7,7 +7,7 @@ noise = 0.0
 number_of_addends = 2
 examples = 10
 
-X_train_integer = np.randomrandint(10, size=(examples, addends))
+X_train_integer = np.random.randint(10, size=(examples, addends))
 Y_train = X_train_integers.sum(axis=0)
 
 print(X_train_integer)
