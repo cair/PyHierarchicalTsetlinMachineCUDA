@@ -6,7 +6,7 @@ from keras.datasets import mnist
 
 clauses = 2000
 T = 50*100
-s = 10.0
+s = 15.0
 
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
 
