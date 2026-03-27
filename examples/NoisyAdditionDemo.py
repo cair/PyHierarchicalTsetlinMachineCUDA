@@ -3,7 +3,7 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
-number_of_values = 5
+number_of_values = 4
 noise = 0.0
 number_of_addends = 2
 number_of_examples = 10000
@@ -24,7 +24,7 @@ for i in range(number_of_examples):
 	for j in range(number_of_addends):
 		X_test[i, j*number_of_values + X_test_integer[i, j]] = 1
 
-tm = MultiClassTsetlinMachine(200, 160, 25.1, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 10), (tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 20), (tm.AND_GROUP, 1)))
+tm = MultiClassTsetlinMachine(200, 160, 20.1, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 10), (tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 20), (tm.AND_GROUP, 1)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
