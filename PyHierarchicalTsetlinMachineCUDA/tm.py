@@ -458,7 +458,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
 
 		self.number_of_outputs = 1
-				
+
 		self.max_y = None
 		self.min_y = None
 		
@@ -473,7 +473,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 		return self._score(X)[0,:]
 
 	def predict(self, X):
-		return int(self.score(X) >= 0)
+		return (self.score(X) >= 0).astype(np.int32)
 
 class RegressionTsetlinMachine(CommonTsetlinMachine):
 	def __init__(self, number_of_clauses, T, s, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
