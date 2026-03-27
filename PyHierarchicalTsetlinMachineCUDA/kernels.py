@@ -405,15 +405,7 @@ code_prepare = """
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
 					#if NEGATIVE_CLAUSES == 1
-						if (tm_type == COALESCED_TM) {
-							clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
-						} else {
-							if (class_id*CLAUSES/number_of_outputs <= clause && clause < (class_id+1)*CLAUSES/number_of_outputs) {
-								clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
-							} else {
-								clause_weights[class_id*CLAUSES + clause] = 0;
-							}
-						}
+						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
 					#else
 						clause_weights[class_id*CLAUSES + clause] = 1;
 					#endif

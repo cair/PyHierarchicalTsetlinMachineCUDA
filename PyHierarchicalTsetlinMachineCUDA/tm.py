@@ -450,16 +450,15 @@ class MultiClassTsetlinMachine(CommonTsetlinMachine):
 		return np.argmax(self.score(X), axis=0)
 
 class TsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, tm_type=VANILLA_TM, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.negative_clauses = 1
-		super().__init__(number_of_clauses, T, s, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+		super().__init__(number_of_clauses, T, s, tm_type=tm_type, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
 
 		self.number_of_outputs = 1
-		self.patch_dim = (X.shape[1], 1, 1)
-		
+				
 		self.max_y = None
 		self.min_y = None
 		
