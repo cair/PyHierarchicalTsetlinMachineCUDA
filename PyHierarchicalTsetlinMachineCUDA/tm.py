@@ -487,17 +487,12 @@ class MultiClassTsetlinMachine:
 				not_target_index = np.arange(not_target_X.shape[0])
 				np.random.shuffle(not_target_index)
 
-				print(target_X.shape, not_target_X[not_target_index,:][:target_X.shape[0],:].shape)
 				balanced_X = np.vstack((target_X, not_target_X[not_target_index,:][:target_X.shape[0],:]))
-				print("*", target_Y.shape, not_target_Y[not_target_index][:target_X.shape[0]].shape)
 				balanced_Y = np.hstack((target_Y, not_target_Y[not_target_index][:target_X.shape[0]]))
 				index = np.arange(balanced_X.shape[0])
 				np.random.shuffle(index)
 
-				print("**", balanced_Y.shape, balanced_X.shape)
-
 				self.tms[i].fit(balanced_X[index], balanced_Y[index], epochs=1, incremental=incremental)
-
 		return
 
 	def score(self, X):
