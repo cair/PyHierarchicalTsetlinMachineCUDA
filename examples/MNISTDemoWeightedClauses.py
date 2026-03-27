@@ -5,7 +5,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 
 clauses = 2000
-T = 50*100
+T = 50*10*10000
 s = 20.0
 
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
