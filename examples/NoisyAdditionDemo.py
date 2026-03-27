@@ -3,7 +3,7 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
-number_of_values = 2
+number_of_values = 3
 noise = 0.0
 number_of_addends = 2
 number_of_examples = 10000
