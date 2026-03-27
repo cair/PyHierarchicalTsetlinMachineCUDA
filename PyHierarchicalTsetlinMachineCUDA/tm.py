@@ -44,12 +44,11 @@ g = curandom.XORWOWRandomNumberGenerator()
 
 class CommonTsetlinMachine():
 
-	def __init__(self, number_of_clauses, T, s, tm_type=VANILLA_TM, q=1.0, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
 		self.T = int(T)
 		self.s = s
-		self.tm_type = tm_type
 		self.q = q
 		self.hierarchy_structure = hierarchy_structure
 		self.depth = len(hierarchy_structure)
@@ -118,7 +117,8 @@ class CommonTsetlinMachine():
 	#define Q %f
 
 	#define NEGATIVE_CLAUSES %d
-		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses)
+	#define FLIP_POLARITY %d
+		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.flip_polarity)
 		
 		mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 		self.prepare_weights = mod_prepare.get_function("prepare_weights")
@@ -153,7 +153,6 @@ class CommonTsetlinMachine():
 		mod_encode = SourceModule(kernels.code_encode, no_extern_c=True)
 		self.prepare_encode_hierarchy = mod_encode.get_function("prepare_encode_hierarchy")
 		self.encode_hierarchy = mod_encode.get_function("encode_hierarchy")
-
 
 	def encode_X(self, X, encoded_X_hierarchy_gpu):
 		number_of_examples = X.shape[0]
@@ -420,10 +419,13 @@ class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 	def predict(self, X):
 		return (self.score(X) >= 0).astype(np.uint32).transpose()
 
-class MultiClassTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, tm_type=VANILLA_TM, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
+	def __init__(self, number_of_clauses, T, s, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.negative_clauses = 1
-		super().__init__(number_of_clauses, T, s, tm_type=tm_type, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+		self.tm_type = COALESCED_TM
+		self.flip_polarity = 1
+
+		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -449,17 +451,76 @@ class MultiClassTsetlinMachine(CommonTsetlinMachine):
 	def predict(self, X):
 		return np.argmax(self.score(X), axis=0)
 
+class MultiClassTsetlinMachine:
+	def __init__(self, number_of_clauses, T, s, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+		self.number_of_clauses = number_of_clauses
+		self.T = T
+		self.s = s
+		self.weighted_clauses = weighted_clauses
+		self.hierarchy_structure = hierarchy_structure
+		self.q = q
+		self.boost_true_positive_feedback = boost_true_positive_feedback
+		self.number_of_state_bits = number_of_state_bits
+		self.append_negated = append_negated
+		self.grid = grid
+		self.block = block
+
+		self.configured = False
+
+	def fit(self, X, Y, epochs=100, incremental=False):
+		self.number_of_outputs = int(np.max(Y) + 1)
+		
+		if not self.configured:
+			self.tms = []
+			for i in range(self.number_of_outputs):
+				self.tms.append(TsetlinMachine(self.number_of_clauses, self.T, self.s, weighted_clauses=self.weighted_clauses, hierarchy_structure=self.hierarchy_structure, q=self.q, boost_true_positive_feedback=self.boost_true_positive_feedback, number_of_state_bits=self.number_of_state_bits, append_negated=self.append_negated, grid=self.grid, block=self.block))
+
+			self.configured = True
+		
+		encoded_Y = np.empty(Y.shape[0], dtype = np.int32)
+
+		for epoch in range(epochs):
+			for i in range(self.number_of_outputs):
+				target_X = X[Y==i]
+
+				not_target_X = X[Y!=i]
+				not_target_index = np.random.rand(not_target_X.shape[0]) <= 1.0/(self.number_of_outputs - 1)
+
+				balanced_X = np.vstack((target_X, not_target_X[not_target_index,:]))
+				balanced_Y = np.hstack((np.ones(target_X.shape[0]), np.zeros(not_target_X.shape[0])))
+				index = np.arange(balanced_X.shape[0])
+				np.random.shuffle(index)
+
+				self.tms[i].fit(balanced_X[index], balanced_Y[index], epochs=1, incremental=incremental)
+		return
+
+	def score(self, X):
+		class_sums = np.empty((self.number_of_outputs, X.shape[0]), dtype=np.int32)
+		for i in range(self.number_of_outputs):
+			class_sums[i,:] = self.tms[i].score(X)
+
+		return class_sums
+
+	def predict(self, X):
+		return np.argmax(self.score(X), axis=0)
+
 class TsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.negative_clauses = 1
-		super().__init__(number_of_clauses, T, s, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+		self.flip_polarity = 0
+
+		if weighted_clauses:
+			self.tm_type = WEIGHTED_TM
+		else:
+			self.tm_type = VANILLA_TM
+
+		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
 
 		self.number_of_outputs = 1
-		self.patch_dim = (X.shape[1], 1, 1)
-		
+
 		self.max_y = None
 		self.min_y = None
 		
@@ -474,12 +535,14 @@ class TsetlinMachine(CommonTsetlinMachine):
 		return self._score(X)[0,:]
 
 	def predict(self, X):
-		return int(self.score(X) >= 0)
+		return (self.score(X) >= 0).astype(np.int32)
 
 class RegressionTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
+	def __init__(self, number_of_clauses, T, s, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
 		self.negative_clauses = 0
-		super().__init__(number_of_clauses, T, s, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
+		self.flip_polarity = 0
+
+		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
