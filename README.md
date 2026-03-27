@@ -17,6 +17,9 @@ pip install dist/pyhierarchicaltsetlinmachinecuda-0.2.1.tar.gz
 ## Examples
 
 ### Noisy Parity Demo
+<p align="center">
+  <img width="90%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/main/figures/Clause_Plot_Mayur_Shende.png">
+</p>
 
 #### Code: NoisyParityDemo.py
 
