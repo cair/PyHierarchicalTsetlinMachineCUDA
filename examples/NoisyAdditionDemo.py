@@ -25,7 +25,7 @@ for i in range(number_of_examples):
 		X_test[i, j*number_of_values + X_test_integer[i, j]] = 1
 
 #tm = MultiClassTsetlinMachine(100, 15*64*10, 20.0, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, number_of_values), (tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 8), (tm.AND_GROUP, 2)))
-tm = MultiClassTsetlinMachine(100, 15*64*10, 20.0, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, number_of_values), (tm.AND_GROUP, 4)))
+tm = MultiClassTsetlinMachine(100, 15*10, 20.0, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, number_of_values), (tm.AND_GROUP, 4)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
