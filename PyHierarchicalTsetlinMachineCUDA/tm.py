@@ -479,16 +479,12 @@ class MultiClassTsetlinMachine:
 		for epoch in range(epochs):
 			for i in range(self.number_of_outputs):
 				target_X = X[Y==i]
-				target_Y = np.ones(target_X.shape[0])
 
 				not_target_X = X[Y!=i]
-				not_target_Y = np.zeros(not_target_X.shape[0])
+				not_target_index = np.random.rand(not_target_X.shape[0]) <= 1.0/(self.number_of_outputs - 1)
 
-				not_target_index = np.arange(not_target_X.shape[0])
-				np.random.shuffle(not_target_index)
-
-				balanced_X = np.vstack((target_X, not_target_X[not_target_index,:][:target_X.shape[0],:]))
-				balanced_Y = np.hstack((target_Y, not_target_Y[not_target_index][:target_X.shape[0]]))
+				balanced_X = np.vstack((target_X, not_target_X[not_target_index,:]))
+				balanced_Y = np.hstack((np.ones(target_X.shape[0]), np.zeros(not_target_X.shape[0])))
 				index = np.arange(balanced_X.shape[0])
 				np.random.shuffle(index)
 
