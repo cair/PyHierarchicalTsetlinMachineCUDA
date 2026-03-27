@@ -494,7 +494,7 @@ class MultiClassTsetlinMachine:
 				index = np.arange(balanced_X.shape[0])
 				np.random.shuffle(index)
 
-				print(balanced_Y.shape)
+				print("**", balanced_Y.shape, balanced_X.shape)
 
 				self.tms[i].fit(balanced_X[index], balanced_Y[index], epochs=1, incremental=incremental)
 
