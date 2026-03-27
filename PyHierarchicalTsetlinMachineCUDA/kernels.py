@@ -106,13 +106,11 @@ code_update = """
 				} else if (target*sign < 0 && clause_output) {
 					// Type II Feedback
 
-					if (*clause_weight < -1 || *clause_weight > 1 || tm_type == COALESCED_TM) {
-						(*clause_weight) -= sign;
-					}
-
-					#if NEGATIVE_CLAUSES == 0
-						if (*clause_weight < 1) {
-							*clause_weight = 1;
+					(*clause_weight) -= sign;
+					
+					#if FLIP_POLARITY == 0
+						if (*clause_weight == 0) {
+							*clause_weight += sign;
 						}
 					#endif
 				}
@@ -399,13 +397,17 @@ code_prepare = """
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
 					#if NEGATIVE_CLAUSES == 1
-						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
+						if (tm_type == COALESCED_TM) {
+							clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
+						} else {
+							clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (clause % 2);
+						}
 					#else
 						clause_weights[class_id*CLAUSES + clause] = 1;
 					#endif
 				}
 			}
-
+				
 			state[index] = localState;
 		}
 
@@ -426,16 +428,6 @@ code_prepare = """
 					}
 					ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] = 0;
 				}
-			}
-
-			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
-				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					#if NEGATIVE_CLAUSES == 1
-						clause_weights[class_id*CLAUSES + clause] = 1 - 2 * (curand(&localState) % 2);
-					#else
-						clause_weights[class_id*CLAUSES + clause] = 1;
-					#endif
-				}				
 			}
 
 			state[index] = localState;
