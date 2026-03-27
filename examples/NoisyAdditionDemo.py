@@ -3,29 +3,19 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
-number_of_values = 5
 noise = 0.0
 number_of_addends = 4
 number_of_examples = 10000
 
-X_train_integer = np.random.randint(number_of_values, size=(number_of_examples, number_of_addends), dtype=np.int32)
-Y_train = X_train_integer.sum(axis=1)
-X_train = np.zeros((number_of_examples, number_of_addends*number_of_values), dtype=np.int32)
-for i in range(number_of_examples):
-	for j in range(number_of_addends):
-		X_train[i, j*number_of_values + X_train_integer[i, j]] = 1
-
+X_train = np.random.randint(2, size=(number_of_examples, number_of_addends)).astype(np.int32)
+Y_train = X_train.sum(axis=1)
 Y_train = np.where(np.random.rand(number_of_examples) <= noise, Y_train + 1, Y_train) # Adds noise
 
-X_test_integer = np.random.randint(number_of_values, size=(number_of_examples, number_of_addends), dtype=np.int32)
-Y_test = X_test_integer.sum(axis=1)
-X_test = np.zeros((number_of_examples, number_of_addends*number_of_values), dtype=np.int32)
-for i in range(number_of_examples):
-	for j in range(number_of_addends):
-		X_test[i, j*number_of_values + X_test_integer[i, j]] = 1
+X_test = np.random.randint(2, size=(number_of_examples, number_of_addends)).astype(np.int32)
+Y_test = X_test.sum(axis=1)
 
 #tm = MultiClassTsetlinMachine(100, 15*64*10, 20.0, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, number_of_values), (tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 8), (tm.AND_GROUP, 2)))
-tm = MultiClassTsetlinMachine(100, 15*10, 20.0, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, number_of_values), (tm.AND_GROUP, 4)))
+tm = MultiClassTsetlinMachine(10, 15, 2.5, number_of_state_bits=8, boost_true_positive_feedback=1, hierarchy_structure=((tm.AND_GROUP, 2), (tm.AND_GROUP, 2)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
