@@ -9,7 +9,7 @@ number_of_addends = 2
 number_of_examples = 10000
 
 X_train_integer = np.random.randint(number_of_values, size=(number_of_examples, number_of_addends), dtype=np.int32)
-Y_train = X_train_integer.sum(axis=1)
+Y_train = X_train_integer.prod(axis=1)
 X_train = np.zeros((number_of_examples, number_of_addends*number_of_values), dtype=np.int32)
 for i in range(number_of_examples):
 	for j in range(number_of_addends):
@@ -18,7 +18,7 @@ for i in range(number_of_examples):
 Y_train = np.where(np.random.rand(number_of_examples) <= noise, Y_train + 1, Y_train) # Adds noise
 
 X_test_integer = np.random.randint(number_of_values, size=(number_of_examples, number_of_addends), dtype=np.int32)
-Y_test = X_test_integer.sum(axis=1)
+Y_test = X_test_integer.prod(axis=1)
 X_test = np.zeros((number_of_examples, number_of_addends*number_of_values), dtype=np.int32)
 for i in range(number_of_examples):
 	for j in range(number_of_addends):
