@@ -195,6 +195,20 @@ class CommonTsetlinMachine():
 
 		return (ta_state_hierarchy[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
+	def ta_state(self, clause, leaf, ta):
+		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
+		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+		ta_state_hierarchy = ta_state_hierarchy.reshape((self.number_of_clauses, self.hierarchy_size[1], self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
+
+		ta_chunk = ta // 32
+        chunk_pos = ta % 32
+        state = 0
+        for b in range(self.number_of_state_bits):
+            if (ta_state_hierarchy[clause, leaf, ta // 32, b] & (1 << (ta % 32))) > 0:
+                state |= (1 << b)
+
+		return state
+
 	def get_state(self):
 		# To be updated
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
