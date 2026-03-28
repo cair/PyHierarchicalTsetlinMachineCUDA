@@ -37,7 +37,7 @@ for i in range(500):
 					if k < tm.number_of_literals_per_leaf // 2:
 						l.append("x%d" % (k,))
 					else:
-						l.append("¬x%d" % (k,))
+						l.append("¬x%d" % (k - tm.number_of_literals_per_leaf // 2,))
 			print(" ^ ".join(l))
 
 	print("#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (i+1, result, stop_training-start_training, stop_testing-start_testing))
