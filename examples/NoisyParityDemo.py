@@ -28,7 +28,7 @@ for i in range(500):
 	for i in range(clauses):
 		print("CLAUSE %d" % (i))
 		for j in range(tm.hierarchy_size[1]):
-			print("\tComponent %d:", end= '')
+			print("\tComponent %d:" % (j), end= '')
 			for k in range(tm.number_of_literals_per_leaf):
 				if k < tm.number_of_literals_per_leaf // 2:
 					print(" x%d=%d)" % (j, tm.ta_action(i, j, k)), end='')
