@@ -417,7 +417,7 @@ class CommonTsetlinMachine():
 				print(": ", end='')
 
 				l = []
-				for k in range(self..number_of_literals_per_leaf):
+				for k in range(self.number_of_literals_per_leaf):
 					if self.ta_action(i, j, k):
 						if k < self.number_of_literals_per_leaf // 2:
 							l.append("x%d(%d)" % (k, self.ta_state(i, j, k)))
