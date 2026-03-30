@@ -410,7 +410,7 @@ class CommonTsetlinMachine():
 
 				component_remainder = j;
 				size = 1;
-				for d in range(self.depth):
+				for d in range(1, self.depth):
 					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
 					component_remainder = component_remainder / self.hierarchy_structure[d][1]
 					print(" %d (%s)" % (depth_d_node_index, self.hierarchy_structure[d][0]), end='')
