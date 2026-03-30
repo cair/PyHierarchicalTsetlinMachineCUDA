@@ -408,13 +408,17 @@ class CommonTsetlinMachine():
 			for j in range(self.hierarchy_size[1]):
 				print("\tComponent #%d" % (j), end= '')
 
-				component_remainder = j;
-				size = 1;
+				component_remainder = j
+				size = 1
+
+				previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
 				for d in range(1, self.depth):
 					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
 					component_remainder = component_remainder / self.hierarchy_structure[d][1]
-					print(" %d (%s)" % (depth_d_node_index, self.hierarchy_structure[d][0]), end='')
-				print(": ", end='')
+
+					if previous_index[d-1] != depth_d_node_index:
+						print("\t" * (self.depth - d) + " %d (%s)" % (depth_d_node_index, self.hierarchy_structure[d][0]))
+						previous_index[d-1] = depth_d_node_index
 
 				l = []
 				for k in range(self.number_of_literals_per_leaf):
@@ -423,7 +427,8 @@ class CommonTsetlinMachine():
 							l.append("x%d(%d)" % (k, self.ta_state(i, j, k)))
 						else:
 							l.append("¬x%d(%d)" % (k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
-				print(" ^ ".join(l))
+				
+				print("\t" * self.depth + " ^ ".join(l))
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):
