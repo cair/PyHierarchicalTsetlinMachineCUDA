@@ -401,6 +401,29 @@ class CommonTsetlinMachine():
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
 		return class_sum
+
+	def print_hierarchy(self):
+		for i in range(clauses):
+			print("CLAUSE %d" % (i))
+			for j in range(tm.hierarchy_size[1]):
+				print("\tComponent" % (j), end= '')
+
+				component_remainder = component;
+				size = 1;
+				for f in range(self.depth):
+					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
+					component_remainder = component_remainder / self.hierarchy_structure[d][1]
+					print(" %d (%s)" % (depth_d_node_index, self.hierarchy_structure[d][0]), end='')
+				print(": ", end='')
+
+				l = []
+				for k in range(tm.number_of_literals_per_leaf):
+					if tm.ta_action(i, j, k):
+						if k < tm.number_of_literals_per_leaf // 2:
+							l.append("x%d(%d)" % (k, tm.ta_state(i, j, k)))
+						else:
+							l.append("¬x%d(%d)" % (k - tm.number_of_literals_per_leaf // 2, tm.ta_state(i, j, k)))
+				print(" ^ ".join(l))
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1)):

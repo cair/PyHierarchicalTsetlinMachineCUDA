@@ -4,7 +4,7 @@ from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
 clauses = 32
-s = 20.0
+s = 30.0
 T = 250
 
 train_data = np.loadtxt("./examples/NoisyParityTrainingData.txt").astype(np.uint32)
@@ -27,18 +27,6 @@ for e in range(1000):
 	result = 100*(tm.predict(X_test) == Y_test).mean()
 	stop_testing = time()
 
-	for i in range(clauses):
-		print("CLAUSE %d" % (i))
-		for j in range(tm.hierarchy_size[1]):
-			print("\tComponent %d: " % (j), end= '')
-
-			l = []
-			for k in range(tm.number_of_literals_per_leaf):
-				if tm.ta_action(i, j, k):
-					if k < tm.number_of_literals_per_leaf // 2:
-						l.append("x%d(%d)" % (k, tm.ta_state(i, j, k)))
-					else:
-						l.append("¬x%d(%d)" % (k - tm.number_of_literals_per_leaf // 2, tm.ta_state(i, j, k)))
-			print(" ^ ".join(l))
+	tm.print_hierarchy()
 
 	print("#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, result, stop_training-start_training, stop_testing-start_testing))
