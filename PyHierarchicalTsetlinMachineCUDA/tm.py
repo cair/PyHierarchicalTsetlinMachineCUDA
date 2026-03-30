@@ -424,7 +424,7 @@ class CommonTsetlinMachine():
 						headings.append("\t" * (self.depth - d) + ")")
 						previous_inded[d-1] = depth_d_node_index
 					elif previous_index[d-1] != depth_d_node_index:
-						headings.append("\t" * (self.depth - d) + "%s" % (self.self.hierarchy_structure[d][0]))
+						headings.append("\t" * (self.depth - d) + "%s" % (self.hierarchy_structure[d][0]))
 						previous_index[d-1] = depth_d_node_index
 					else:
 						headings.append('')
