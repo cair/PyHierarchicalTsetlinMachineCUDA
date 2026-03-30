@@ -406,7 +406,7 @@ class CommonTsetlinMachine():
 		for i in range(self.number_of_clauses):
 			print("CLAUSE %d" % (i))
 			for j in range(self.hierarchy_size[1]):
-				print("\tComponent" % (j), end= '')
+				print("\tComponent #%d" % (j), end= '')
 
 				component_remainder = component;
 				size = 1;
