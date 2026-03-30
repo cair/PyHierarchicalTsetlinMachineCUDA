@@ -417,16 +417,16 @@ class CommonTsetlinMachine():
 					component_remainder = component_remainder // self.hierarchy_structure[d][1]
 
 					print(depth_d_node_index)
-					# if start_indexing[d-1]:
-					# 	headings.append("\t" * (self.depth - d) + "(" % (self.hierarchy_structure[d][0]))
-					# 	start_indexing[d-1] = 0
-					# elif depth_d_node_index == 0:
-					# 	headings.append("\t" * (self.depth - d) + ") %s (" % (self.hierarchy_structure[d][0]))
-					# else:
-					# 	headings.append('')
+					if start_indexing[d-1]:
+						headings.append("\t" * (self.depth - d) + "(")
+						start_indexing[d-1] = 0
+					elif depth_d_node_index == 0:
+						headings.append("\t" * (self.depth - d) + ") %s (" % (self.hierarchy_structure[d][0]))
+					else:
+						headings.append('')
 
-				#for d in range(self.depth-2, -1, -1):
-				#	print(headings[d])
+				for d in range(self.depth-2, -1, -1):
+					print(headings[d])
 
 				l = []
 				for k in range(self.number_of_literals_per_leaf):
