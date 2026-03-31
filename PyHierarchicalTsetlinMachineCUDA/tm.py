@@ -29,9 +29,9 @@ from pycuda.compiler import SourceModule
 
 from time import time
 
-OR_GROUP = "∨*"
-OR_ALTERNATIVES = "∨"
-AND_GROUP = "∧"
+OR_GROUP = " ∨* "
+OR_ALTERNATIVES = " ∨ "
+AND_GROUP = " ∧ "
 
 VANILLA_TM = 0
 WEIGHTED_TM = 1
@@ -402,7 +402,7 @@ class CommonTsetlinMachine():
 
 		return class_sum
 
-	def print_hierarchy(self):
+	def print_hierarchy(self, print_ta_state=False):
 		for i in range(self.number_of_clauses):
 			print("CLAUSE %d" % (i))
 
@@ -441,9 +441,15 @@ class CommonTsetlinMachine():
 				for k in range(self.number_of_literals_per_leaf):
 					if self.ta_action(i, j, k):
 						if k < self.number_of_literals_per_leaf // 2:
-							l.append("x%d(%d)" % (k, self.ta_state(i, j, k)))
+							if print_ta_state:
+								l.append("x%d(%d)" % (k, self.ta_state(i, j, k)))
+							else:
+								l.append("x%d" % (k,))
 						else:
-							l.append("¬x%d(%d)" % (k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
+							if print_ta_state:
+								l.append("¬x%d(%d)" % (k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
+							else:
+								l.append("¬x%d" % (k - self.number_of_literals_per_leaf // 2,))
 				
 				print("(" + " ∧ ".join(l) + ")", end = '')
 			print()
