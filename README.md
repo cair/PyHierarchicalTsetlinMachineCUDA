@@ -69,18 +69,17 @@ for i in range(500):
 python ./examples/NoisyParityData.py
 python ./examples/NoisyParityDemo.py
 
-#1 Accuracy: 58.54% Training: 22.36s Testing: 1.39s
-#2 Accuracy: 61.03% Training: 22.40s Testing: 1.39s
-#3 Accuracy: 72.43% Training: 22.42s Testing: 1.39s
+Accuracy over 1000 epochs:
+
+#1 Accuracy: 51.19% Training: 21.88s Testing: 1.37s
+#2 Accuracy: 51.94% Training: 21.91s Testing: 1.37s
+#3 Accuracy: 53.46% Training: 21.91s Testing: 1.37s
 ...
-#88 Accuracy: 99.87% Training: 24.39s Testing: 1.51s
-#89 Accuracy: 99.38% Training: 24.40s Testing: 1.52s
-#90 Accuracy: 99.94% Training: 24.39s Testing: 1.52s
+CLAUSE #1: (((((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (x0 ∧ x1)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0) ∨ (x1 ∧ ¬x0))) ∨ (((x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1) ∨ (x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1))) ∨ (((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (x0 ∧ x1)) ∧ ((x1 ∧ ¬x0) ∨ (x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1)))) ∧ ((((x1 ∧ x2 ∧ ¬x0) ∨ (x0 ∧ ¬x1 ∧ ¬x2) ∨ (x1 ∧ x2 ∧ ¬x0)) ∧ ((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (x0 ∧ x1))) ∨ (((¬x0 ∧ ¬x1 ∧ ¬x2) ∨ (x0 ∧ x1 ∧ ¬x2) ∨ (x0 ∧ x1 ∧ ¬x2)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1))) ∨ (((x2 ∧ ¬x0 ∧ ¬x1) ∨ (¬x0 ∧ ¬x1 ∧ ¬x2) ∨ (¬x0 ∧ ¬x1 ∧ ¬x2)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1)))))
 ...
-CLAUSE #31: (((((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1))) ∨ (((x0 ∧ x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1)) ∧ ((x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1) 
-  (x1 ∧ ¬x0))) ∨ (((¬x0 ∧ ¬x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1)) ∧ ((x0 ∧ ¬x1) ∨ (x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0)))) ∧ ((((x0 ∧ x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬
-x0) ∨ (x0 ∧ ¬x1))) ∨ (((¬x0 ∧ ¬x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1)) ∧ ((x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1) ∨ (x0 ∧ ¬x1))) ∨ (((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (x0 ∧ x1)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧
- ¬x0) ∨ (x0 ∧ ¬x1)))))
+CLAUSE #31: (((((¬x0 ∧ ¬x1) ∨ (x2 ∧ ¬x0 ∧ ¬x1) ∨ (x0 ∧ x1 ∧ ¬x2)) ∧ ((x0 ∧ x1 ∧ ¬x2) ∨ (x0 ∧ x1 ∧ x2) ∨ (x0 ∧ x1 ∧ ¬x2))) ∨ (((x2 ∧ ¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (x0 ∧ x1)) ∧ ((x0 ∧ x1 ∧ ¬x2) ∨ (¬x0 ∧ ¬x1 ∧ ¬x2) ∨ (¬x0 ∧ ¬x1 ∧ ¬x2))) ∨ (((x0 ∧ x1 ∧ ¬x2) ∨ (x2 ∧ ¬x0 ∧ ¬x1) ∨ (x1 ∧ ¬x2)) ∧ ((x0 ∧ x1 ∧ x2) ∨ (x0 ∧ x1 ∧ ¬x2) ∨ (x0 ∧ x1 ∧ x2)))) ∧ (((x0 ∨ (x1 ∧ ¬x0) ∨ (x1 ∧ ¬x0)) ∧ ((x0 ∧ ¬x1) ∨ (x1 ∧ ¬x0) ∨ (x0 ∧ ¬x1))) ∨ (((¬x0 ∧ ¬x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((x0 ∧ x1) ∨ (¬x0 ∧ ¬x1) ∨ (x0 ∧ x1))) ∨ (((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((x0 ∧ x1) ∨ ¬x1 ∨ (¬x0 ∧ ¬x1)))))
+
+#395 Accuracy: 99.64% Training: 22.86s Testing: 1.42s
 ```
 
 ### Paper
