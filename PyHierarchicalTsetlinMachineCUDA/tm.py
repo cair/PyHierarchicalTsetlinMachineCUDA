@@ -404,7 +404,7 @@ class CommonTsetlinMachine():
 
 	def print_hierarchy(self, print_ta_state=False):
 		for i in range(self.number_of_clauses):
-			print("\n CLAUSE #%d: " % (i), end='')
+			print("\nCLAUSE #%d: " % (i), end='')
 
 			previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
 			for j in range(self.hierarchy_size[1]):
