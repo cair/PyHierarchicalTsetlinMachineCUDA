@@ -234,7 +234,7 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				int and_group_vote_product = T;
+				int and_group_vote_product = THRESHOLD;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					//and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
