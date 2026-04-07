@@ -285,7 +285,7 @@ int main() {
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			//printf("\nPlayer %d wins!\n\n", winner);
 			//hg_print(&hg);
-			hg_print_feature_vector_depth_3_variant(&hg, winner, data_fp);
+			hg_print_feature_vector_depth_3(&hg, winner, data_fp);
 			game++;
 		}
 	}
