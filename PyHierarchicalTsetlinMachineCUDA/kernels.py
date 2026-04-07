@@ -159,12 +159,12 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, unsigned long long int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, long long int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
+			int *Xi = &X[(long long)example*LITERAL_CHUNKS];
 
 			// Evaluate each clause component (leaf) in separate threads
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
@@ -204,7 +204,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_groups(unsigned long long int *child_input, unsigned long long int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		__global__ void evaluate_or_groups(long long int *child_input, long long int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -226,7 +226,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(unsigned long long int *child_input, unsigned long long int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(long long int *child_input, long long int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -249,7 +249,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(unsigned long long int *child_input, unsigned long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(long long int *child_input, long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -266,7 +266,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_alternatives(unsigned long long int *child_input, unsigned long long int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(long long int *child_input, long long int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -289,7 +289,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, long long int *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
