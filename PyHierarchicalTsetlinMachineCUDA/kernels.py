@@ -159,7 +159,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -252,7 +252,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -292,7 +292,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, float *child_input, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *child_input, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
