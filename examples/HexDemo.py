@@ -27,11 +27,15 @@ data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
 X_train = data[:int(len(data)*0.8),0:-1]
 Y_train = data[:int(len(data)*0.8),-1]
 
+X_train = np.column_stack((X_train, np.zeros((len(Y_train), 2*2), dtype=np.uint32)))
+
 #X_train = data[:,0:-1]
 #Y_train = data[:,-1]
 
 X_test = data[int(len(data)*0.8):,0:-1]
 Y_test = data[int(len(data)*0.8):,-1]
+
+X_test = np.column_stack((X_test, np.zeros((len(Y_test), 2*2), dtype=np.uint32)))
 
 tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, (args.board_dim/2)**2 * 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, args.board_dim * args.board_dim * 2), (tm.AND_GROUP, 1)))
