@@ -3,7 +3,7 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
-board_dim = 2
+board_dim = 4
 
 clauses = 100
 s = 50.0
