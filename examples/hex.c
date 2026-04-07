@@ -194,20 +194,22 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 				for (int y = 0; y < 3; ++y) {
 					for (int m = 0; m < 2; ++m) {
 						for (int n = 0; n < 2; ++n) {
+							int i = q * 3 * 2 + x * 2 + m;
+							int j = r * 3 * 2 + y * 2 + n;
 
-						int i = q * 3 * 2 + x * 2 + m;
-						int j = r * 3 * 2 + y * 2 + n;
-
-						if (i < BOARD_DIM && j < BOARD_DIM) {
-							if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-								fprintf(data_fp, "0 1 ");
-							} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-								fprintf(data_fp, "1 0 ");
+							printf("(%d, %d)\n", i, j);
+							
+							if (i < BOARD_DIM && j < BOARD_DIM) {
+								if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
+									fprintf(data_fp, "0 1 ");
+								} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
+									fprintf(data_fp, "1 0 ");
+								} else {
+									fprintf(data_fp, "0 0 ");
+								}
 							} else {
 								fprintf(data_fp, "0 0 ");
 							}
-						} else {
-							fprintf(data_fp, "0 0 ");
 						}
 					}
 				}
