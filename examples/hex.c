@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef BOARD_DIM
-    #define BOARD_DIM 2
-#endif
+#define BOARD_DIM 4
+
+#define EXAMPLES 10000
 
 int neighbors[] = {-(BOARD_DIM+2) + 1, -(BOARD_DIM+2), -1, 1, (BOARD_DIM+2), (BOARD_DIM+2) - 1};
 
@@ -212,7 +212,8 @@ int main() {
 
 	int winner = -1;
 
-	for (int game = 0; game < 10000; ++game) {
+	int game = 0;
+	while (game < EXAMPLES) {
 		hg_init(&hg);
 
 		int player = 0;
@@ -227,11 +228,12 @@ int main() {
 			player = 1 - player;
 		}
 
-		//if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
+		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			printf("\nPlayer %d wins!\n\n", winner);
 			hg_print(&hg);
 			hg_print_feature_vector(&hg, winner, data_fp);
-		//}
+			game++;
+		}
 	}
 
 	fclose(data_fp);
