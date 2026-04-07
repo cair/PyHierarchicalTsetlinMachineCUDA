@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #ifndef BOARD_DIM
-    #define BOARD_DIM 4
+    #define BOARD_DIM 2
 #endif
 
 int neighbors[] = {-(BOARD_DIM+2) + 1, -(BOARD_DIM+2), -1, 1, (BOARD_DIM+2), (BOARD_DIM+2) - 1};
