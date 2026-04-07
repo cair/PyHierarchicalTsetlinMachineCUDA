@@ -184,7 +184,7 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 	fprintf(data_fp, "%d\n", winner);
 }
 
-void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data_fp)
+void hg_print_feature_vector_depth_3_variant(struct hex_game *hg, int winner, FILE *data_fp)
 {
 
 	// Quadrants
@@ -215,6 +215,40 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 		}
 	}
 	
+	fprintf(data_fp, "%d\n", winner);
+}
+
+void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data_fp)
+{
+
+	// Quadrants
+	for (int q = 0; q < 2; ++q) {
+		for (int r = 0; r < 2; ++r) {
+			for (int x = 0; x < 2; ++x) {
+				for (int y = 0; y < 2; ++y) {
+					for (int m = 0; m < 3; ++m) {
+						for (int n = 0; n < 3; ++n) {
+							int i = q * 3 * 2 + x * 3 + m;
+							int j = r * 3 * 2 + y * 3 + n;
+
+							if (i < BOARD_DIM && j < BOARD_DIM) {
+								if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
+									fprintf(data_fp, "0 1 ");
+								} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
+									fprintf(data_fp, "1 0 ");
+								} else {
+									fprintf(data_fp, "0 0 ");
+								}
+							} else {
+								fprintf(data_fp, "0 0 ");
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	fprintf(data_fp, "%d\n", winner);
 }
 
@@ -251,7 +285,7 @@ int main() {
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			//printf("\nPlayer %d wins!\n\n", winner);
 			//hg_print(&hg);
-			hg_print_feature_vector_depth_3(&hg, winner, data_fp);
+			hg_print_feature_vector_depth_3_variant(&hg, winner, data_fp);
 			game++;
 		}
 	}
