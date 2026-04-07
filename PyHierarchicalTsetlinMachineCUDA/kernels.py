@@ -241,7 +241,6 @@ code_update = """
 
 					if (and_group_vote_product > THRESHOLD) {
 						and_group_vote_product = THRESHOLD;
-						break;
 					}
 				}
 
