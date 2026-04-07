@@ -5,9 +5,9 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
 board_dim = 2
 
-clauses = 1000
+clauses = 100
 s = 50.0
-T = 1500
+T = 80
 
 data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
 X_train = data[:int(len(data)*0.8),0:-1]
