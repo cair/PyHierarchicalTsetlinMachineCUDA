@@ -184,6 +184,23 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 	fprintf(data_fp, "%d\n", winner);
 }
 
+void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data_fp)
+{
+
+	// Quadrants
+	for (int q = 0; q < 2; ++q) {
+		for (int r = 0; r < 2; ++r) {
+			for (int x = 0; x < 3; ++x) {
+				for (int y = 0; y < 3; ++y) {
+					int i = q * 2 * 3 * 3 + x * 3;
+					int j = r * 3 * 3 + y;
+					printf("(%d %d)\n", i, j);
+				}
+			}
+		}
+	}
+}
+
 int main() {
 	struct hex_game hg;
 
@@ -218,7 +235,7 @@ int main() {
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			//printf("\nPlayer %d wins!\n\n", winner);
 			//hg_print(&hg);
-			hg_print_feature_vector(&hg, winner, data_fp);
+			hg_print_feature_vector_depth_3(&hg, winner, data_fp);
 			game++;
 		}
 	}
