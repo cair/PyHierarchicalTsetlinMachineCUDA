@@ -196,7 +196,7 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 						for (int n = 0; n < 2; ++n) {
 							int i = q * 3 * 2 + x * 2 + m;
 							int j = r * 3 * 2 + y * 2 + n;
-							
+
 							if (i < BOARD_DIM && j < BOARD_DIM) {
 								if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 									fprintf(data_fp, "0 1 ");
@@ -214,13 +214,14 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 			}
 		}
 	}
+	
+	fprintf(data_fp, "%d\n", winner);
 }
 
 int main() {
 	struct hex_game hg;
 
 	FILE *data_fp;
-
 
 	data_fp = fopen("hex_data.txt", "w");
 
