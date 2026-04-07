@@ -234,14 +234,29 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				int and_group_vote_product = 1;
+				float and_group_vote_product = 0;
+				int zero_factor = 0;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
-					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
+					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
+						and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
+					} else {
+						zero_factor = 1;
+						break;
+					}
 				}
 
 				// Store and group product as node output
-				and_group_node_output[and_group_node] = and_group_vote_product;
+
+				if (!zero_factor) {
+					if (and_group_vote_product < 8) {
+						and_group_node_output[and_group_node] = pow(2, and_group_vote_product);
+					} else {
+						and_group_node_output[and_group_node] = 256;
+					}
+				} else {
+					and_group_node_output[and_group_node] = 0;
+				}
 			}
 		}
 
