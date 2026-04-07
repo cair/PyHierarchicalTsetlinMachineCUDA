@@ -129,9 +129,6 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 
 	for (int i = 0; i < BOARD_DIM / 2; ++i) {
 		for (int j = 0; j < BOARD_DIM / 2; ++j) {
-			if (i != 0 && j != 0) {
-				printf(" ");
-			}
 			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 				fprintf(data_fp, "0 1 ");
 			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
