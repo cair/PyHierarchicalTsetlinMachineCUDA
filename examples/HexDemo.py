@@ -22,7 +22,7 @@ tsetlin_machine = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_tr
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(1000):
 	start_training = time()
-	tsetlin_machine.fit(X_train, Y_train, epochs=10, incremental=True)
+	tsetlin_machine.fit(X_train, Y_train, epochs=1, incremental=True)
 	stop_training = time()
 
 	start_testing = time()
