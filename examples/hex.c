@@ -123,8 +123,38 @@ void hg_print(struct hex_game *hg)
 	}
 }
 
+void hg_print_feature_vector(struct hex_game *hg, FILE *data_fp)
+{
+	for (int i = 0; i < BOARD_DIM; ++i) {
+		for (int j = 0; j < i; j++) {
+			fprintf(data_fp, " ");
+		}
+
+		for (int j = 0; j < BOARD_DIM; ++j) {
+			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
+				fprintf(data_fp, " X");
+			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
+				fprintf(data_fp, " O");
+			} else {
+				fprintf(data_fp, " ·");
+			}
+		}
+		fprintf(data_fp, "\n");
+	}
+}
+
 int main() {
 	struct hex_game hg;
+
+	FILE *data_fp;
+
+
+	data_fp = fopen("hex_data.txt", "w");
+
+	if (data_fp == NULL) {
+        printf("Error opening file!\n");
+        exit(-1);
+    }
 
 	int winner = -1;
 
@@ -146,6 +176,9 @@ int main() {
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.6) {
 			printf("\nPlayer %d wins!\n\n", winner);
 			hg_print(&hg);
+			hg_print_feature_vector(&hg, data_fp);
 		}
 	}
+
+	fclose(data_fp);
 }
