@@ -239,8 +239,8 @@ code_update = """
 					// Aggregate votes from each child node through multiplication
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
-					if (and_group_vote_product > THRESHOLD) {
-						and_group_vote_product = THRESHOLD;
+					if (and_group_vote_product > THRESHOLD*10) {
+						and_group_vote_product = THRESHOLD*10;
 					}
 				}
 
