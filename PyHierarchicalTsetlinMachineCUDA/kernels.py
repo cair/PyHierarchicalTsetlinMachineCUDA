@@ -159,7 +159,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -226,7 +226,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -234,25 +234,18 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				float and_group_vote_product = 0;
+				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
-					//and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
-					
-					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
-						and_group_vote_product += logf(child_input[and_group_node*number_of_and_group_factors + and_factor]);
-					} else {
-						and_group_vote_product = -1;
-						break;
-					}
+					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 				}
 
 				// Store and group product as node output
-				and_group_node_output[and_group_node] = and_group_vote_product + 1;
+				and_group_node_output[and_group_node] = and_group_vote_product;
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -269,7 +262,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -292,7 +285,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, float *child_input, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
