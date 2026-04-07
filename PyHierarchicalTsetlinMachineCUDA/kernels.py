@@ -294,7 +294,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, unsigned long long int *child_input, int *clause_weights, long long int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, long long int *child_input, int *clause_weights, long long int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -304,7 +304,7 @@ code_update = """
 				if (child_input[clause]) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], (long long int)clause_weight * child_input[clause]);					
+						atomicAdd(&class_sum[class_id], clause_weight * child_input[clause]);					
 					}
 				}
 			}
