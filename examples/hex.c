@@ -215,7 +215,7 @@ int main() {
 			player = 1 - player;
 		}
 
-		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.6) {
+		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			//printf("\nPlayer %d wins!\n\n", winner);
 			//hg_print(&hg);
 			hg_print_feature_vector(&hg, winner, data_fp);
