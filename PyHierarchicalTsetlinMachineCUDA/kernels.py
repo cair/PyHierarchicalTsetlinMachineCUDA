@@ -234,29 +234,19 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				float and_group_vote_product = 0;
-				int zero_factor = 0;
+				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
-					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
-						and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
-					} else {
-						zero_factor = 1;
+					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
+
+					if (and_group_vote_product > THRESHOLD) {
+						and_group_vote_product = THRESHOLD;
 						break;
 					}
 				}
 
 				// Store and group product as node output
-
-				if (!zero_factor) {
-					if (and_group_vote_product < 8) {
-						and_group_node_output[and_group_node] = pow(2, and_group_vote_product);
-					} else {
-						and_group_node_output[and_group_node] = 256;
-					}
-				} else {
-					and_group_node_output[and_group_node] = 0;
-				}
+				and_group_node_output[and_group_node] = and_group_vote_product;
 			}
 		}
 
@@ -290,9 +280,10 @@ code_update = """
 					// Aggregate same input or alternatives through summation
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
-					//if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative]) {
-					//	or_alternatives_vote_sum = 1;
-					//}
+					if (or_alternatives_vote_sum > THRESHOLD) {
+						or_alternatives_vote_sum = THRESHOLD;
+						break;
+					}
 				}
 
 				// Store vote sum as node output
