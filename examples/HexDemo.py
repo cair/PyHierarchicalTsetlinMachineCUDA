@@ -11,6 +11,9 @@ def default_args(**kwargs):
     parser.add_argument("--T", default=800, type=int)
     parser.add_argument("--s", default=50.0, type=float)
     parser.add_argument("--board_dim", default=10, type=int)
+    parser.add_argument("--boost", default=0, type=int)
+    parser.add_argument("--or_alternatives", default=10, type=int)
+
     args = parser.parse_args()
     for key, value in kwargs.items():
         if key in args.__dict__:
@@ -27,7 +30,7 @@ Y_train = data[:int(len(data)*0.8),-1]
 X_test = data[int(len(data)*0.8):,0:-1]
 Y_test = data[int(len(data)*0.8):,-1]
 
-tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, (args.board_dim/2)**2 * 2), (tm.OR_ALTERNATIVES, 4), (tm.AND_GROUP, 4)))
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, (args.board_dim/2)**2 * 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, args.board_dim * args.board_dim * 2), (tm.AND_GROUP, 1)))
 
 print("\nAccuracy over 1000 epochs:\n")
