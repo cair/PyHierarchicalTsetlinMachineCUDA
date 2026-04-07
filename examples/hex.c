@@ -199,7 +199,7 @@ int main() {
 
 	int winner = -1;
 
-	for (int game = 0; game < 10000000; ++game) {
+	for (int game = 0; game < 1000000; ++game) {
 		hg_init(&hg);
 
 		int player = 0;
