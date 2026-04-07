@@ -131,13 +131,10 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 		for (int j = 0; j < BOARD_DIM / 2; ++j) {
 			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 				fprintf(data_fp, "0 1 ");
-				printf("0 1 ");
 			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
 				fprintf(data_fp, "1 0 ");
-				printf("1 0 ");
 			} else {
 				fprintf(data_fp, "0 0 ");
-				printf("0 0 ");
 			}
 		}
 	}
@@ -148,13 +145,10 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 		for (int j = 0; j < BOARD_DIM / 2; ++j) {
 			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 				fprintf(data_fp, "0 1 ");
-				printf("0 1 ");
 			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
 				fprintf(data_fp, "1 0 ");
-				printf("1 0 ");
 			} else {
 				fprintf(data_fp, "0 0 ");
-				printf("0 0 ");
 			}
 		}
 	}
@@ -165,13 +159,10 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 		for (int j = BOARD_DIM / 2; j < BOARD_DIM; ++j) {
 			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 				fprintf(data_fp, "0 1 ");
-				printf("0 1 ");
 			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
 				fprintf(data_fp, "1 0 ");
-				printf("1 0 ");
 			} else {
 				fprintf(data_fp, "0 0 ");
-				printf("0 0 ");
 			}
 		}
 	}
@@ -182,19 +173,15 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 		for (int j = BOARD_DIM / 2; j < BOARD_DIM; ++j) {
 			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
 				fprintf(data_fp, "0 1 ");
-				printf("0 1 ");
 			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
 				fprintf(data_fp, "1 0 ");
-				printf("1 0 ");
 			} else {
 				fprintf(data_fp, "0 0 ");
-				printf("0 0 ");
 			}
 		}
 	}
 
 	fprintf(data_fp, "%d\n", winner);
-	printf("%d\n", winner);
 }
 
 int main() {
@@ -230,7 +217,7 @@ int main() {
 
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			printf("\nPlayer %d wins!\n\n", winner);
-			hg_print(&hg);
+			//hg_print(&hg);
 			hg_print_feature_vector(&hg, winner, data_fp);
 			game++;
 		}
