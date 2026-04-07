@@ -192,8 +192,8 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 		for (int r = 0; r < 2; ++r) {
 			for (int x = 0; x < 3; ++x) {
 				for (int y = 0; y < 3; ++y) {
-					int i = q * 2 * 3 * 3 + x * 3;
-					int j = r * 3 * 3 + y;
+					int i = q * 3 + x;
+					int j = r * 3 + y;
 					printf("(%d %d)\n", i, j);
 				}
 			}
