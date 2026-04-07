@@ -241,8 +241,8 @@ code_update = """
 					unsigned long long int previous_and_group_vote_product = and_group_vote_product;
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
-					if (and_group_vote_product < previous_and_group_vote_product) {
-						and_group_vote_product = previous_and_group_vote_product;
+					if (and_group_vote_product > THRESHOLD*1000 || and_group_vote_product < previous_and_group_vote_product) {
+						and_group_vote_product = THRESHOLD*1000; //previous_and_group_vote_product;
 					}
 				}
 
