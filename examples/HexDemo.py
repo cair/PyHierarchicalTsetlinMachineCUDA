@@ -6,7 +6,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 board_dim = 2
 
 clauses = 1000
-s = 50.0
+s = 1.0
 T = 1500
 
 data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
