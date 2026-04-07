@@ -240,7 +240,7 @@ code_update = """
 					//and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 					
 					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
-						and_group_vote_product += logf(child_input[and_group_node*number_of_and_group_factors + and_factor])
+						and_group_vote_product += logf(child_input[and_group_node*number_of_and_group_factors + and_factor]);
 					} else {
 						and_group_vote_product = -1;
 						break;
