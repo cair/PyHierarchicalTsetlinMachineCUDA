@@ -3,11 +3,21 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
-board_dim = 10
+def default_args(**kwargs):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--epochs", default=1000, type=int)
+    parser.add_argument("--number-of-clauses", default=1000, type=int)
+    parser.add_argument("--T", default=800, type=int)
+    parser.add_argument("--s", default=50.0, type=float)
+    parser.add_argument("--board_dim", default=10, type=int)
+    args = parser.parse_args()
+    for key, value in kwargs.items():
+        if key in args.__dict__:
+            setattr(args, key, value)
+    return args
 
-clauses = 100
-s = 50.0
-T = 80
+
+args = default_args()
 
 data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
 X_train = data[:int(len(data)*0.8),0:-1]
@@ -17,10 +27,10 @@ X_test = data[int(len(data)*0.8):,0:-1]
 Y_test = data[int(len(data)*0.8):,-1]
 
 #tsetlin_machine = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 25), (tm.OR_ALTERNATIVES, 1), (tm.AND_GROUP, 4)))
-tsetlin_machine = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, board_dim * board_dim * 2), (tm.AND_GROUP, 1)))
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, args.board_dim * args.board_dim * 2), (tm.AND_GROUP, 1)))
 
 print("\nAccuracy over 1000 epochs:\n")
-for e in range(1000):
+for e in range(args.epochs):
 	start_training = time()
 	tsetlin_machine.fit(X_train, Y_train, epochs=1, incremental=True)
 	stop_training = time()
