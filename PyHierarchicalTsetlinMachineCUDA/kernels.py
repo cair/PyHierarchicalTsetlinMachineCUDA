@@ -279,11 +279,6 @@ code_update = """
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
-
-					if (or_alternatives_vote_sum > THRESHOLD) {
-						or_alternatives_vote_sum = THRESHOLD;
-						break;
-					}
 				}
 
 				// Store vote sum as node output
