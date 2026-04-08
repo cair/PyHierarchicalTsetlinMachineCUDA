@@ -43,7 +43,7 @@ print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
 	for b in range(10):
 		start_training = time()
-		tsetlin_machine.fit(X_train[b*len(Y_train)/10:(b+1)*len(Y_train)/10], Y_train[b*len(Y_train)/10:(b+1)*len(Y_train)/10], epochs=1, incremental=True)
+		tsetlin_machine.fit(X_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], Y_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], epochs=1, incremental=True)
 		stop_training = time()
 
 		start_testing = time()
