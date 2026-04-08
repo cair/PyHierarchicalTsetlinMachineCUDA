@@ -47,8 +47,10 @@ for e in range(args.epochs):
 	stop_training = time()
 
 	start_testing = time()
-	result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+	result_testing = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
 	stop_testing = time()
+
+	result_training = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
 	#tm.print_hierarchy()
 
