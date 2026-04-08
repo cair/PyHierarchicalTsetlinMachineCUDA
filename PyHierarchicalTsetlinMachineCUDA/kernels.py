@@ -245,7 +245,7 @@ code_update = """
 						printf("AND OVERFLOW %lld -> %lld\\n", previous_and_group_vote_product, and_group_vote_product);
 
 						for (int and_factor_2 = 0; and_factor_2 < number_of_and_group_factors; ++and_factor_2) {
-							printf("Votes: %lld\\n", child_input[and_group_node*number_of_and_group_factors + and_factor]);
+							printf("Votes: %lld %d\\n", child_input[and_group_node*number_of_and_group_factors + and_factor_2], and_factor_2);
 						}
 						//and_group_vote_product = previous_and_group_vote_product;
 					}
