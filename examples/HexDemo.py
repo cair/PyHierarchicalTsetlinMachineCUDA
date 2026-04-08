@@ -41,15 +41,15 @@ tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
+	start_training = time()
 	for b in range(10):
-		start_training = time()
 		tsetlin_machine.fit(X_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], Y_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], epochs=1, incremental=True)
-		stop_training = time()
+	stop_training = time()
 
-		start_testing = time()
-		result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
-		stop_testing = time()
+	start_testing = time()
+	result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+	stop_testing = time()
 
-		#tm.print_hierarchy()
+	#tm.print_hierarchy()
 
-		print("#%d/%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, b+1, result, stop_training-start_training, stop_testing-start_testing))
+	print("#%d/%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, b+1, result, stop_training-start_training, stop_testing-start_testing))
