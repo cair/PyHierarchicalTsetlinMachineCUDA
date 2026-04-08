@@ -475,6 +475,36 @@ class CommonTsetlinMachine():
 
 		return fmap
 
+	def calc_hierarchy_votes(self, X):
+		"""
+		Get the clause activation information for each sample in X.
+		"""
+		assert not self.first, "Model must be trained before getting activations."
+
+		number_of_examples = X.shape[0]
+		encoded_X_hierarchy_test_gpu = gpuarray.empty((number_of_examples, self.number_of_literal_chunks), dtype=np.uint32)
+		self.encode_X(X, encoded_X_hierarchy_test_gpu.gpudata)
+
+		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
+		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		hierarchy_votes = []
+		for e in range(number_of_examples):
+			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu.gpudata, e)
+
+			cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
+			class_sum[:, e] = class_sum_example
+
+			hierarchy_votes_example = []
+			for d in range(self.depth):
+				temp_arr = np.empty(self.number_of_clauses*int(self.hierarchy_size[d+1]), dtype=np.int32)
+				cuda.memcpy_dtoh(temp_arr, self.hierarchy_votes[d])
+				hierarchy_votes_example.append(temp_arr.reshape((self.number_of_clauses, int(self.hierarchy_size[d+1]))))
+
+			hierarchy_votes.append(hierarchy_votes_example)
+		
+		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
+		return hierarchy_votes, class_sum
+
 	def print_hierarchy(self, print_ta_state=False):
 		for i in range(self.number_of_clauses):
 			print("\nCLAUSE #%d: " % (i), end='')
@@ -551,7 +581,7 @@ class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 		return
 
 	def score(self, X):
-		X = X.reshape(X.shape[0], X.shape[1], 1)
+		X = X.reshape(X.shape[0], X.shape[1], 1)	# ASK: What is this reshape?
 		return self._score(X)
 
 	def predict(self, X):
