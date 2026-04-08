@@ -238,10 +238,8 @@ code_update = """
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-					int previous_and_group_vote_product = and_group_vote_product;
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
-
-					if (and_group_vote_product < previous_and_group_vote_product) {
+					if (and_group_vote_product < 0) {
 						printf("AND OVERFLOW: %d < %d\\n", and_group_vote_product, previous_and_group_vote_product);
 						//and_group_vote_product = previous_and_group_vote_product;
 					}
