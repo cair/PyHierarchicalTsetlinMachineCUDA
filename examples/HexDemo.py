@@ -13,7 +13,7 @@ def default_args(**kwargs):
     parser.add_argument("--board_dim", default=10, type=int)
     parser.add_argument("--boost", default=0, type=int)
     parser.add_argument("--or_alternatives_1", default=1, type=int)
-    parser.add_argument("--or_alternatives_2", default=40, type=int)
+    parser.add_argument("--or_alternatives_2", default=1, type=int)
 
     args = parser.parse_args()
     for key, value in kwargs.items():
