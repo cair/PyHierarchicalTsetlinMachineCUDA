@@ -12,7 +12,8 @@ def default_args(**kwargs):
     parser.add_argument("--s", default=50.0, type=float)
     parser.add_argument("--board_dim", default=10, type=int)
     parser.add_argument("--boost", default=0, type=int)
-    parser.add_argument("--or_alternatives", default=10, type=int)
+    parser.add_argument("--or_alternatives_1", default=1, type=int)
+    parser.add_argument("--or_alternatives_2", default=40, type=int)
 
     args = parser.parse_args()
     for key, value in kwargs.items():
@@ -35,7 +36,7 @@ Y_test = data[int(len(data)*0.8):,-1]
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=True, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.AND_GROUP, 4)))
-tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives_1), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives_2), (tm.AND_GROUP, 4)))
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
