@@ -238,13 +238,13 @@ code_update = """
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-					//unsigned long long int previous_and_group_vote_product = and_group_vote_product;
+					int previous_and_group_vote_product = and_group_vote_product;
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
-					//if (and_group_vote_product < previous_and_group_vote_product) {
-					//	//printf("AND OVERFLOW\\n");
-					//	and_group_vote_product = previous_and_group_vote_product;
-					//}
+					if (and_group_vote_product < previous_and_group_vote_product) {
+						printf("AND OVERFLOW: %d < %d\\n", and_group_vote_product, previous_and_group_vote_product);
+						//and_group_vote_product = previous_and_group_vote_product;
+					}
 				}
 
 				// Store and group product as node output
@@ -427,7 +427,7 @@ code_prepare = """
 					for (int b = 0; b < STATE_BITS-1; ++b) {
 						ta_state[ta_chunk*STATE_BITS + b] = ~0;
 					}
-					ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] = ~0;
+					ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] = 0;
 				}
 			}
 
