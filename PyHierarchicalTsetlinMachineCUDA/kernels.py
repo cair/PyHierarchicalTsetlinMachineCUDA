@@ -212,7 +212,7 @@ code_update = """
 			// Add up the votes of each OR node child
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
-				int or_group_vote_sum = 0;
+				long long int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
@@ -234,7 +234,7 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				int and_group_vote_product = 1;
+				long long int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
