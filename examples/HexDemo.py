@@ -7,14 +7,12 @@ import argparse
 def default_args(**kwargs):
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", default=1000, type=int)
-    parser.add_argument("--clauses", default=1000, type=int)
-    parser.add_argument("--T", default=800, type=int)
+    parser.add_argument("--clauses", default=2000, type=int)
+    parser.add_argument("--T", default=6400, type=int)
     parser.add_argument("--s", default=50.0, type=float)
     parser.add_argument("--board_dim", default=10, type=int)
-    parser.add_argument("--boost", default=0, type=int)
-    parser.add_argument("--or_alternatives", default=1, type=int)
-    parser.add_argument("--or_alternatives_1", default=1, type=int)
-    parser.add_argument("--or_alternatives_2", default=1, type=int)
+    parser.add_argument("--boost", default=1, type=int)
+    parser.add_argument("--or_alternatives", default=40, type=int)
 
     args = parser.parse_args()
     for key, value in kwargs.items():
