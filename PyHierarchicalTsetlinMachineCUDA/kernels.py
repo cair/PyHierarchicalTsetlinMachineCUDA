@@ -242,13 +242,12 @@ code_update = """
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
 					if (and_group_vote_product < 0) {
-						if (index == 0) {
-							printf("AND OVERFLOW %lld -> %lld\\n", previous_and_group_vote_product, and_group_vote_product);
+						printf("AND OVERFLOW %lld -> %lld\\n", previous_and_group_vote_product, and_group_vote_product);
 
-							for (int and_factor_2 = 0; and_factor_2 < number_of_and_group_factors; ++and_factor_2) {
-								printf("Votes: %lld %d\\n", child_input[and_group_node*number_of_and_group_factors + and_factor_2], and_factor_2);
-							}
+						for (int and_factor_2 = 0; and_factor_2 < number_of_and_group_factors; ++and_factor_2) {
+							printf("Votes: %lld %d\\n", child_input[and_group_node*number_of_and_group_factors + and_factor_2], and_factor_2);
 						}
+						
 						and_group_vote_product = previous_and_group_vote_product;
 					}
 				}
