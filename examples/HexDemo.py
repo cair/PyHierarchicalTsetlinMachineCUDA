@@ -25,19 +25,19 @@ def default_args(**kwargs):
 
 args = default_args()
 
-data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)[:100000]
+data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
 X_train = data[:int(len(data)*0.8),0:-1]
 Y_train = data[:int(len(data)*0.8),-1]
 
 X_test = data[int(len(data)*0.8):,0:-1]
 Y_test = data[int(len(data)*0.8):,-1]
 
-tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, (args.board_dim/2)**2 * 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
+#tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, (args.board_dim/2)**2 * 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, args.board_dim * args.board_dim * 2), (tm.AND_GROUP, 1)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=True, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.AND_GROUP, 4)))
-tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives_1), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives_2), (tm.AND_GROUP, 4)))
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=10, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives_1), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives_2), (tm.AND_GROUP, 4)))
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
@@ -52,4 +52,4 @@ for e in range(args.epochs):
 
 	#tm.print_hierarchy()
 
-	print("#%d/%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, b+1, result, stop_training-start_training, stop_testing-start_testing))
+	print("#%d/%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, b+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
