@@ -290,9 +290,9 @@ code_update = """
 					long long int previous_or_alternatives_vote_sum = or_alternatives_vote_sum;
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
-					if (or_alternatives_vote_sum < previous_or_alternatives_vote_sum) {
+					if (or_alternatives_vote_sum < 0) {
 						printf("OR OVERFLOW\\n");
-						or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
+						//or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
 					}
 				}
 
