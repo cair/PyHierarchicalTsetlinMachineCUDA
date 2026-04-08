@@ -3,7 +3,7 @@
 
 #define BOARD_DIM 10
 
-#define EXAMPLES 100000
+#define EXAMPLES 250000
 
 int neighbors[] = {-(BOARD_DIM+2) + 1, -(BOARD_DIM+2), -1, 1, (BOARD_DIM+2), (BOARD_DIM+2) - 1};
 
