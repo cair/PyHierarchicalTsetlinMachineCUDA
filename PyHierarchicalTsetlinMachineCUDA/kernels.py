@@ -427,7 +427,7 @@ code_prepare = """
 					for (int b = 0; b < STATE_BITS-1; ++b) {
 						ta_state[ta_chunk*STATE_BITS + b] = ~0;
 					}
-					ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] = 0;
+					ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] = ~0;
 				}
 			}
 
