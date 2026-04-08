@@ -242,7 +242,7 @@ code_update = """
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
 					if (and_group_vote_product < previous_and_group_vote_product) {
-						printf("AND OVERFLOW\\n");
+						//printf("AND OVERFLOW\\n");
 						and_group_vote_product = previous_and_group_vote_product;
 					}
 				}
@@ -286,7 +286,7 @@ code_update = """
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
 					if (or_alternatives_vote_sum < previous_or_alternatives_vote_sum) {
-						//printf("OR OVERFLOW\\n");
+						printf("OR OVERFLOW\\n");
 						or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
 					}
 				}
