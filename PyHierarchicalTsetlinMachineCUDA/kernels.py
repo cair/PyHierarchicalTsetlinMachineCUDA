@@ -483,3 +483,31 @@ code_transform = """
 		}
 	}
 """
+
+code_clauses = """
+	extern "C" __global__ void get_ta_states(const unsigned int* global_ta_state, unsigned int* unpacked_states) {
+		int index = blockIdx.x * blockDim.x + threadIdx.x;
+		int stride = blockDim.x * gridDim.x;
+
+		for (unsigned long long i = index; i < CLAUSES * COMPONENTS * LITERALS_PER_LEAF; i += stride) {
+			unsigned long long clause = i / (COMPONENTS * LITERALS_PER_LEAF);
+			unsigned long long comp   = (i / LITERALS_PER_LEAF) % COMPONENTS;
+			unsigned long long ta_idx = i % LITERALS_PER_LEAF;
+
+			int chunk   = ta_idx / 32;
+			int bit_pos = ta_idx % 32;
+
+			unsigned int state = 0;
+			for (int b = 0; b < STATE_BITS; ++b) {
+				unsigned int plane = global_ta_state[
+					(clause * COMPONENTS * TA_CHUNKS_PER_LEAF * STATE_BITS) +
+					(comp   * TA_CHUNKS_PER_LEAF * STATE_BITS) +
+					(chunk  * STATE_BITS) + b
+				];
+				if (plane & (1U << bit_pos)) state |= (1U << b);
+			}
+
+			unpacked_states[(clause * COMPONENTS * LITERALS_PER_LEAF) + (comp * LITERALS_PER_LEAF) + ta_idx] = state;
+		}
+	}
+"""

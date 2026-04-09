@@ -16,8 +16,9 @@ setup(
 		'pycuda',
 		'scipy',
 		'scikit-learn',
+		'networkx',
 	],
 	extras_require={
-		'examples': ['tensorflow'],
+		'examples': ['tensorflow', 'matplotlib', 'pygraphviz'],
 	}
 )

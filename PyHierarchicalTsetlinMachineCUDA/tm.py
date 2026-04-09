@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from collections import deque
 import numpy as np
 
 import PyHierarchicalTsetlinMachineCUDA.kernels as kernels
@@ -156,6 +157,9 @@ class CommonTsetlinMachine():
 		mod_encode = SourceModule(kernels.code_encode, no_extern_c=True)
 		self.prepare_encode_hierarchy = mod_encode.get_function("prepare_encode_hierarchy")
 		self.encode_hierarchy = mod_encode.get_function("encode_hierarchy")
+
+		mod_clauses = SourceModule(parameters + kernels.code_clauses, no_extern_c=True)
+		self.kernel_get_ta_states = mod_clauses.get_function("get_ta_states")
 
 	def encode_X(self, X, encoded_X_hierarchy_gpu):
 		number_of_examples = X.shape[0]
@@ -407,6 +411,99 @@ class CommonTsetlinMachine():
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
 		return class_sum
+
+	def get_ta_states(self) -> np.ndarray:
+		"""
+		Get state value for each TA.
+		Returns: Numpy array of shape (number_of_clauses, number_of_clause_components, number_of_literals_per_leaf)
+		"""
+		# Mem Allocation
+		ta_states_gpu = gpuarray.to_gpu(
+			np.zeros((self.number_of_clauses, self.hierarchy_size[1], self.number_of_literals_per_leaf), dtype=np.uint32)
+		)
+
+		# Calculate grid size based on the kernel
+		total = self.number_of_clauses * self.hierarchy_size[1] * self.number_of_literals_per_leaf
+		grid = (((total + self.block[0] - 1) // self.block[0]), 1, 1)
+		self.kernel_get_ta_states(self.ta_state_hierarchy_gpu, ta_states_gpu, block=self.block, grid=grid)
+
+		# Copy back to CPU
+		return ta_states_gpu.get()
+
+	def get_literals(self):
+		"""
+		Get included literals for each clause.
+		Returns: Numpy array of shape (number_of_clauses, number_of_clause_components, number_of_literals_per_leaf)
+		"""
+		return (self.get_ta_states() >= (1 << (self.number_of_state_bits - 1))).astype(np.uint8)
+
+	def map_ta_id_to_feature_id(self):
+		"""
+		Return an array of shape(number_of_clause_components, number_of_literals_per_leaf). That is the total number of TAs in a clause. Maps each TA id to a feature_id in the input. In each component, the first half of the TAs correspond to the positive features, and the second half correspond to the negated features.
+		"""
+		# BFS top-down traversal
+		q = deque()
+		q.append((self.depth - 1, 0, 0)) # (level, node_id, group_id)
+
+		comp_grps = -1 * np.ones(self.hierarchy_size[1], dtype=np.int32)
+		while q:
+			level, node_id, group_id = q.popleft()
+
+			if level == 0:
+				# This is the leaf component
+				comp_grps[node_id] = group_id
+				continue
+
+			n_children = self.hierarchy_structure[level][1]
+			is_alt = (self.hierarchy_structure[level][0] == OR_ALTERNATIVES)
+			for child_pos in range(n_children):
+				child_id = node_id * n_children + child_pos
+				if is_alt:
+					# All children share the same features
+					child_group_id = group_id
+				else:
+					# Features are partitioned among the children
+					child_group_id = group_id * n_children + child_pos
+
+				q.append((level - 1, child_id, child_group_id))
+
+		# map each TA in a component to a feature
+		half = self.number_of_literals_per_leaf // 2
+		lit_ids = np.arange(self.number_of_literals_per_leaf)
+		local_feats = lit_ids % half if self.append_negated else lit_ids
+		fmap = comp_grps[:, None] * (half if self.append_negated else self.number_of_literals_per_leaf) + local_feats[None, :]
+
+		return fmap
+
+	def calc_hierarchy_votes(self, X):
+		"""
+		Get the clause activation information for each sample in X.
+		"""
+		assert not self.first, "Model must be trained before getting activations."
+
+		number_of_examples = X.shape[0]
+		encoded_X_hierarchy_test_gpu = gpuarray.empty((number_of_examples, self.number_of_literal_chunks), dtype=np.uint32)
+		self.encode_X(X, encoded_X_hierarchy_test_gpu.gpudata)
+
+		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
+		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		hierarchy_votes = []
+		for e in range(number_of_examples):
+			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu.gpudata, e)
+
+			cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
+			class_sum[:, e] = class_sum_example
+
+			hierarchy_votes_example = []
+			for d in range(self.depth):
+				temp_arr = np.empty(self.number_of_clauses*int(self.hierarchy_size[d+1]), dtype=np.int32)
+				cuda.memcpy_dtoh(temp_arr, self.hierarchy_votes[d])
+				hierarchy_votes_example.append(temp_arr.reshape((self.number_of_clauses, int(self.hierarchy_size[d+1]))))
+
+			hierarchy_votes.append(hierarchy_votes_example)
+		
+		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
+		return hierarchy_votes, class_sum
 
 	def print_hierarchy(self, print_ta_state=False):
 		for i in range(self.number_of_clauses):
