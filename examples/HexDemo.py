@@ -39,7 +39,8 @@ Y_test = data[int(len(data)*0.8):,-1]
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=True, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.AND_GROUP, 9), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 #tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 8), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9), (tm.AND_GROUP, 4)))
-tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=10, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives_1), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives_2), (tm.AND_GROUP, 4)))
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 18), (tm.OR_ALTERNATIVES, args.or_alternatives_1), (tm.AND_GROUP, 4), (tm.OR_ALTERNATIVES, args.or_alternatives_2), (tm.AND_GROUP, 4)))
+#tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 24), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 9)))
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
