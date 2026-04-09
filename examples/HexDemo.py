@@ -27,7 +27,7 @@ def default_args(**kwargs):
 
 args = default_args()
 
-data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
+data = np.loadtxt("./examples/hex_data_2.txt").astype(np.uint32)
 X_train = data[:int(len(data)*0.8),0:-1]
 Y_train = data[:int(len(data)*0.8),-1]
 
