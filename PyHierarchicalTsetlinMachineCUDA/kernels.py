@@ -88,6 +88,8 @@ code_update = """
 			
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
+			} else if (target == 1 && curand_uniform(localState) < 0.5) {
+				return;
 			}
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
