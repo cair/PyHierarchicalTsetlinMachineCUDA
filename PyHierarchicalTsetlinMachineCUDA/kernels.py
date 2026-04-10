@@ -215,10 +215,13 @@ code_update = """
 				long long int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
+
+					long long int previous_or_group_vote_sum = or_group_vote_sum; 
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
-					//if (child_input[or_group_node*number_of_or_group_addends + or_addend]) {
-					//	or_group_vote_sum = 1; 
-					//}
+					if (or_group_vote_sum < 0) {
+						printf("OR* OVERFLOW %lld -> %lld\\n", previous_or_group_vote_sum, or_group_vote_sum);						
+						or_group_vote_sum = previous_or_group_vote_sum;
+					}
 				}
 
 				// Store or group vote sum as node output
@@ -242,12 +245,7 @@ code_update = """
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
 					if (and_group_vote_product < 0) {
-						printf("AND OVERFLOW %lld -> %lld\\n", previous_and_group_vote_product, and_group_vote_product);
-
-						for (int and_factor_2 = 0; and_factor_2 < number_of_and_group_factors; ++and_factor_2) {
-							printf("Votes: %lld %d\\n", child_input[and_group_node*number_of_and_group_factors + and_factor_2], and_factor_2);
-						}
-						
+						printf("AND OVERFLOW %lld -> %lld\\n", previous_and_group_vote_product, and_group_vote_product);						
 						and_group_vote_product = previous_and_group_vote_product;
 					}
 				}
@@ -291,8 +289,8 @@ code_update = """
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
 					if (or_alternatives_vote_sum < 0) {
-						printf("OR OVERFLOW\\n");
-						//or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
+						printf("OR OVERFLOW %lld -> %lld\\n", previous_or_alternatives_vote_sum, or_alternatives_vote_sum);
+						or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
 					}
 				}
 
