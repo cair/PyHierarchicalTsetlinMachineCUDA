@@ -88,7 +88,7 @@ code_update = """
 			
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
-			} else if (target == 1 && curand_uniform(localState) < 0.25) {
+			} else if (target == 1 && curand_uniform(localState) < 0.75) {
 				return;
 			}
 
