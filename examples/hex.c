@@ -125,103 +125,6 @@ void hg_print(struct hex_game *hg)
 
 void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 {
-	// Quadrant I
-
-	for (int i = 0; i < BOARD_DIM / 2; ++i) {
-		for (int j = 0; j < BOARD_DIM / 2; ++j) {
-			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-				fprintf(data_fp, "0 1 ");
-			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-				fprintf(data_fp, "1 0 ");
-			} else {
-				fprintf(data_fp, "0 0 ");
-			}
-		}
-	}
-
-	// Quadrant II
-
-	for (int i = BOARD_DIM / 2; i < BOARD_DIM; ++i) {
-		for (int j = 0; j < BOARD_DIM / 2; ++j) {
-			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-				fprintf(data_fp, "0 1 ");
-			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-				fprintf(data_fp, "1 0 ");
-			} else {
-				fprintf(data_fp, "0 0 ");
-			}
-		}
-	}
-
-	// Quadrant III
-
-	for (int i = 0; i < BOARD_DIM / 2; ++i) {
-		for (int j = BOARD_DIM / 2; j < BOARD_DIM; ++j) {
-			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-				fprintf(data_fp, "0 1 ");
-			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-				fprintf(data_fp, "1 0 ");
-			} else {
-				fprintf(data_fp, "0 0 ");
-			}
-		}
-	}
-
-	// Quadrant IV
-
-	for (int i = BOARD_DIM / 2; i < BOARD_DIM; ++i) {
-		for (int j = BOARD_DIM / 2; j < BOARD_DIM; ++j) {
-			if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-				fprintf(data_fp, "0 1 ");
-			} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-				fprintf(data_fp, "1 0 ");
-			} else {
-				fprintf(data_fp, "0 0 ");
-			}
-		}
-	}
-
-	fprintf(data_fp, "%d\n", winner);
-}
-
-void hg_print_feature_vector_depth_3_variant(struct hex_game *hg, int winner, FILE *data_fp)
-{
-
-	// Quadrants
-	for (int q = 0; q < 2; ++q) {
-		for (int r = 0; r < 2; ++r) {
-			for (int x = 0; x < 3; ++x) {
-				for (int y = 0; y < 3; ++y) {
-					for (int m = 0; m < 2; ++m) {
-						for (int n = 0; n < 2; ++n) {
-							int i = q * 3 * 2 + x * 2 + m;
-							int j = r * 3 * 2 + y * 2 + n;
-
-							if (i < BOARD_DIM && j < BOARD_DIM) {
-								if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-									fprintf(data_fp, "0 1 ");
-								} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-									fprintf(data_fp, "1 0 ");
-								} else {
-									fprintf(data_fp, "0 0 ");
-								}
-							} else {
-								fprintf(data_fp, "0 0 ");
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	fprintf(data_fp, "%d\n", winner);
-}
-
-void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data_fp)
-{
-
-	// Quadrants
 	for (int q = 0; q < 2; ++q) {
 		for (int r = 0; r < 2; ++r) {
 			for (int x = 0; x < 2; ++x) {
@@ -252,35 +155,6 @@ void hg_print_feature_vector_depth_3(struct hex_game *hg, int winner, FILE *data
 	fprintf(data_fp, "%d\n", winner);
 }
 
-void hg_print_feature_vector_depth_3_variant_2(struct hex_game *hg, int winner, FILE *data_fp)
-{
-
-	// Quadrants
-	for (int q = 0; q < 3; ++q) {
-		for (int r = 0; r < 3; ++r) {
-			for (int m = 0; m < 4; ++m) {
-				for (int n = 0; n < 4; ++n) {
-					int i = q * 4 + m;
-					int j = r * 4 + n;
-
-					if (i < BOARD_DIM && j < BOARD_DIM) {
-						if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-							fprintf(data_fp, "0 1 ");
-						} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-							fprintf(data_fp, "1 0 ");
-						} else {
-							fprintf(data_fp, "0 0 ");
-						}
-					} else {
-						fprintf(data_fp, "0 0 ");
-					}
-				}
-			}
-		}
-	}
-
-	fprintf(data_fp, "%d\n", winner);
-}
 
 int main() {
 	struct hex_game hg;
@@ -313,9 +187,7 @@ int main() {
 		}
 
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
-			//printf("\nPlayer %d wins!\n\n", winner);
-			//hg_print(&hg);
-			hg_print_feature_vector_depth_3(&hg, winner, data_fp);
+			hg_print_feature_vector(&hg, winner, data_fp);
 			game++;
 		}
 	}
