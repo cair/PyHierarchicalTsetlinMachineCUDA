@@ -287,7 +287,7 @@ int main() {
 
 	FILE *data_fp;
 
-	data_fp = fopen("hex_data_2.txt", "w");
+	data_fp = fopen("hex_data.txt", "w");
 
 	if (data_fp == NULL) {
         printf("Error opening file!\n");
@@ -315,7 +315,7 @@ int main() {
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
 			//printf("\nPlayer %d wins!\n\n", winner);
 			//hg_print(&hg);
-			hg_print_feature_vector_depth_3_variant_2(&hg, winner, data_fp);
+			hg_print_feature_vector_depth_3(&hg, winner, data_fp);
 			game++;
 		}
 	}
