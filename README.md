@@ -80,7 +80,9 @@ CLAUSE 1: (((((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬
 
 <p align="center">
   <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/hex_description/figures/Hex-board-11x11.png">
-	Source: https://en.wikipedia.org/wiki/Hex_(board_game)
+</p>
+<p align="center">
+Source: https://en.wikipedia.org/wiki/Hex_(board_game)
 </p>
 
 #### Code: HexDemo.py
