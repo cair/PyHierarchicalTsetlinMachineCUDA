@@ -142,10 +142,22 @@ for e in range(args.epochs):
 #### Output
 
 ```bash
-#304 Training Accuracy: 100.00% Testing Accuracy: 99.24% Training Time: 32.15s Testing Time: 6.07s
-#305 Training Accuracy: 100.00% Testing Accuracy: 99.26% Training Time: 32.13s Testing Time: 6.07s
-#306 Training Accuracy: 100.00% Testing Accuracy: 99.25% Training Time: 32.11s Testing Time: 6.07s
+cd ./examples
+make
+./hex
+cd ..
+python3 ./examples/HexDemo.py
+
+Accuracy over 1000 epochs:
+
+#1 Training Accuracy: 97.71% Testing Accuracy: 97.26% Training Time: 36.00s Testing Time: 5.65s
+#2 Training Accuracy: 99.11% Testing Accuracy: 98.61% Training Time: 33.65s Testing Time: 5.65s
+#3 Training Accuracy: 99.53% Testing Accuracy: 98.92% Training Time: 33.00s Testing Time: 5.65s
+#4 Training Accuracy: 99.74% Testing Accuracy: 99.18% Training Time: 32.66s Testing Time: 5.67s
+#5 Training Accuracy: 99.84% Testing Accuracy: 99.35% Training Time: 32.40s Testing Time: 5.67s
+...
 ```
+
 ## Paper
 
 _A Tsetlin Machine for Logical Learning and Reasoning With AND-OR Hierarchies_. Ole-Christoffer Granmo, et al., 2026. (Forthcoming)
