@@ -46,4 +46,4 @@ for e in range(args.epochs):
 
 	result_training = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
-	print("#%d/%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, b+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
+	print("#%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
