@@ -134,6 +134,11 @@ for e in range(args.epochs):
 
 #### Output
 
+```bash
+#304 Training Accuracy: 100.00% Testing Accuracy: 99.24% Training Time: 32.15s Testing Time: 6.07s
+#305 Training Accuracy: 100.00% Testing Accuracy: 99.26% Training Time: 32.13s Testing Time: 6.07s
+#306 Training Accuracy: 100.00% Testing Accuracy: 99.25% Training Time: 32.11s Testing Time: 6.07s
+```
 ## Paper
 
 _A Tsetlin Machine for Logical Learning and Reasoning With AND-OR Hierarchies_. Ole-Christoffer Granmo, et al., 2026. (Forthcoming)
