@@ -101,9 +101,8 @@ def default_args(**kwargs):
     parser.add_argument("--T", default=9000, type=int)
     parser.add_argument("--s", default=44.0, type=float)
     parser.add_argument("--q", default=1.0, type=float)
-    parser.add_argument("--board_dim", default=10, type=int)
     parser.add_argument("--boost", default=1, type=int)
-    parser.add_argument("--number_of_state_bits", default=10, type=int)
+    parser.add_argument("--number_of_state_bits", default=7, type=int)
     parser.add_argument("--or_alternatives", default=60, type=int)
   
     args = parser.parse_args()
@@ -136,7 +135,7 @@ for e in range(args.epochs):
 
 	result_training = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
-	print("#%d/%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, b+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
+	print("#%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
 ```
 
 #### Output
@@ -156,6 +155,11 @@ Accuracy over 1000 epochs:
 #4 Training Accuracy: 99.74% Testing Accuracy: 99.18% Training Time: 32.66s Testing Time: 5.67s
 #5 Training Accuracy: 99.84% Testing Accuracy: 99.35% Training Time: 32.40s Testing Time: 5.67s
 ...
+#446 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.09s Testing Time: 6.09s
+#447 Training Accuracy: 100.00% Testing Accuracy: 99.46% Training Time: 32.08s Testing Time: 6.09s
+#448 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.10s Testing Time: 6.09s
+#449 Training Accuracy: 100.00% Testing Accuracy: 99.47% Training Time: 32.06s Testing Time: 6.07s
+#450 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 31.96s Testing Time: 6.08s
 ```
 
 ## Paper
