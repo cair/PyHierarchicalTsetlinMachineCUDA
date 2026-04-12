@@ -560,6 +560,48 @@ class CommonTsetlinMachine():
 					print(l[0], end = '')
 
 			print(")" * (self.depth - 1))
+
+	def save(self) -> dict:
+		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits, dtype=np.uint32)
+		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+
+		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses, dtype=np.int32)
+		cuda.memcpy_dtoh(clause_weights, self.clause_weights_gpu)
+
+		return {
+			'ta_state_hierarchy': ta_state_hierarchy,
+			'clause_weights': clause_weights,
+			'number_of_outputs': self.number_of_outputs,
+			'min_y': self.min_y,
+			'max_y': self.max_y,
+			'params': {
+				'number_of_clauses': self.number_of_clauses,
+				'T': self.T,
+				's': self.s,
+				'q': self.q,
+				'hierarchy_structure': self.hierarchy_structure,
+				'boost_true_positive_feedback': self.boost_true_positive_feedback,
+				'number_of_state_bits': self.number_of_state_bits,
+				'append_negated': self.append_negated,
+			},
+			'negative_clauses': self.negative_clauses,
+			'tm_type': self.tm_type,
+			'flip_polarity': self.flip_polarity,
+			'weighted_clauses': getattr(self, 'weighted_clauses', None),
+		}
+
+	def load(self, state_dict: dict):
+		self.number_of_outputs = state_dict['number_of_outputs']
+		self.min_y = state_dict['min_y']
+		self.max_y = state_dict['max_y']
+
+		self.allocate_gpu_memory()
+
+		cuda.memcpy_htod(self.ta_state_hierarchy_gpu, state_dict['ta_state_hierarchy'])
+		cuda.memcpy_htod(self.clause_weights_gpu, state_dict['clause_weights'])
+
+		self.first = False
+
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
@@ -672,6 +714,36 @@ class MultiClassTsetlinMachine:
 
 	def predict(self, X):
 		return np.argmax(self.score(X), axis=0)
+
+	def save(self) -> dict:
+		return {
+			'number_of_outputs': self.number_of_outputs,
+			'tms': [t.save() for t in self.tms],
+			'params': {
+				'number_of_clauses': self.number_of_clauses,
+				'T': self.T,
+				's': self.s,
+				'q': self.q,
+				'weighted_clauses': self.weighted_clauses,
+				'hierarchy_structure': self.hierarchy_structure,
+				'boost_true_positive_feedback': self.boost_true_positive_feedback,
+				'number_of_state_bits': self.number_of_state_bits,
+				'append_negated': self.append_negated,
+				'grid': self.grid,
+				'block': self.block,
+			},
+		}
+
+	def load(self, state_dict: dict):
+		self.number_of_outputs = state_dict['number_of_outputs']
+
+		self.tms = []
+		for tm_state in state_dict['tms']:
+			t = TsetlinMachine(self.number_of_clauses, self.T, self.s, weighted_clauses=self.weighted_clauses, hierarchy_structure=self.hierarchy_structure, q=self.q, boost_true_positive_feedback=self.boost_true_positive_feedback, number_of_state_bits=self.number_of_state_bits, append_negated=self.append_negated, grid=self.grid, block=self.block)
+			t.load(tm_state)
+			self.tms.append(t)
+
+		self.configured = True
 
 class TsetlinMachine(CommonTsetlinMachine):
 	def __init__(self, number_of_clauses, T, s, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
