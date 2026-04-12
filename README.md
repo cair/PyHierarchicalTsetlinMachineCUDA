@@ -80,7 +80,7 @@ CLAUSE 1: (((((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬
 
 #### Code: HexDemo.py
 
-```bash
+```python
 from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
 from time import time
