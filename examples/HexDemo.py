@@ -7,15 +7,14 @@ import argparse
 def default_args(**kwargs):
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", default=1000, type=int)
-    parser.add_argument("--clauses", default=2000, type=int)
-    parser.add_argument("--T", default=6400, type=int)
-    parser.add_argument("--s", default=50.0, type=float)
+    parser.add_argument("--clauses", default=40000, type=int)
+    parser.add_argument("--T", default=18000, type=int)
+    parser.add_argument("--s", default=44.0, type=float)
     parser.add_argument("--q", default=1.0, type=float)
     parser.add_argument("--board_dim", default=10, type=int)
     parser.add_argument("--boost", default=1, type=int)
     parser.add_argument("--number_of_state_bits", default=10, type=int)
-
-    parser.add_argument("--or_alternatives", default=40, type=int)
+    parser.add_argument("--or_alternatives", default=60, type=int)
   
     args = parser.parse_args()
     for key, value in kwargs.items():
@@ -34,7 +33,7 @@ Y_test = data[int(len(data)*0.8):,-1]
 
 tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 72), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
 
-print("\nAccuracy over 1000 epochs:\n")
+print("\nAccuracy over %d epochs:\n" % (args.epochs))
 for e in range(args.epochs):
 	start_training = time()
 	for b in range(10):
