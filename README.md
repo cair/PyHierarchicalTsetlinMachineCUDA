@@ -76,7 +76,93 @@ CLAUSE 1: (((((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬
 #778 Accuracy: 99.71% Training: 32.57s Testing: 2.18s
 ```
 
-### Paper
+### Hex Demo
+
+<p align="center">
+  <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/hex_description/figures/Hex-board-11x11.png">
+</p>
+<p align="center">
+Source: https://en.wikipedia.org/wiki/Hex_(board_game)
+</p>
+
+#### Code: HexDemo.py
+
+```python
+from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
+import numpy as np
+from time import time
+import PyHierarchicalTsetlinMachineCUDA.tm as tm
+import argparse
+
+def default_args(**kwargs):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--epochs", default=1000, type=int)
+    parser.add_argument("--clauses", default=2000, type=int)
+    parser.add_argument("--T", default=9000, type=int)
+    parser.add_argument("--s", default=44.0, type=float)
+    parser.add_argument("--q", default=1.0, type=float)
+    parser.add_argument("--boost", default=1, type=int)
+    parser.add_argument("--number_of_state_bits", default=7, type=int)
+    parser.add_argument("--or_alternatives", default=60, type=int)
+  
+    args = parser.parse_args()
+    for key, value in kwargs.items():
+        if key in args.__dict__:
+            setattr(args, key, value)
+    return args
+
+args = default_args()
+
+data = np.loadtxt("./examples/hex_data.txt").astype(np.uint32)
+X_train = data[:int(len(data)*0.8),0:-1]
+Y_train = data[:int(len(data)*0.8),-1]
+
+X_test = data[int(len(data)*0.8):,0:-1]
+Y_test = data[int(len(data)*0.8):,-1]
+
+tsetlin_machine = TsetlinMachine(args.clauses, args.T, args.s, weighted_clauses=False, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 72), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 4)))
+
+print("\nAccuracy over %d epochs:\n" % (args.epochs))
+for e in range(args.epochs):
+	start_training = time()
+	for b in range(10):
+		tsetlin_machine.fit(X_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], Y_train[b*len(Y_train)//10:(b+1)*len(Y_train)//10], epochs=1, incremental=True)
+	stop_training = time()
+
+	start_testing = time()
+	result_testing = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+	stop_testing = time()
+
+	result_training = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
+
+	print("#%d Training Accuracy: %.2f%% Testing Accuracy: %.2f%% Training Time: %.2fs Testing Time: %.2fs" % (e+1, result_training, result_testing, stop_training-start_training, stop_testing-start_testing))
+```
+
+#### Output
+
+```bash
+cd ./examples
+make
+./hex
+cd ..
+python3 ./examples/HexDemo.py
+
+Accuracy over 1000 epochs:
+
+#1 Training Accuracy: 97.71% Testing Accuracy: 97.26% Training Time: 36.00s Testing Time: 5.65s
+#2 Training Accuracy: 99.11% Testing Accuracy: 98.61% Training Time: 33.65s Testing Time: 5.65s
+#3 Training Accuracy: 99.53% Testing Accuracy: 98.92% Training Time: 33.00s Testing Time: 5.65s
+#4 Training Accuracy: 99.74% Testing Accuracy: 99.18% Training Time: 32.66s Testing Time: 5.67s
+#5 Training Accuracy: 99.84% Testing Accuracy: 99.35% Training Time: 32.40s Testing Time: 5.67s
+...
+#446 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.09s Testing Time: 6.09s
+#447 Training Accuracy: 100.00% Testing Accuracy: 99.46% Training Time: 32.08s Testing Time: 6.09s
+#448 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.10s Testing Time: 6.09s
+#449 Training Accuracy: 100.00% Testing Accuracy: 99.47% Training Time: 32.06s Testing Time: 6.07s
+#450 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 31.96s Testing Time: 6.08s
+```
+
+## Paper
 
 _A Tsetlin Machine for Logical Learning and Reasoning With AND-OR Hierarchies_. Ole-Christoffer Granmo, et al., 2026. (Forthcoming)
 
