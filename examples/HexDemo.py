@@ -11,7 +11,6 @@ def default_args(**kwargs):
     parser.add_argument("--T", default=9000, type=int)
     parser.add_argument("--s", default=44.0, type=float)
     parser.add_argument("--q", default=1.0, type=float)
-    parser.add_argument("--board_dim", default=10, type=int)
     parser.add_argument("--boost", default=1, type=int)
     parser.add_argument("--number_of_state_bits", default=10, type=int)
     parser.add_argument("--or_alternatives", default=60, type=int)
