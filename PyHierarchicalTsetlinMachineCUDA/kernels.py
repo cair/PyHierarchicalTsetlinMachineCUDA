@@ -280,7 +280,7 @@ code_update = """
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				// Sum up votes from each or alternative
-				int or_alternatives_vote_sum = 0;
+				long long int or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
 					
