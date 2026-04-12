@@ -79,7 +79,7 @@ CLAUSE 1: (((((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬
 ### Hex Demo
 
 <p align="center">
-  <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/main/figures/Hex-board-11x11.png">
+  <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/hex_description/figures/Hex-board-11x11.png">
 </p>
 
 #### Code: HexDemo.py
