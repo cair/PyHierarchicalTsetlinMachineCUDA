@@ -76,7 +76,13 @@ CLAUSE 1: (((((x0 ∧ x1) ∨ (x0 ∧ x1) ∨ (¬x0 ∧ ¬x1)) ∧ ((¬x0 ∧ ¬
 #778 Accuracy: 99.71% Training: 32.57s Testing: 2.18s
 ```
 
-### Paper
+### Hex Demo
+
+#### Code: HexDemo.py
+
+#### Output
+
+## Paper
 
 _A Tsetlin Machine for Logical Learning and Reasoning With AND-OR Hierarchies_. Ole-Christoffer Granmo, et al., 2026. (Forthcoming)
 
