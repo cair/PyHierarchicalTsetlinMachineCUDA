@@ -168,6 +168,7 @@ code_update = """
 
 			// Evaluate each clause component (leaf) in separate threads
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
 				int component_remainder = component;
@@ -184,14 +185,12 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
-						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size_ta_chunk_base *= hierarchy_structure_factors[d];
-					}
+					ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+					size_ta_chunk_base *= hierarchy_structure_factors[d];
 				}
 
 				// Get state of current ta team component
-				unsigned int *ta_state = &global_ta_state[ta_chunk_base*STATE_BITS];
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				// Evaluate clause component
 				int component_output = 1;
@@ -355,14 +354,12 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
-						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size_ta_chunk_base *= hierarchy_structure_factors[d];
-					}
+					ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+					size_ta_chunk_base *= hierarchy_structure_factors[d];
 				}
 
 				// Get state of current ta team component
-				unsigned int *ta_state = &global_ta_state[ta_chunk_base*STATE_BITS];
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
 					int local_class_sum = class_sum[class_id];
