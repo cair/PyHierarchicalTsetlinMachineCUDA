@@ -232,7 +232,7 @@ code_update = """
 				}
 
 				// Store or group vote sum as node output
-				or_group_node_output[or_group_node] = or_group_max_vote_sum; //or_group_vote_sum;
+				or_group_node_output[or_group_node] = or_group_vote_sum;
 			}
 		}
 
