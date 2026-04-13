@@ -316,9 +316,9 @@ code_update = """
 				if (group_node_output[group_node] != -1) {
 					int selected_child;
 					if (number_of_non_zero_children > 0) {
-						selected_child = non_zero_children[curand(localState) % number_of_non_zero_children];
+						selected_child = non_zero_children[curand(&localState) % number_of_non_zero_children];
 					} else {
-						selected_child = curand(localState) % number_of_group_node_children;
+						selected_child = curand(&localState) % number_of_group_node_children;
 					}
 					
 					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
