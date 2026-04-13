@@ -226,7 +226,7 @@ code_update = """
 						or_group_vote_sum = previous_or_group_vote_sum;
 					}
 
-					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > long int or_group_max_vote_sum) {
+					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > or_group_max_vote_sum) {
 						or_group_max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
 					}
 				}
