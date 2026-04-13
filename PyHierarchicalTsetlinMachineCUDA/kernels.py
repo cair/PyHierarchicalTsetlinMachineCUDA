@@ -170,35 +170,40 @@ code_update = """
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
 				int component = clause_component % COMPONENTS;
 
-				// Get state of current clause component
-
-				// This one must be updated for reuse of TAs within OR group
-				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
 				int component_remainder = component;
+				int feature_chunk_base = 0;
 				int ta_chunk_base = 0;
-				int size = 1;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
 				for (int d = 0; d < depth-1; ++d) {
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] == 0) {
-						ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size *= hierarchy_structure_factors[d];
+					if (hierarchy_structure_alternatives[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_alternatives[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
 				}
+
+				// Get state of current clause component
+				unsigned int *ta_state = &global_ta_state[ta_chunk_base * STATE_BITS];
 
 				// Evaluate clause component
 				int component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
 					}
 				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
 					component_output = 0;
 				}
 
@@ -333,21 +338,28 @@ code_update = """
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
-				// Get state of current clause component
-				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
 				int component_remainder = component;
+				int feature_chunk_base = 0;
 				int ta_chunk_base = 0;
-				int size = 1;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
 				for (int d = 0; d < depth-1; ++d) {
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] == 0) {
-						ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size *= hierarchy_structure_factors[d];
+					if (hierarchy_structure_alternatives[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_alternatives[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
 				}
+
+				// Get state of current clause component
+				unsigned int *ta_state = &global_ta_state[ta_chunk_base * STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
 					int local_class_sum = class_sum[class_id];
@@ -357,7 +369,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
