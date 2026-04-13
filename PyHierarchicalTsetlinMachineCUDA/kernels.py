@@ -280,6 +280,52 @@ code_update = """
 			}
 		}
 
+		__global__ void propagate_or_group_false_truth_values(long long int *child_input, long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int non_zero_children[361];
+			int number_of_non_zero_children = 0;
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				if (group_node_output[group_node] == -1) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+					}
+				}  else if (group_node_output[group_node] == 0) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+						}
+					}
+				} else {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							non_zero_children[number_of_non_zero_children] = or_addend;
+							number_of_non_zero_children++;
+						}
+					}
+				}
+
+				if (goup_node_output[group_node] != -1) {
+					int selected_child;
+					if (number_of_non_zero_children > 0) {
+						selected_child = non_zero_children[curand(localState) % number_of_non_zero_children];
+					} else {
+						selected_child = curand(localState) % number_of_group_node_children;
+					}
+					
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (selected_child != or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;
+						}
+					}
+				}
+			}
+		}
+
 		__global__ void evaluate_or_alternatives(long long int *child_input, long long int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -336,6 +382,10 @@ code_update = """
 
 			// Calculate clause output first
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				if (component_output[clause_component] == 1) {
+					continue;
+				}
+
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
