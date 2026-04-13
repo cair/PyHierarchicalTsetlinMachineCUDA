@@ -171,6 +171,8 @@ code_update = """
 				int component = clause_component % COMPONENTS;
 
 				// Get state of current clause component
+
+				// This one must be updated for reuse of TAs within OR group
 				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
 
 				int component_remainder = component;
