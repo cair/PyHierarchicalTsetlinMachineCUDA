@@ -1,7 +1,7 @@
-#from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
+from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
 import numpy as np
 from time import time
-#import PyHierarchicalTsetlinMachineCUDA.tm as tm
+import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 from skimage.util import view_as_windows
 
