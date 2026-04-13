@@ -159,12 +159,12 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, long long int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			int *Xi = &X[(long long)example*LITERAL_CHUNKS];
+			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
 
 			// Evaluate each clause component (leaf) in separate threads
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
@@ -204,7 +204,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_groups(long long int *child_input, long long int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		__global__ void evaluate_or_groups(int *child_input, int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -212,11 +212,11 @@ code_update = """
 			// Add up the votes of each OR node child
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
-				long long int or_group_vote_sum = 0;
+				int or_group_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 
-					long long int previous_or_group_vote_sum = or_group_vote_sum; 
+					int previous_or_group_vote_sum = or_group_vote_sum; 
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
 					if (or_group_vote_sum < 0) {
 						printf("OR* OVERFLOW %lld -> %lld\\n", previous_or_group_vote_sum, or_group_vote_sum);						
@@ -229,7 +229,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(long long int *child_input, long long int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -237,11 +237,11 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
-				long long int and_group_vote_product = 1;
+				int and_group_vote_product = 1;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-					long long int previous_and_group_vote_product = and_group_vote_product;
+					int previous_and_group_vote_product = and_group_vote_product;
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
 					if (and_group_vote_product < 0) {
@@ -255,7 +255,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(long long int *child_input, long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -272,7 +272,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_alternatives(long long int *child_input, long long int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -280,12 +280,12 @@ code_update = """
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				// Sum up votes from each or alternative
-				long long int or_alternatives_vote_sum = 0;
+				int or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
 					
 
-					long long int previous_or_alternatives_vote_sum = or_alternatives_vote_sum;
+					int previous_or_alternatives_vote_sum = or_alternatives_vote_sum;
 					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 
 					if (or_alternatives_vote_sum < 0) {
@@ -299,7 +299,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, long long int *child_input, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -316,7 +316,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, long long int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
