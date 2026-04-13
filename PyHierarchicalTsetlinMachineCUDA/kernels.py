@@ -233,7 +233,11 @@ code_update = """
 				}
 
 				// Store or group vote sum as node output
-				or_group_node_output[or_group_node] = or_group_vote_sum;
+				if (or_group_vote_sum > 0) {
+					or_group_node_output[or_group_node] = 1;
+				} else {
+					or_group_node_output[or_group_node] = 0;
+				}
 			}
 		}
 
