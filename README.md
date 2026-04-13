@@ -160,6 +160,7 @@ Accuracy over 1000 epochs:
 #448 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.10s Testing Time: 6.09s
 #449 Training Accuracy: 100.00% Testing Accuracy: 99.47% Training Time: 32.06s Testing Time: 6.07s
 #450 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 31.96s Testing Time: 6.08s
+...
 ```
 
 ## Paper
