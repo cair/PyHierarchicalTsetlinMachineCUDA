@@ -184,10 +184,10 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
+					//if (hierarchy_structure_alternatives[d] != 2) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
-					}
+					//}
 				}
 
 				// Get state of current clause component
@@ -352,10 +352,10 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
+					//if (hierarchy_structure_alternatives[d] != 2) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
-					}
+					//}
 				}
 
 				// Get state of current clause component
