@@ -232,12 +232,14 @@ code_update = """
 					}
 				}
 
+				or_group_node_output[or_group_node] = or_group_vote_sum;
 				// Store or group vote sum as node output
-				if (or_group_vote_sum > 0) {
+				/*if (or_group_vote_sum > 0) {
 					or_group_node_output[or_group_node] = 1;
 				} else {
 					or_group_node_output[or_group_node] = 0;
 				}
+				*/
 			}
 		}
 
