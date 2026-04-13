@@ -6,7 +6,7 @@ from keras.datasets import mnist
 from skimage.util import view_as_windows
 
 clauses = 2000
-T = 1600
+T = 50*100
 s = 10.0
 
 patch_size = 10
@@ -28,7 +28,7 @@ for i in range(X_test.shape[0]):
 	X_test[i,:,:,:] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size, patch_size))
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
-tm = MultiClassTsetlinMachine(clauses, T, s, hierarchy_structure=((tm.AND_GROUP, patch_size**2), (tm.OR_GROUP, number_of_patches)))
+tm = MultiClassTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2), (tm.OR_GROUP, number_of_patches)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
