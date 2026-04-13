@@ -215,7 +215,6 @@ code_update = """
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
 				long long int or_group_vote_sum = 0;
-				long long int or_group_max_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 
@@ -224,10 +223,6 @@ code_update = """
 					if (or_group_vote_sum < 0) {
 						printf("OR* OVERFLOW %lld -> %lld\\n", previous_or_group_vote_sum, or_group_vote_sum);						
 						or_group_vote_sum = previous_or_group_vote_sum;
-					}
-
-					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > or_group_max_vote_sum) {
-						or_group_max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
 					}
 				}
 
