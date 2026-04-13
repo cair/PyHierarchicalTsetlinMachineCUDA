@@ -150,7 +150,7 @@ class CommonTsetlinMachine():
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
 		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
-		self.propagate_or_group_false_truth_values.prepare("PPii")
+		self.propagate_or_group_false_truth_values.prepare("PPPii")
 
 		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
 		self.evaluate_or_groups.prepare("PPii")
@@ -366,6 +366,7 @@ class CommonTsetlinMachine():
 						self.propagate_or_group_false_truth_values.prepared_call(
 							self.grid,
 							self.block,
+							self.cuda_rng.state,
 							self.hierarchy_votes[d-1],
 							self.hierarchy_votes[d],
 							self.hierarchy_size[d + 1],
