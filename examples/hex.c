@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//#define BOARD_DIM 11
+#define BOARD_DIM 11
 
-#define BOARD_DIM 6
-
-//#define EXAMPLES 250000
-
-#define EXAMPLES 50000
+#define EXAMPLES 250000
 
 int neighbors[] = {-(BOARD_DIM+2) + 1, -(BOARD_DIM+2), -1, 1, (BOARD_DIM+2), (BOARD_DIM+2) - 1};
 
@@ -127,34 +123,6 @@ void hg_print(struct hex_game *hg)
 	}
 }
 
-void hg_print_feature_vector_variant(struct hex_game *hg, int winner, FILE *data_fp)
-{
-	for (int q = 0; q < 2; ++q) {
-		for (int r = 0; r < 2; ++r) {
-			for (int x = 0; x < 3; ++x) {
-				for (int y = 0; y < 3; ++y) {
-					int i = q * 3 + x;
-					int j = r * 3 + y;
-
-					if (i < BOARD_DIM && j < BOARD_DIM) {
-						if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2] == 1) {
-							fprintf(data_fp, "0 1 ");
-						} else if (hg->board[((i+1)*(BOARD_DIM+2) + j + 1)*2 + 1] == 1) {
-							fprintf(data_fp, "1 0 ");
-						} else {
-							fprintf(data_fp, "0 0 ");
-						}
-					} else {
-						fprintf(data_fp, "0 0 ");
-					}
-				}
-			}
-		}
-	}
-
-	fprintf(data_fp, "%d\n", winner);
-}
-
 void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 {
 	for (int q = 0; q < 2; ++q) {
@@ -187,6 +155,7 @@ void hg_print_feature_vector(struct hex_game *hg, int winner, FILE *data_fp)
 	fprintf(data_fp, "%d\n", winner);
 }
 
+
 int main() {
 	struct hex_game hg;
 
@@ -218,7 +187,7 @@ int main() {
 		}
 
 		if (hg.number_of_open_positions >= BOARD_DIM*BOARD_DIM*0.5) {
-			hg_print_feature_vector_variant(&hg, winner, data_fp);
+			hg_print_feature_vector(&hg, winner, data_fp);
 			game++;
 		}
 	}
