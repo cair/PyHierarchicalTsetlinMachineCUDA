@@ -6,7 +6,7 @@ from keras.datasets import mnist
 from skimage.util import view_as_windows
 
 clauses = 2000
-T = 50*100
+T = 50*10
 s = 10.0
 
 patch_size = 10
