@@ -280,16 +280,20 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values(long long int *child_input, long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values(curandState *state, long long int *child_input, long long int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
 			int non_zero_children[361];
-			int number_of_non_zero_children = 0;
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
 
 			// If a group node is false, all children are made false.
 			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				int number_of_non_zero_children = 0;
+
 				if (group_node_output[group_node] == -1) {
 					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
 						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
@@ -309,7 +313,7 @@ code_update = """
 					}
 				}
 
-				if (goup_node_output[group_node] != -1) {
+				if (group_node_output[group_node] != -1) {
 					int selected_child;
 					if (number_of_non_zero_children > 0) {
 						selected_child = non_zero_children[curand(localState) % number_of_non_zero_children];
@@ -324,6 +328,8 @@ code_update = """
 					}
 				}
 			}
+
+			state[index] = localState;
 		}
 
 		__global__ void evaluate_or_alternatives(long long int *child_input, long long int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
