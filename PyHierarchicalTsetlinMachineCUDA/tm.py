@@ -69,6 +69,8 @@ class CommonTsetlinMachine():
 			self.hierarchy_structure_factors[d-1] = self.hierarchy_structure[d][1]
 			if self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
 				self.hierarchy_structure_alternatives[d-1] = 1
+			elif self.hierarchy_structure[d][0] == OR_GROUP:
+				self.hierarchy_structure_alternatives[d-1] = 2
 
 		# Calculates total number of features spanned by the hierarchy
 		self.number_of_features_hierarchy = 1
