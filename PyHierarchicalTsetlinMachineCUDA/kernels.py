@@ -388,7 +388,7 @@ code_update = """
 
 			// Calculate clause output first
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
-				if (component_output[clause_component] == 1) {
+				if (component_output[clause_component] == -1) {
 					continue;
 				}
 
