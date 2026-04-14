@@ -22,11 +22,29 @@ number_of_patches = int((X_org_train.shape[1] - patch_size + 1) * (X_org_train.s
 X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
 for i in range(X_train.shape[0]):
 	X_train[i,:,:patch_size*patch_size] = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
+	for x in range(patch_size):
+		for y in range(1, patch_size):
+			for z in range(1, patch_size):
+				if z < x:
+					X_train[i,:,patch_size*patch_size + (patch_size - 1) + z - 1] = 1
+
+				if z < y:
+					X_train[i,:,patch_size*patch_size + z - 1] = 1
+
 X_train = X_train.reshape((X_org_train.shape[0], -1))
 
 X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
 for i in range(X_test.shape[0]):
 	X_test[i,:,:patch_size*patch_size] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
+	for x in range(patch_size):
+		for y in range(1, patch_size):
+			for z in range(1, patch_size):
+				if z < x:
+					X_test[i,:,patch_size*patch_size + (patch_size - 1) + z - 1] = 1
+
+				if z < y:
+					X_test[i,:,patch_size*patch_size + z - 1] = 1
+
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
 tm = MultiClassTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (patch_size-1)*2), (tm.OR_GROUP, number_of_patches)))
