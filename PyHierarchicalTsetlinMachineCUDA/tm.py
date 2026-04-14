@@ -28,6 +28,7 @@ import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
 from pycuda import gpuarray
+import sys
 
 from time import time
 
@@ -59,16 +60,20 @@ class CommonTsetlinMachine():
 		# Calculates the number of nodes at each level of the hierarchy
 		self.hierarchy_size = [0] * (self.depth + 1)
 		self.hierarchy_size[self.depth] = 1
+		print(self.hierarchy_size)
+		print(self.hierarchy_structure)
 		for d in range(self.depth - 1):
 			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
 
 		# Represents hierarchy structure for transfer to GPU
 		self.hierarchy_structure_factors = [0] * (self.depth - 1)
-		self.hierarchy_structure_alternatives = [0] * (self.depth - 1)
+		self.hierarchy_structure_type = [0] * (self.depth - 1)
 		for d in range(1, self.depth):
 			self.hierarchy_structure_factors[d-1] = self.hierarchy_structure[d][1]
 			if self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.hierarchy_structure_alternatives[d-1] = 1
+				self.hierarchy_structure_type[d-1] = 1
+			elif self.hierarchy_structure[d][0] == OR_GROUP:
+				self.hierarchy_structure_type[d-1] = 2
 
 		# Calculates total number of features spanned by the hierarchy
 		self.number_of_features_hierarchy = 1
@@ -147,6 +152,9 @@ class CommonTsetlinMachine():
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
+		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
+		self.propagate_or_group_false_truth_values.prepare("PPPii")
+
 		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
 		self.evaluate_or_groups.prepare("PPii")
 
@@ -189,8 +197,8 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.hierarchy_structure_factors_gpu, np.array(self.hierarchy_structure_factors, dtype=np.int32))
 
 		# GPU memory for storing hierarchy structure
-		self.hierarchy_structure_alternatives_gpu = cuda.mem_alloc((self.depth-1)*4)
-		cuda.memcpy_htod(self.hierarchy_structure_alternatives_gpu, np.array(self.hierarchy_structure_alternatives, dtype=np.int32))
+		self.hierarchy_structure_type_gpu = cuda.mem_alloc((self.depth-1)*4)
+		cuda.memcpy_htod(self.hierarchy_structure_type_gpu, np.array(self.hierarchy_structure_type, dtype=np.int32))
 
 		# GPU memory for storing Tsetlin Automata states
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
@@ -266,7 +274,7 @@ class CommonTsetlinMachine():
 			self.hierarchy_votes[0],
 			self.depth,
 			self.hierarchy_structure_factors_gpu,
-			self.hierarchy_structure_alternatives_gpu,
+			self.hierarchy_structure_type_gpu,
 			encoded_X_hierarchy,
 			np.int32(e)
 		)
@@ -320,6 +328,10 @@ class CommonTsetlinMachine():
 		cuda.Context.synchronize()
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
+		if self.number_of_features_hierarchy != X.shape[1]:
+			print("The number of features spanned by hierarchy does not align with the input data.")
+			sys.exit(-1)
+
 		number_of_examples = X.shape[0]
 
 		if self.first:
@@ -347,15 +359,27 @@ class CommonTsetlinMachine():
 				# Propagates the root value and any intermittent node values back to the leaves.
 				# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 				for d in range(self.depth-1, 0, -1):
-					self.propagate_and_group_false_truth_values.prepared_call(
-						self.grid,
-						self.block,
-						self.hierarchy_votes[d-1],
-						self.hierarchy_votes[d],
-						self.hierarchy_size[d + 1],
-						self.hierarchy_structure[d][1]
-					)
-					cuda.Context.synchronize()
+					if self.hierarchy_structure[d][0] != OR_GROUP:
+						self.propagate_and_group_false_truth_values.prepared_call(
+							self.grid,
+							self.block,
+							self.hierarchy_votes[d-1],
+							self.hierarchy_votes[d],
+							self.hierarchy_size[d + 1],
+							self.hierarchy_structure[d][1]
+						)
+						cuda.Context.synchronize()
+					else:
+						self.propagate_or_group_false_truth_values.prepared_call(
+							self.grid,
+							self.block,
+							self.cuda_rng.state,
+							self.hierarchy_votes[d-1],
+							self.hierarchy_votes[d],
+							self.hierarchy_size[d + 1],
+							self.hierarchy_structure[d][1]
+						)
+						cuda.Context.synchronize()
 
 				# Updates the clause components (leaves) based on the propagated truth values
 				self.update_hierarchy.prepared_call(
@@ -368,7 +392,7 @@ class CommonTsetlinMachine():
 					self.hierarchy_votes[0],
 					self.depth,
 					self.hierarchy_structure_factors_gpu,
-					self.hierarchy_structure_alternatives_gpu,
+					self.hierarchy_structure_type_gpu,
 					self.class_sum_gpu,
 					encoded_X_hierarchy_training_gpu,
 					Y_gpu,

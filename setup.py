@@ -2,7 +2,7 @@ from setuptools import *
 
 setup(
    name='PyHierarchicalTsetlinMachineCUDA',
-   version='0.2.5',
+   version='0.2.6',
    author='Ole-Christoffer Granmo',
    author_email='ole.granmo@uia.no',
    url='https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/',
@@ -16,6 +16,7 @@ setup(
 		'pycuda',
 		'scipy',
 		'scikit-learn',
+      'scikit-image',
 		'networkx',
 	],
 	extras_require={

@@ -159,7 +159,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -168,35 +168,43 @@ code_update = """
 
 			// Evaluate each clause component (leaf) in separate threads
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
-				// Get state of current clause component
-				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
-
 				int component_remainder = component;
+				int feature_chunk_base = 0;
 				int ta_chunk_base = 0;
-				int size = 1;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
 				for (int d = 0; d < depth-1; ++d) {
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] == 0) {
-						ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size *= hierarchy_structure_factors[d];
+					if (hierarchy_structure_type[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_type[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
 				}
+
+				// Get state of current ta team component
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				// Evaluate clause component
 				int component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
 						component_output = 0;
 						break;
 					}
 				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[ta_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
 					component_output = 0;
 				}
 
@@ -213,8 +221,14 @@ code_update = """
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
 				int or_group_vote_sum = 0;
+				int max_vote_sum = 0;
+        
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
+
+					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > max_vote_sum) {
+						max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
+					}
 
 					int previous_or_group_vote_sum = or_group_vote_sum; 
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
@@ -224,8 +238,8 @@ code_update = """
 					}
 				}
 
-				// Store or group vote sum as node output
-				or_group_node_output[or_group_node] = or_group_vote_sum;
+				// or_group_node_output[or_group_node] = or_group_vote_sum;
+				or_group_node_output[or_group_node] = max_vote_sum;
 			}
 		}
 
@@ -272,6 +286,58 @@ code_update = """
 			}
 		}
 
+		__global__ void propagate_or_group_false_truth_values(curandState *state, int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int non_zero_children[361];
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				int number_of_non_zero_children = 0;
+
+				if (group_node_output[group_node] == -1) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+					}
+				}  else if (group_node_output[group_node] == 0) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+						}
+					}
+				} else {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							non_zero_children[number_of_non_zero_children] = or_addend;
+							number_of_non_zero_children++;
+						}
+					}
+				}
+
+				if (group_node_output[group_node] != -1) {
+					int selected_child;
+					if (number_of_non_zero_children > 0) {
+						selected_child = non_zero_children[curand(&localState) % number_of_non_zero_children];
+					} else {
+						selected_child = curand(&localState) % number_of_group_node_children;
+					}
+					
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (selected_child != or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;
+						}
+					}
+				}
+			}
+
+			state[index] = localState;
+		}
+
 		__global__ void evaluate_or_alternatives(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -316,7 +382,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -328,24 +394,38 @@ code_update = """
 
 			// Calculate clause output first
 			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				if (component_output[clause_component] == -1) {
+					continue;
+				}
+
 				int clause = clause_component / COMPONENTS;
 				int component = clause_component % COMPONENTS;
 
 				// Get state of current clause component
-				unsigned int *ta_state = &global_ta_state[clause_component*TA_CHUNKS_PER_LEAF*STATE_BITS];
+				// This one must be updated for reuse of TAs within OR group
 
 				int component_remainder = component;
+				int feature_chunk_base = 0;
 				int ta_chunk_base = 0;
-				int size = 1;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
 				for (int d = 0; d < depth-1; ++d) {
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] == 0) {
-						ta_chunk_base += size * depth_d_node_index * TA_CHUNKS_PER_LEAF;
-						size *= hierarchy_structure_factors[d];
+					if (hierarchy_structure_type[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_type[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
 				}
+
+				// Get state of current ta team component
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
 					int local_class_sum = class_sum[class_id];
@@ -355,7 +435,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[ta_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
