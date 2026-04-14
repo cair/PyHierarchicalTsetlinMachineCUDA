@@ -159,7 +159,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -180,12 +180,12 @@ code_update = """
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] != 1) {
+					if (hierarchy_structure_type[d] != 1) {
 						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
+					if (hierarchy_structure_type[d] != 2) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
@@ -381,7 +381,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_alternatives, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -412,12 +412,12 @@ code_update = """
 					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
 					component_remainder = component_remainder / hierarchy_structure_factors[d];
 
-					if (hierarchy_structure_alternatives[d] != 1) {
+					if (hierarchy_structure_type[d] != 1) {
 						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_alternatives[d] != 2) {
+					if (hierarchy_structure_type[d] != 2) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}

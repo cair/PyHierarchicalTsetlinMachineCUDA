@@ -65,13 +65,13 @@ class CommonTsetlinMachine():
 
 		# Represents hierarchy structure for transfer to GPU
 		self.hierarchy_structure_factors = [0] * (self.depth - 1)
-		self.hierarchy_structure_alternatives = [0] * (self.depth - 1)
+		self.hierarchy_structure_type = [0] * (self.depth - 1)
 		for d in range(1, self.depth):
 			self.hierarchy_structure_factors[d-1] = self.hierarchy_structure[d][1]
 			if self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.hierarchy_structure_alternatives[d-1] = 1
+				self.hierarchy_structure_type[d-1] = 1
 			elif self.hierarchy_structure[d][0] == OR_GROUP:
-				self.hierarchy_structure_alternatives[d-1] = 2
+				self.hierarchy_structure_type[d-1] = 2
 
 		# Calculates total number of features spanned by the hierarchy
 		self.number_of_features_hierarchy = 1
@@ -195,8 +195,8 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.hierarchy_structure_factors_gpu, np.array(self.hierarchy_structure_factors, dtype=np.int32))
 
 		# GPU memory for storing hierarchy structure
-		self.hierarchy_structure_alternatives_gpu = cuda.mem_alloc((self.depth-1)*4)
-		cuda.memcpy_htod(self.hierarchy_structure_alternatives_gpu, np.array(self.hierarchy_structure_alternatives, dtype=np.int32))
+		self.hierarchy_structure_type_gpu = cuda.mem_alloc((self.depth-1)*4)
+		cuda.memcpy_htod(self.hierarchy_structure_type_gpu, np.array(self.hierarchy_structure_type, dtype=np.int32))
 
 		# GPU memory for storing Tsetlin Automata states
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
@@ -272,7 +272,7 @@ class CommonTsetlinMachine():
 			self.hierarchy_votes[0],
 			self.depth,
 			self.hierarchy_structure_factors_gpu,
-			self.hierarchy_structure_alternatives_gpu,
+			self.hierarchy_structure_type_gpu,
 			encoded_X_hierarchy,
 			np.int32(e)
 		)
@@ -390,7 +390,7 @@ class CommonTsetlinMachine():
 					self.hierarchy_votes[0],
 					self.depth,
 					self.hierarchy_structure_factors_gpu,
-					self.hierarchy_structure_alternatives_gpu,
+					self.hierarchy_structure_type_gpu,
 					self.class_sum_gpu,
 					encoded_X_hierarchy_training_gpu,
 					Y_gpu,
