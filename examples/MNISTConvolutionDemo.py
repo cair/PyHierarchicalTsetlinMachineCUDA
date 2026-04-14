@@ -25,7 +25,7 @@ X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_
 for i in range(X_train.shape[0]):
 	X_train[i,:,:patch_size*patch_size] = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x):
-		for y in range(umber_of_patches_y):
+		for y in range(number_of_patches_y):
 			for z in range(number_of_patches_x):
 				if z < x:
 					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
@@ -40,7 +40,7 @@ X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_si
 for i in range(X_test.shape[0]):
 	X_test[i,:,:patch_size*patch_size] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x):
-		for y in range(umber_of_patches_y):
+		for y in range(number_of_patches_y):
 			for z in range(number_of_patches_x):
 				if z < x:
 					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
