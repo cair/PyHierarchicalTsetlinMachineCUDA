@@ -30,10 +30,8 @@ for i in range(X_train.shape[0]):
 	all_views = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x_with_padding // 2):
 		for y in range(number_of_patches_y_with_padding // 2):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -45,10 +43,8 @@ for i in range(X_train.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2, number_of_patches_x_with_padding):
 		for y in range(number_of_patches_y_with_padding // 2):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -60,10 +56,8 @@ for i in range(X_train.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2):
 		for y in range(number_of_patches_y_with_padding // 2, number_of_patches_y_with_padding):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -75,10 +69,8 @@ for i in range(X_train.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2, number_of_patches_x_with_padding):
 		for y in range(number_of_patches_y_with_padding // 2, number_of_patches_y_with_padding):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_train[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -95,10 +87,8 @@ for i in range(X_test.shape[0]):
 	all_views = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x_with_padding // 2):
 		for y in range(number_of_patches_y_with_padding // 2):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -110,10 +100,8 @@ for i in range(X_test.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2, number_of_patches_x_with_padding):
 		for y in range(number_of_patches_y_with_padding // 2):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -125,10 +113,8 @@ for i in range(X_test.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2):
 		for y in range(number_of_patches_y_with_padding // 2, number_of_patches_y_with_padding):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
@@ -140,10 +126,8 @@ for i in range(X_test.shape[0]):
 
 	for x in range(number_of_patches_x_with_padding // 2, number_of_patches_x_with_padding):
 		for y in range(number_of_patches_y_with_padding // 2, number_of_patches_y_with_padding):
-			if x * number_of_patches_y + y > number_of_patches:
-				continue
-
-			X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
+			if x * number_of_patches_y + y < number_of_patches:
+				X_test[i, x * number_of_patches_y_with_padding + y,:patch_size*patch_size] = all_views[x * number_of_patches_y + y]
 
 			for z in range(number_of_patches_x_with_padding):
 				if z < x:
