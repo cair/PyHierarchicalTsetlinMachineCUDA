@@ -221,8 +221,13 @@ code_update = """
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
 				int or_group_vote_sum = 0;
+				int max_vote_sum = 0;
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
+
+					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > max_vote_sum) {
+						max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
+					}
 
 					int previous_or_group_vote_sum = or_group_vote_sum; 
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
@@ -232,14 +237,8 @@ code_update = """
 					}
 				}
 
-				or_group_node_output[or_group_node] = or_group_vote_sum;
-				// Store or group vote sum as node output
-				/*if (or_group_vote_sum > 0) {
-					or_group_node_output[or_group_node] = 1;
-				} else {
-					or_group_node_output[or_group_node] = 0;
-				}
-				*/
+				// or_group_node_output[or_group_node] = or_group_vote_sum;
+				or_group_node_output[or_group_node] = max_vote_sum;
 			}
 		}
 

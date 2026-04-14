@@ -28,6 +28,7 @@ import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
 from pycuda import gpuarray
+import sys
 
 from time import time
 
@@ -325,6 +326,10 @@ class CommonTsetlinMachine():
 		cuda.Context.synchronize()
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
+		if self.number_of_features_hierarchy != X.shape[1]:
+			print("The number of features spanned by hierarchy does not align with the input data!")
+			sys.exit(-1)
+
 		number_of_examples = X.shape[0]
 
 		if self.first:
