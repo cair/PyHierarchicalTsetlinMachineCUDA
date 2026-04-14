@@ -270,8 +270,8 @@ code_update = """
 				}
 
 				// Store and group product as node output
-				//and_group_node_output[and_group_node] = and_group_vote_product;
-				and_group_node_output[and_group_node] = max_vote_sum;
+				and_group_node_output[and_group_node] = and_group_vote_product;
+				//and_group_node_output[and_group_node] = max_vote_sum;
 			}
 		}
 
