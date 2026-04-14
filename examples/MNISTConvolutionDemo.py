@@ -21,7 +21,7 @@ number_of_patches_x = int(X_org_train.shape[1] - patch_size + 1)
 number_of_patches_y = int(X_org_train.shape[2] - patch_size + 1)
 number_of_patches = number_of_patches_x * number_of_patches_y
 
-X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
+X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_size + (number_of_patches_x - 1) + (number_of_patches_y - 1)))
 for i in range(X_train.shape[0]):
 	X_train[i,:,:patch_size*patch_size] = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x):
@@ -36,7 +36,7 @@ for i in range(X_train.shape[0]):
 
 X_train = X_train.reshape((X_org_train.shape[0], -1))
 
-X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
+X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + + (number_of_patches_x - 1) + (number_of_patches_y - 1)))
 for i in range(X_test.shape[0]):
 	X_test[i,:,:patch_size*patch_size] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x):
