@@ -1,12 +1,12 @@
-from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
-#from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassCoalescedTsetlinMachine
+#from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
+from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassCoalescedTsetlinMachine
 import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 from skimage.util import view_as_windows
 
-clauses = 2000
+clauses = 20000
 T = 5000
 s = 10.0
 
@@ -51,7 +51,7 @@ for i in range(X_test.shape[0]):
 
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
-tm = MultiClassTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (number_of_patches_x - 1) + (number_of_patches_y - 1)), (tm.OR_GROUP, number_of_patches)))
+tm = MultiClassCoalescedTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (number_of_patches_x - 1) + (number_of_patches_y - 1)), (tm.OR_GROUP, number_of_patches)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
