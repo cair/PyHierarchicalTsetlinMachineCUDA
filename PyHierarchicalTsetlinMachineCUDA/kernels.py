@@ -238,7 +238,7 @@ code_update = """
 					}
 				}
 
-				// or_group_node_output[or_group_node] = or_group_vote_sum;
+				//or_group_node_output[or_group_node] = or_group_vote_sum;
 				or_group_node_output[or_group_node] = max_vote_sum;
 			}
 		}
