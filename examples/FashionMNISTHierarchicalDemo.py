@@ -22,7 +22,7 @@ for i in range(X_org_train.shape[0]):
 	X_org_train[i,:] = cv2.adaptiveThreshold(X_org_train[i], 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
 for i in range(X_org_test.shape[0]):
-	X_org_test[i,:] = cv2.adaptiveThreshold(X_test[i], 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+	X_org_test[i,:] = cv2.adaptiveThreshold(X_org_test[i], 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
 number_of_patches_x = X_org_train.shape[1] - patch_size + 1
 number_of_patches_y = X_org_train.shape[2] - patch_size + 1
