@@ -36,7 +36,7 @@ for i in range(X_train.shape[0]):
 
 X_train = X_train.reshape((X_org_train.shape[0], -1))
 
-X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + + (number_of_patches_x - 1) + (number_of_patches_y - 1)))
+X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + (number_of_patches_x - 1) + (number_of_patches_y - 1)))
 for i in range(X_test.shape[0]):
 	X_test[i,:,:patch_size*patch_size] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	for x in range(number_of_patches_x):
@@ -51,7 +51,7 @@ for i in range(X_test.shape[0]):
 
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
-tm = MultiClassTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (patch_size-1)*2), (tm.OR_GROUP, number_of_patches)))
+tm = MultiClassTsetlinMachine(clauses, T, s, weighted_clauses=True, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (number_of_patches_x - 1) + (number_of_patches_y - 1), (tm.OR_GROUP, number_of_patches)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
