@@ -252,11 +252,16 @@ code_update = """
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 				int and_group_vote_product = 1;
+				int max_vote_sum = 0;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
 					int previous_and_group_vote_product = and_group_vote_product;
 					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
+
+					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > max_vote_sum) {
+						max_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
+					}
 
 					if (and_group_vote_product < 0) {
 						printf("AND OVERFLOW %d -> %d\\n", previous_and_group_vote_product, and_group_vote_product);						
@@ -265,7 +270,8 @@ code_update = """
 				}
 
 				// Store and group product as node output
-				and_group_node_output[and_group_node] = and_group_vote_product;
+				//and_group_node_output[and_group_node] = and_group_vote_product;
+				and_group_node_output[and_group_node] = max_vote_sum;
 			}
 		}
 
