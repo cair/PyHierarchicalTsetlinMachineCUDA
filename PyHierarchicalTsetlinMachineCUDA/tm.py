@@ -327,7 +327,7 @@ class CommonTsetlinMachine():
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
-			print("The number of features spanned by hierarchy does not align with the input data!")
+			print("The number of features spanned by hierarchy does not align with the input data.")
 			sys.exit(-1)
 
 		number_of_examples = X.shape[0]
