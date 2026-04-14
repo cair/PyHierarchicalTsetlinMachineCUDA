@@ -18,10 +18,10 @@ padding = 1
 X_org_train = np.copy(X_org_train)
 X_org_test = np.copy(X_org_test)
 
-for i in range(X_train.shape[0]):
+for i in range(X_org_train.shape[0]):
 	X_org_train[i,:] = cv2.adaptiveThreshold(X_org_train[i], 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
-for i in range(X_test.shape[0]):
+for i in range(X_org_test.shape[0]):
 	X_org_test[i,:] = cv2.adaptiveThreshold(X_test[i], 1, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
 
 number_of_patches_x = X_org_train.shape[1] - patch_size + 1
