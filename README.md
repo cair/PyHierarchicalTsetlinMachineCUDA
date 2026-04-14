@@ -1,10 +1,6 @@
 # Hierarchical Tsetlin Machine in CUDA
 Implements the [Hierarchical Tsetlin Machine](https://github.com/cair/HierarchicalTsetlinMachine) in CUDA.
 
-<p align="center">
-  <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/main/figures/Visualization_voting.png">
-</p>
-
 ## Installation
 
 ```bash
@@ -21,6 +17,10 @@ pip install dist/PyHierarchicalTsetlinMachineCUDA-0.2.6.tar.gz
 ## Examples
 
 ### Noisy Parity Demo
+
+<p align="center">
+  <img width="60%" src="https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/blob/main/figures/Visualization_voting.png">
+</p>
 
 #### Code: NoisyParityDemo.py
 
