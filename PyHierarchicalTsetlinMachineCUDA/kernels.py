@@ -222,6 +222,7 @@ code_update = """
 				// Add OR addends
 				int or_group_vote_sum = 0;
 				int max_vote_sum = 0;
+        
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 

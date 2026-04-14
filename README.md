@@ -149,11 +149,11 @@ python3 ./examples/HexDemo.py
 
 Accuracy over 1000 epochs:
 
-#1 Training Accuracy: 97.71% Testing Accuracy: 97.26% Training Time: 36.00s Testing Time: 5.65s
-#2 Training Accuracy: 99.11% Testing Accuracy: 98.61% Training Time: 33.65s Testing Time: 5.65s
-#3 Training Accuracy: 99.53% Testing Accuracy: 98.92% Training Time: 33.00s Testing Time: 5.65s
-#4 Training Accuracy: 99.74% Testing Accuracy: 99.18% Training Time: 32.66s Testing Time: 5.67s
-#5 Training Accuracy: 99.84% Testing Accuracy: 99.35% Training Time: 32.40s Testing Time: 5.67s
+#1 Training Accuracy: 97.98% Testing Accuracy: 97.46% Training Time: 37.02s Testing Time: 5.74s
+#2 Training Accuracy: 99.19% Testing Accuracy: 98.70% Training Time: 34.44s Testing Time: 5.76s
+#3 Training Accuracy: 99.49% Testing Accuracy: 98.92% Training Time: 33.60s Testing Time: 5.75s
+#4 Training Accuracy: 99.65% Testing Accuracy: 99.05% Training Time: 33.15s Testing Time: 5.78s
+#5 Training Accuracy: 99.73% Testing Accuracy: 99.10% Training Time: 32.86s Testing Time: 5.76s
 ...
 #446 Training Accuracy: 100.00% Testing Accuracy: 99.45% Training Time: 32.09s Testing Time: 6.09s
 #447 Training Accuracy: 100.00% Testing Accuracy: 99.46% Training Time: 32.08s Testing Time: 6.09s
