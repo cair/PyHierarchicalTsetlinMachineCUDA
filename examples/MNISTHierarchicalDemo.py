@@ -139,7 +139,7 @@ for i in range(X_test.shape[0]):
 
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
-tm = MultiClassCoalescedTsetlinMachine(clauses, T, s, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (number_of_patches_x_with_padding - 1) + (number_of_patches_y_with_padding - 1)), (tm.OR_GROUP, number_of_patches_with_padding)))
+tm = MultiClassCoalescedTsetlinMachine(clauses, T, s, hierarchy_structure=((tm.AND_GROUP, patch_size**2 + (number_of_patches_x_with_padding - 1) + (number_of_patches_y_with_padding - 1)), (tm.OR_GROUP, number_of_patches_with_padding // 4), (AND_GROUP, 4)))
 
 print("\nAccuracy over 500 epochs:\n")
 for i in range(500):
