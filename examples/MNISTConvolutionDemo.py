@@ -18,32 +18,36 @@ X_org_train = np.where(X_org_train > 75, 1, 0).astype(np.uint32)
 X_org_test = np.where(X_org_test > 75, 1, 0).astype(np.uint32)
 
 number_of_patches = int((X_org_train.shape[1] - patch_size + 1) * (X_org_train.shape[2] - patch_size + 1))
+number_of_patches_x = X_org_train.shape[1] - patch_size + 1
+number_of_patches_y = X_org_train.shape[2] - patch_size + 1
 
 X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
 for i in range(X_train.shape[0]):
 	X_train[i,:,:patch_size*patch_size] = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
-	for x in range(patch_size):
-		for y in range(patch_size):
-			for z in range(patch_size):
+	for x in range(number_of_patches_x):
+		for y in range(umber_of_patches_y):
+			for z in range(number_of_patches_x):
 				if z < x:
-					X_train[i, y * patch_size + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
+					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
 
+			for z in range(number_of_patches_y):
 				if z < y:
-					X_train[i, y * patch_size + x, patch_size * patch_size + z - 1] = 1
+					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
 
 X_train = X_train.reshape((X_org_train.shape[0], -1))
 
 X_test = np.zeros((X_org_test.shape[0], number_of_patches, patch_size * patch_size + (patch_size-1)*2))
 for i in range(X_test.shape[0]):
 	X_test[i,:,:patch_size*patch_size] = view_as_windows(X_org_test[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
-	for x in range(patch_size):
-		for y in range(patch_size):
-			for z in range(patch_size):
+	for x in range(number_of_patches_x):
+		for y in range(umber_of_patches_y):
+			for z in range(number_of_patches_x):
 				if z < x:
-					X_test[i, y * patch_size + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
+					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
 
+			for z in range(number_of_patches_y):
 				if z < y:
-					X_test[i, y * patch_size + x, patch_size * patch_size + z - 1] = 1
+					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
 
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
