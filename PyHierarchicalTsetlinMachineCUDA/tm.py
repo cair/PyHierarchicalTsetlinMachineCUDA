@@ -60,8 +60,6 @@ class CommonTsetlinMachine():
 		# Calculates the number of nodes at each level of the hierarchy
 		self.hierarchy_size = [0] * (self.depth + 1)
 		self.hierarchy_size[self.depth] = 1
-		print(self.hierarchy_size)
-		print(self.hierarchy_structure)
 		for d in range(self.depth - 1):
 			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
 
