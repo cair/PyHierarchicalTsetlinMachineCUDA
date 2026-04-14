@@ -583,7 +583,7 @@ code_clauses = """
 		int index = blockIdx.x * blockDim.x + threadIdx.x;
 		int stride = blockDim.x * gridDim.x;
 
-		for (unsigned long long i = index; i < CLAUSES * COMPONENTS * LITERALS_PER_LEAF; i += stride) {
+		for (unsigned long long i = index; i < 1LLU * CLAUSES * COMPONENTS * LITERALS_PER_LEAF; i += stride) {
 			unsigned long long clause = i / (COMPONENTS * LITERALS_PER_LEAF);
 			unsigned long long comp   = (i / LITERALS_PER_LEAF) % COMPONENTS;
 			unsigned long long ta_idx = i % LITERALS_PER_LEAF;
