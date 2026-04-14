@@ -17,8 +17,8 @@ patch_size = 10
 X_org_train = np.where(X_org_train > 75, 1, 0).astype(np.uint32)
 X_org_test = np.where(X_org_test > 75, 1, 0).astype(np.uint32)
 
-number_of_patches_x = int(X_org_train.shape[1] - patch_size + 1)
-number_of_patches_y = int(X_org_train.shape[2] - patch_size + 1)
+number_of_patches_x = X_org_train.shape[1] - patch_size + 1
+number_of_patches_y = X_org_train.shape[2] - patch_size + 1
 number_of_patches = number_of_patches_x * number_of_patches_y
 
 X_train = np.zeros((X_org_train.shape[0], number_of_patches, patch_size * patch_size + (number_of_patches_x - 1) + (number_of_patches_y - 1)))
