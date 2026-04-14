@@ -28,11 +28,11 @@ for i in range(X_train.shape[0]):
 		for y in range(number_of_patches_y):
 			for z in range(number_of_patches_x):
 				if z < x:
-					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
+					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
 
 			for z in range(number_of_patches_y):
 				if z < y:
-					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
+					X_train[i, y * number_of_patches_x + x, patch_size * patch_size + (number_of_patches_x - 1) + z - 1] = 1
 
 X_train = X_train.reshape((X_org_train.shape[0], -1))
 
@@ -43,11 +43,11 @@ for i in range(X_test.shape[0]):
 		for y in range(number_of_patches_y):
 			for z in range(number_of_patches_x):
 				if z < x:
-					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + (patch_size - 1) + z - 1] = 1
+					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
 
 			for z in range(number_of_patches_y):
 				if z < y:
-					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + z - 1] = 1
+					X_test[i, y * number_of_patches_x + x, patch_size * patch_size + (number_of_patches_x - 1) + z - 1] = 1
 
 X_test = X_test.reshape((X_org_test.shape[0], -1))
 
