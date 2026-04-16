@@ -11,7 +11,7 @@ clauses = 40000
 T = 5000
 s = 10.0
 
-patch_size = 10
+patch_size = 3
 padding = 1
 
 (X_org_train, Y_train), (X_org_test, Y_test) = fashion_mnist.load_data()
@@ -37,6 +37,9 @@ for i in range(X_train.shape[0]):
 	all_views = view_as_windows(X_org_train[i,:,:], (patch_size, patch_size)).reshape((number_of_patches, patch_size*patch_size))
 	
 	patch_counter = 0
+
+	
+	
 	for x in range(number_of_patches_x_with_padding // 2):
 		for y in range(number_of_patches_y_with_padding // 2):
 			if x * number_of_patches_y + y < number_of_patches:
