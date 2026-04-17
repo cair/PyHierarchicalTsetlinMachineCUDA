@@ -547,7 +547,7 @@ class CommonTsetlinMachine():
 
 					if self.hierarchy_structure[d][0] != OR_ALTERNATIVES:
 						feature_base += size * depth_d_node_index 
-						size *= hierarchy_structure[d][1];
+						size *= self.hierarchy_structure[d][1];
 					feature_base *= self.number_of_features_per_leaf
 
 					if previous_index[d-1] == -1:
