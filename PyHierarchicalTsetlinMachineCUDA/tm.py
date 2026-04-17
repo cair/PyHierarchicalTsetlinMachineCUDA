@@ -539,9 +539,16 @@ class CommonTsetlinMachine():
 				left = []
 				right = []
 				inside = []
+				feature_base = 0
+				size = 1
 				for d in range(1, self.depth):
 					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
 					component_remainder = component_remainder // self.hierarchy_structure[d][1]
+
+					if self.hierarchy_structure[d][0] != OR_ALTERNATIVES:
+						feature_base += size * depth_d_node_index 
+						size *= hierarchy_structure[d][1];
+					feature_base *= self.number_of_features_per_leaf
 
 					if previous_index[d-1] == -1:
 						left.append("(")
@@ -567,14 +574,14 @@ class CommonTsetlinMachine():
 					if self.ta_action(i, j, k):
 						if k < self.number_of_literals_per_leaf // 2:
 							if print_ta_state:
-								l.append("x%d(%d)" % (k, self.ta_state(i, j, k)))
+								l.append("x%d(%d)" % (feature_base + k, self.ta_state(i, j, k)))
 							else:
-								l.append("x%d" % (k,))
+								l.append("x%d" % (feature_base + k,))
 						else:
 							if print_ta_state:
-								l.append("¬x%d(%d)" % (k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
+								l.append("¬x%d(%d)" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
 							else:
-								l.append("¬x%d" % (k - self.number_of_literals_per_leaf // 2,))
+								l.append("¬x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
 				
 				if len(l) > 1:
 					print("(" + " ∧ ".join(l) + ")", end = '')
