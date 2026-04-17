@@ -549,8 +549,6 @@ class CommonTsetlinMachine():
 						feature_base += size * depth_d_node_index 
 						size *= self.hierarchy_structure[d][1];
 
-					print(j, feature_base)
-
 					if previous_index[d-1] == -1:
 						left.append("(")
 					elif depth_d_node_index == 0 and previous_index[d-1] != depth_d_node_index:
