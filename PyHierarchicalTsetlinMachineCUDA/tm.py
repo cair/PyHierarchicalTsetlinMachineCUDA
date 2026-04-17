@@ -540,7 +540,7 @@ class CommonTsetlinMachine():
 				right = []
 				inside = []
 				feature_base = 0
-				size = 1
+				size = self.hierarchy_structure[0][1]
 				for d in range(1, self.depth):
 					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
 					component_remainder = component_remainder // self.hierarchy_structure[d][1]
@@ -548,7 +548,8 @@ class CommonTsetlinMachine():
 					if self.hierarchy_structure[d][0] != OR_ALTERNATIVES:
 						feature_base += size * depth_d_node_index 
 						size *= self.hierarchy_structure[d][1];
-					feature_base *= self.number_of_features_per_leaf
+
+					pint(j, feature_base)
 
 					if previous_index[d-1] == -1:
 						left.append("(")
