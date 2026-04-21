@@ -277,8 +277,12 @@ code_update = """
 
 				// Store and group product as node output
 
+				if (exp2f(log2_and_group_vote_product) != and_group_vote_product) {
+					printf("ERRROR %f != %f\\n", exp2f(log2_and_group_vote_product), and_group_vote_product);
+				}
+				
 				if (log_scaling) {
-					and_group_node_output[and_group_node] = log2_and_group_vote_product;
+					and_group_node_output[and_group_node] = exp2f(log2_and_group_vote_product);
 				} else {
 					and_group_node_output[and_group_node] = and_group_vote_product;
 				}
@@ -390,8 +394,8 @@ code_update = """
 			for (int clause = index; clause < CLAUSES; clause += stride) {
 				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 					int clause_weight = clause_weights[class_id*CLAUSES + clause];
-					atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
-					//atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);
+					//atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
+					atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);
 				}
 			}
 		}
