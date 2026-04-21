@@ -31,7 +31,7 @@ test_data = np.loadtxt("./examples/NoisyParityTestingData.txt").astype(np.uint32
 X_test = test_data[:,0:-1]
 Y_test = test_data[:,-1]
 
-tm = TsetlinMachine(args.clauses, args.T, args.s, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 2)))
+tm = TsetlinMachine(args.clauses, args.T, args.s, q=args.q, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 2)))
 
 print("\nAccuracy over %d epochs:\n" % (args.epochs))
 for e in range(args.epochs):
