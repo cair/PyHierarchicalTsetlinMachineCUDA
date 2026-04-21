@@ -86,6 +86,8 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
+			printf("%f\\n", class_sum);
+
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
