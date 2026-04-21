@@ -2,26 +2,10 @@ from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
-import argparse
 
-def default_args(**kwargs):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", default=1000, type=int)
-    parser.add_argument("--clauses", default=32, type=int)
-    parser.add_argument("--T", default=250, type=int)
-    parser.add_argument("--s", default=25.0, type=float)
-    parser.add_argument("--q", default=1.0, type=float)
-    parser.add_argument("--boost", default=0, type=int)
-    parser.add_argument("--number_of_state_bits", default=8, type=int)
-    parser.add_argument("--or_alternatives", default=10, type=int)
-
-    args = parser.parse_args()
-    for key, value in kwargs.items():
-        if key in args.__dict__:
-            setattr(args, key, value)
-    return args
-
-args = default_args()
+clauses = 32
+s = 25.0
+T = 250
 
 train_data = np.loadtxt("./examples/NoisyParityTrainingData.txt").astype(np.uint32)
 X_train = train_data[:,0:-1]
@@ -31,10 +15,10 @@ test_data = np.loadtxt("./examples/NoisyParityTestingData.txt").astype(np.uint32
 X_test = test_data[:,0:-1]
 Y_test = test_data[:,-1]
 
-tm = TsetlinMachine(args.clauses, args.T, args.s, q=args.q, weighted_clauses=False, number_of_state_bits=args.number_of_state_bits, boost_true_positive_feedback=args.boost, hierarchy_structure=((tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, args.or_alternatives), (tm.AND_GROUP, 2)))
+tm = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 3), (tm.OR_ALTERNATIVES, 3), (tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 3), (tm.AND_GROUP, 2)))
 
-print("\nAccuracy over %d epochs:\n" % (args.epochs))
-for e in range(args.epochs):
+print("\nAccuracy over 1000 epochs:\n")
+for e in range(1000):
 	start_training = time()
 	tm.fit(X_train, Y_train, epochs=10, incremental=True)
 	stop_training = time()
