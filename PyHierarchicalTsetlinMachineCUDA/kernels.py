@@ -254,26 +254,14 @@ code_update = """
 				float and_group_vote_product = 1;
 				float previous_and_group_vote_product = -1;
 				float log2_and_group_vote_product = 0;
-				int min_vote_sum = INT_MAX;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-/*
 					if (log_scaling) {
-						if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
-		 					log2_and_group_vote_product += log2f(1.0 + child_input[and_group_node*number_of_and_group_factors + and_factor]);
-		 				} else {
-		 					log2_and_group_vote_product = 0;
-		 					break;
-		 				}
+		 				log2_and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
 					} else {
 						previous_and_group_vote_product = and_group_vote_product;
 						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
-					}
-*/
-
-					if (child_input[and_group_node*number_of_and_group_factors + and_factor] < min_vote_sum) {
-						min_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
 					}
 
 					if (and_group_vote_product < 0) {
@@ -284,12 +272,11 @@ code_update = """
 
 				// Store and group product as node output
 
-				//if (log_scaling) {
-				//	and_group_node_output[and_group_node] = log2_and_group_vote_product;
-				//} else {
-				//	and_group_node_output[and_group_node] = and_group_vote_product;
-				//}
-				and_group_node_output[and_group_node] = min_vote_sum;
+				if (log_scaling) {
+					and_group_node_output[and_group_node] = log2_and_group_vote_product;
+				} else {
+					and_group_node_output[and_group_node] = and_group_vote_product;
+				}
 			}
 		}
 
@@ -399,7 +386,7 @@ code_update = """
 				if (child_input[clause] > 0) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);					
+						atomicAdd(&class_sum[class_id], 1.0*clause_weight * pow(child_input[clause], 2));					
 					}
 				}
 			}
