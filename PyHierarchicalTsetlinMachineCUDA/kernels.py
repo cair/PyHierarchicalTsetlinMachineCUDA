@@ -147,7 +147,7 @@ code_update = """
 							dec(ta_state, ta_chunk, la_feedback);
 						}
 					}
-				} else if (target*sign < 0 && component_output && 0) {
+				} else if (target*sign < 0 && component_output) {
 					// Type II Feedback
 
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
