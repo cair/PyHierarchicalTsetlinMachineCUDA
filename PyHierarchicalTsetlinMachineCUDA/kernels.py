@@ -254,7 +254,7 @@ code_update = """
 				float and_group_vote_product = 1;
 				float previous_and_group_vote_product = -1;
 				float log2_and_group_vote_product = 0;
-				//int max_vote_sum = 0;
+				int min_vote_sum = INT_MAX;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
@@ -271,9 +271,9 @@ code_update = """
 						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 					}
 
-					//if (child_input[and_group_node*number_of_and_group_factors + and_factor] > max_vote_sum) {
-					//	max_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
-					//}
+					if (child_input[and_group_node*number_of_and_group_factors + and_factor] < min_vote_sum) {
+						min_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
+					}
 
 					if (and_group_vote_product < 0) {
 						printf("AND OVERFLOW %d -> %d\\n", previous_and_group_vote_product, and_group_vote_product);						
@@ -283,12 +283,12 @@ code_update = """
 
 				// Store and group product as node output
 
-				if (log_scaling) {
-					and_group_node_output[and_group_node] = log2_and_group_vote_product;
-				} else {
-					and_group_node_output[and_group_node] = and_group_vote_product;
-				}
-				//and_group_node_output[and_group_node] = max_vote_sum;
+				//if (log_scaling) {
+				//	and_group_node_output[and_group_node] = log2_and_group_vote_product;
+				//} else {
+				//	and_group_node_output[and_group_node] = and_group_vote_product;
+				//}
+				and_group_node_output[and_group_node] = min_vote_sum;
 			}
 		}
 
