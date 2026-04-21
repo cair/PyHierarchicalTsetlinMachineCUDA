@@ -115,9 +115,7 @@ code_update = """
 		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
-			
-			printf("Class Sum %f\\n", class_sum);
-			
+
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
@@ -453,6 +451,10 @@ code_update = """
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
+					}
+
+					if (inndex == 0) {
+						printf("%f\\n", local_class_sum);
 					}
 
 					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
