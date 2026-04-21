@@ -274,9 +274,9 @@ code_update = """
 
 				// Store and group product as node output
 
-				if (exp2f(log2_and_group_vote_product) != and_group_vote_product) {
-					printf("ERRROR %f != %f\\n", exp2f(log2_and_group_vote_product), and_group_vote_product);
-				}
+			//	if (exp2f(log2_and_group_vote_product) != and_group_vote_product) {
+			//		printf("ERRROR %f != %f\\n", exp2f(log2_and_group_vote_product), and_group_vote_product);
+			//	}
 
 				if (log_scaling) {
 					and_group_node_output[and_group_node] = exp2f(log2_and_group_vote_product);
