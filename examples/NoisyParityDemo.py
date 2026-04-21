@@ -4,7 +4,7 @@ from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 
 
-ef default_args(**kwargs):
+def default_args(**kwargs):
     parser = argparse.ArgumentParser()
     parser.add_argument("--epochs", default=1000, type=int)
     parser.add_argument("--clauses", default=32, type=int)
