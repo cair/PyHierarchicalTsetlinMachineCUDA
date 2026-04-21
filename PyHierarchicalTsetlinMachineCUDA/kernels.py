@@ -258,12 +258,12 @@ code_update = """
 					// Aggregate votes from each child node through multiplication
 					
 					if (log_scaling) {
-						if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
+						//if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
 			 				log2_and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
-			 			} else {
-			 				log2_and_group_vote_product = -1;
-			 				break;
-			 			}
+			 			//} else {
+			 			//	log2_and_group_vote_product = -1;
+			 			//	break;
+			 			//}
 					} else {
 						previous_and_group_vote_product = and_group_vote_product;
 						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
@@ -388,12 +388,10 @@ code_update = """
 
 			// Add up the votes from each clause
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				if (child_input[clause] != -1) {
-					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						//atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
-						atomicAdd(&class_sum[class_id], 1.0*clause_weight *child_input[clause]);
-					}
+				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
+					int clause_weight = clause_weights[class_id*CLAUSES + clause];
+					atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
+					//atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);
 				}
 			}
 		}
@@ -523,7 +521,7 @@ code_prepare = """
 
 
 			if (index == 0) {
-				printf("34 == %f\\n", exp2(log2f(34)));
+				printf("%f == %f\\n", 34, exp2(log2f(34)));
 			}
 
 			curandState localState = state[index];

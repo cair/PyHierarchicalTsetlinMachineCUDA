@@ -288,7 +288,7 @@ class CommonTsetlinMachine():
 					self.hierarchy_votes[d],
 					self.hierarchy_size[d + 1],
 					self.hierarchy_structure[d][1],
-					0#d == self.depth-1
+					d == self.depth-1
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_GROUP:
