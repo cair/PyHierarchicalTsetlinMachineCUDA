@@ -221,7 +221,8 @@ code_update = """
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
 				int or_group_vote_sum = 0;
-        
+		        int max_vote_sum = 0;
+		        
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
 
@@ -279,7 +280,7 @@ code_update = """
 				// Store and group product as node output
 
 				if (log_scaling) {
-					log2_and_group_vote_product;
+					and_group_node_output[and_group_node] = log2_and_group_vote_product;
 				} else {
 					and_group_node_output[and_group_node] = and_group_vote_product;
 				}
