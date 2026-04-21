@@ -119,11 +119,10 @@ code_update = """
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
-			
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
-			int absolute_prediction_error = fabsf(y - class_sum);
+			float absolute_prediction_error = fabsf(y - class_sum);
 			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					// Type I Feedback
@@ -401,7 +400,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -447,7 +446,7 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					int local_class_sum = class_sum[class_id];
+					float local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
@@ -462,7 +461,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, int *class_sum, int *y, int example)
+		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, float *class_sum, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -472,7 +471,7 @@ code_update = """
 
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					int local_class_sum = class_sum[class_id];
+					float local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
@@ -490,7 +489,7 @@ code_update = """
 code_prepare = """
 	extern "C"
     {
-		__global__ void prepare_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *class_sum)
+		__global__ void prepare_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -514,7 +513,7 @@ code_prepare = """
 			state[index] = localState;
 		}
 
-		__global__ void prepare_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *class_sum)
+		__global__ void prepare_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
