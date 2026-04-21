@@ -522,6 +522,11 @@ code_prepare = """
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
+
+			if (index == 0) {
+				printf("34 == %f\\n", exp2(log2(34))));
+			}
+
 			curandState localState = state[index];
 
 			// Evaluate each clause component (leaf) in separate threads
