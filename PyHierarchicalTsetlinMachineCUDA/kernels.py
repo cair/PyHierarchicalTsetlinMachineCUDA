@@ -260,7 +260,12 @@ code_update = """
 					
 
 					if (log_scaling) {
-	 					log2_and_group_vote_product += log2f(1.0 + child_input[and_group_node*number_of_and_group_factors + and_factor]);
+						if (child_input[and_group_node*number_of_and_group_factors + and_factor]) {
+		 					log2_and_group_vote_product += log2f(1.0 + child_input[and_group_node*number_of_and_group_factors + and_factor]);
+		 				} else {
+		 					log2_and_group_vote_product = 0;
+		 					break;
+		 				}
 					} else {
 						previous_and_group_vote_product = and_group_vote_product;
 						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
