@@ -150,6 +150,8 @@ code_update = """
 				} else if (target*sign < 0 && component_output) {
 					// Type II Feedback
 
+					printf("TYPE II Feedback\n");
+
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
 						inc(ta_state, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
