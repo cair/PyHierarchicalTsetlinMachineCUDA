@@ -258,7 +258,12 @@ code_update = """
 					// Aggregate votes from each child node through multiplication
 					
 					if (log_scaling) {
-		 				log2_and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
+						if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
+			 				log2_and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
+			 			} else {
+			 				log2_and_group_vote_product = -1;
+			 				break;
+			 			}
 					} else {
 						previous_and_group_vote_product = and_group_vote_product;
 						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
@@ -386,7 +391,9 @@ code_update = """
 				if (child_input[clause] > 0) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));					
+						if (child_input[clause] != -1) {
+							atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
+						}
 					}
 				}
 			}
