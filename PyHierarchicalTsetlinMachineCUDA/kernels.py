@@ -386,7 +386,7 @@ code_update = """
 				if (child_input[clause] > 0) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], 1.0*clause_weight * pow(2, child_input[clause]));					
+						atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));					
 					}
 				}
 			}
