@@ -392,7 +392,7 @@ code_update = """
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
 						if (child_input[clause] != -1) {
-							atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
+							atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2f(child_input[clause]));
 						}
 					}
 				}
@@ -524,7 +524,7 @@ code_prepare = """
 
 
 			if (index == 0) {
-				printf("34 == %f\\n", exp2f(log2f(34)));
+				printf("34 == %f\\n", exp2(log2f(34)));
 			}
 
 			curandState localState = state[index];
