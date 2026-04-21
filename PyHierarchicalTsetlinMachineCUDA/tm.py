@@ -260,7 +260,7 @@ class CommonTsetlinMachine():
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
-		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.float32)
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
@@ -422,8 +422,8 @@ class CommonTsetlinMachine():
 		encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
 		self.encode_X(X, encoded_X_hierarchy_test_gpu)
 
-		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
-		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.float32)
+		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.float32)
 
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
