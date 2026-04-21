@@ -524,7 +524,7 @@ code_prepare = """
 
 
 			if (index == 0) {
-				printf("34 == %f\\n", exp2(log2(34))));
+				printf("34 == %f\\n", exp2(log2(34)));
 			}
 
 			curandState localState = state[index];
