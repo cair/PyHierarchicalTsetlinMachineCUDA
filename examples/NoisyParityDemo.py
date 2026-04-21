@@ -2,7 +2,7 @@ from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
-
+import argparse
 
 def default_args(**kwargs):
     parser = argparse.ArgumentParser()
