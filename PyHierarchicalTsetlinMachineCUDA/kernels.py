@@ -86,8 +86,6 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			printf("%f\\n", class_sum);
-
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
 			}
@@ -117,6 +115,8 @@ code_update = """
 		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
+			
+			printf("Class Sum %f\\n", class_sum);
 			
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
