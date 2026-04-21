@@ -212,7 +212,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_groups(int *child_input, int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		__global__ void evaluate_or_groups(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -220,8 +220,8 @@ code_update = """
 			// Add up the votes of each OR node child
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
-				int or_group_vote_sum = 0;
-		        int max_vote_sum = 0;
+				float or_group_vote_sum = 0;
+		        float max_vote_sum = 0;
 		        
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
@@ -243,7 +243,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors, int log_scaling)
+		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors, int log_scaling)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -252,9 +252,9 @@ code_update = """
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 
-				int and_group_vote_product = 1;
-				int previous_and_group_vote_product = -1;
-				int log2_and_group_vote_product = 0;
+				float and_group_vote_product = 1;
+				float previous_and_group_vote_product = -1;
+				float log2_and_group_vote_product = 0;
 				//int max_vote_sum = 0;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
@@ -288,7 +288,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -305,7 +305,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values(curandState *state, int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -357,7 +357,7 @@ code_update = """
 			state[index] = localState;
 		}
 
-		__global__ void evaluate_or_alternatives(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -365,7 +365,7 @@ code_update = """
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				// Sum up votes from each or alternative
-				int or_alternatives_vote_sum = 0;
+				float or_alternatives_vote_sum = 0;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregate same input or alternatives through summation
 					
@@ -384,14 +384,14 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *child_input, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes from each clause
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				if (child_input[clause]) {
+				if (child_input[clause] > 0) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
 						atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);					
