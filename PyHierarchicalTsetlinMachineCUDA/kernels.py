@@ -453,7 +453,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					if (inndex == 0) {
+					if (index == 0) {
 						printf("%f\\n", local_class_sum);
 					}
 
