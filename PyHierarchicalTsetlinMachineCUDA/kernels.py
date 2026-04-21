@@ -221,7 +221,6 @@ code_update = """
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
 				int or_group_vote_sum = 0;
-				int max_vote_sum = 0;
         
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
 					// Aggregate votes from each child node through addition
@@ -243,7 +242,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors, int log_scaling)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -251,17 +250,25 @@ code_update = """
 			// Multiply the votes from the children of each AND node
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
+
 				int and_group_vote_product = 1;
-				int max_vote_sum = 0;
+				int previous_and_group_vote_product = -1;
+				int log2_and_group_vote_product = 0;
+				//int max_vote_sum = 0;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-					int previous_and_group_vote_product = and_group_vote_product;
-					and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 
-					if (child_input[and_group_node*number_of_and_group_factors + and_factor] > max_vote_sum) {
-						max_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
+					if (log_scaling) {
+	 					log2_and_group_vote_product += log2(1 + child_input[and_group_node*number_of_and_group_factors + and_factor]);
+					} else {
+						previous_and_group_vote_product = and_group_vote_product;
+						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 					}
+
+					//if (child_input[and_group_node*number_of_and_group_factors + and_factor] > max_vote_sum) {
+					//	max_vote_sum = child_input[and_group_node*number_of_and_group_factors + and_factor];
+					//}
 
 					if (and_group_vote_product < 0) {
 						printf("AND OVERFLOW %d -> %d\\n", previous_and_group_vote_product, and_group_vote_product);						
@@ -270,7 +277,12 @@ code_update = """
 				}
 
 				// Store and group product as node output
-				and_group_node_output[and_group_node] = and_group_vote_product;
+
+				if (log_scaling) {
+					log2_and_group_vote_product;
+				} else {
+					and_group_node_output[and_group_node] = and_group_vote_product;
+				}
 				//and_group_node_output[and_group_node] = max_vote_sum;
 			}
 		}
