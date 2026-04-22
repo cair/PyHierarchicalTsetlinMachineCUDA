@@ -231,20 +231,14 @@ code_update = """
 						max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
 					}
 
-					int previous_or_group_vote_sum = or_group_vote_sum; 
 					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
-					if (or_group_vote_sum < 0) {
-						printf("OR* OVERFLOW %d -> %d\\n", previous_or_group_vote_sum, or_group_vote_sum);						
-						or_group_vote_sum = previous_or_group_vote_sum;
-					}
 				}
 
-				//or_group_node_output[or_group_node] = or_group_vote_sum;
 				or_group_node_output[or_group_node] = max_vote_sum;
 			}
 		}
 
-		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors, int log_scaling)
+		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -379,8 +373,8 @@ code_update = """
 					}
 				}
 
-				float weighted_clause_output_sum = 0;
 				if (clause_output_max != NEG_INFINITY) {
+					float weighted_clause_output_sum = 0;
 					for (int clause = 0; clause < CLAUSES; ++clause) {
 						weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
 					}
