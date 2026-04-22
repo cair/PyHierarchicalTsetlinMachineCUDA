@@ -339,7 +339,7 @@ class CommonTsetlinMachine():
 				sys.exit()
 
 		# Adds up the votes from each clause (hierarchy root)
-		self.evaluate_final.prepared_call(
+		self.evaluate_final_log.prepared_call(
 			self.grid,
 			self.block,
 			np.int32(self.number_of_outputs),
