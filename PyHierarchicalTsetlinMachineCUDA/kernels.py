@@ -297,7 +297,8 @@ code_update = """
 						printf("LOGSCALE\\n");
 					#else
 						component_output = 0;
-					#endif				}
+					#endif
+				}
 
 				global_component_output[clause_component] = component_output;
 			}
