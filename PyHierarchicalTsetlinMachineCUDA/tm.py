@@ -288,7 +288,7 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
-		self.evaluate_leaves.prepared_call(
+		self.evaluate_leaves_log.prepared_call(
 			self.grid,
 			self.block,
 			self.ta_state_hierarchy_gpu,
