@@ -501,7 +501,7 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-				 	int local_class_sum = class_sum[class_id];
+					float local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
@@ -515,7 +515,7 @@ code_update = """
 					#if LOG_SCALE == 1
 						update_component_hierarchy_log(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != NEG_INFINITY, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 					#else
-						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != 0, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 					#endif
 				}
 			}
@@ -535,7 +535,7 @@ code_update = """
 
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					int local_class_sum = class_sum[class_id];
+					float local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
