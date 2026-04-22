@@ -24,7 +24,9 @@ code_header = """
 	
 	#define INT_SIZE 32ULL
 
-	#define NEG_INFINITY (-1 * INFINITY)
+	//#define NEG_INFINITY (-1 * INFINITY)
+
+	#define NEG_INFINITY 0x80000000
 
 	#if (LITERALS_PER_LEAF % 32 != 0)
 	#define FILTER_HIERARCHICAL (~(0xffffffff << (LITERALS_PER_LEAF % INT_SIZE)))
@@ -164,7 +166,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves_log(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
+		__global__ void evaluate_leaves_log(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -202,9 +204,9 @@ code_update = """
 				// Evaluate clause component
 
 				#if LOG_SCALE == 1
-					float component_output = 0;
+					int component_output = 0;
 				#else
-					float component_output = 1;
+					int component_output = 1;
 				#endif
 
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {

@@ -290,8 +290,8 @@ class CommonTsetlinMachine():
 
 		# Evaluates all the hierarchy leaves in parallel
 
-		self.evaluate_leaves.prepared_call(
-		#self.evaluate_leaves_log.prepared_call(
+		#self.evaluate_leaves.prepared_call(
+		self.evaluate_leaves_log.prepared_call(
 			self.grid,
 			self.block,
 			self.ta_state_hierarchy_gpu,
