@@ -196,17 +196,17 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				// Evaluate clause component
-				int component_output = 1;
+				int component_output = 0;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						component_output = 0;
+						component_output = NEG_INFINITY;
 						break;
 					}
 				}
 
 				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
-					component_output = 0;
+					component_output = NEG_INFINITY;
 				}
 
 				global_component_output[clause_component] = component_output;
@@ -253,38 +253,15 @@ code_update = """
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 
-				float and_group_vote_product = 1;
-				float previous_and_group_vote_product = -1;
 				float log2_and_group_vote_product = 0;
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-						if (child_input[and_group_node*number_of_and_group_factors + and_factor] > 0) {
-			 				log2_and_group_vote_product += log2f(child_input[and_group_node*number_of_and_group_factors + and_factor]);
-			 			} else {
-			 				log2_and_group_vote_product = NEG_INFINITY;
-			 				break;
-			 			}
-						previous_and_group_vote_product = and_group_vote_product;
-						and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
-
-					if (and_group_vote_product < 0) {
-						printf("AND OVERFLOW %d -> %d\\n", previous_and_group_vote_product, and_group_vote_product);						
-						and_group_vote_product = previous_and_group_vote_product;
-					}
+			 		log2_and_group_vote_product += child_input[and_group_node*number_of_and_group_factors + and_factor];			 			
 				}
 
-				// Store and group product as node output
-
-			//	if (exp2f(log2_and_group_vote_product) != and_group_vote_product) {
-			//		printf("ERRROR %f != %f\\n", exp2f(log2_and_group_vote_product), and_group_vote_product);
-			//	}
-
-				if (log_scaling) {
-					and_group_node_output[and_group_node] = exp2f(log2_and_group_vote_product);
-				} else {
-					and_group_node_output[and_group_node] = and_group_vote_product;
-				}
+				
+				and_group_node_output[and_group_node] = log2_and_group_vote_product;
 			}
 		}
 
@@ -295,10 +272,10 @@ code_update = """
 
 			// If a group node is false, all children are made false.
 			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
-				if (group_node_output[group_node] == 0) {
+				if (group_node_output[group_node] == NEG_INFINITY) {
 					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
-						if (child_input[group_node*number_of_group_node_children + and_factor] > 0) {
-							child_input[group_node*number_of_group_node_children + and_factor] = 0;	
+						if (child_input[group_node*number_of_group_node_children + and_factor] != NEG_INFINITY) {
+							child_input[group_node*number_of_group_node_children + and_factor] = NEG_INFINITY;	
 						}
 					}
 				}
@@ -323,15 +300,15 @@ code_update = """
 					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
 						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
 					}
-				}  else if (group_node_output[group_node] == 0) {
+				}  else if (group_node_output[group_node] == NEG_INFINITY) {
 					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
-							child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+						if (child_input[group_node*number_of_group_node_children + or_addend] != NEG_INFINITY) {
+							child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
 						}
 					}
 				} else {
 					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] != NEG_INFINITY) {
 							non_zero_children[number_of_non_zero_children] = or_addend;
 							number_of_non_zero_children++;
 						}
@@ -364,23 +341,23 @@ code_update = """
 
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
-				// Sum up votes from each or alternative
-				float or_alternatives_vote_sum = 0;
+				float or_alternatives_vote_max = NEG_INFINITY;
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-					// Aggregate same input or alternatives through summation
-					
-
-					int previous_or_alternatives_vote_sum = or_alternatives_vote_sum;
-					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
-
-					if (or_alternatives_vote_sum < 0) {
-						printf("OR OVERFLOW %d -> %d\\n", previous_or_alternatives_vote_sum, or_alternatives_vote_sum);
-						or_alternatives_vote_sum = previous_or_alternatives_vote_sum;
+					if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] > or_alternatives_vote_max) {
+						or_alternatives_vote_max = child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 					}
 				}
 
+				// Sum up votes from each or alternative
+				float or_alternatives_vote_sum = 0;
+				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+					// Aggregates or alternatives through summation
+					
+					or_alternatives_vote_sum += exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
+				}
+
 				// Store vote sum as node output
-				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
+				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
 			}
 		}
 
@@ -393,8 +370,7 @@ code_update = """
 			for (int clause = index; clause < CLAUSES; clause += stride) {
 				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 					int clause_weight = clause_weights[class_id*CLAUSES + clause];
-					//atomicAdd(&class_sum[class_id], 1.0*clause_weight * exp2(child_input[clause]));
-					atomicAdd(&class_sum[class_id], 1.0*clause_weight * child_input[clause]);
+					atomicAdd(&class_sum[class_id], 1.0 * clause_weight * exp2f(child_input[clause]));
 				}
 			}
 		}
