@@ -135,29 +135,53 @@ class CommonTsetlinMachine():
 		self.update_hierarchy = mod_update.get_function("update_hierarchy")
 		self.update_hierarchy.prepare("PiPPPiPPPPPi")
 
+		self.update_hierarchy_log = mod_update.get_function("update_hierarchy_log")
+		self.update_hierarchy_log.prepare("PiPPPiPPPPPi")
+
 		self.update_weights = mod_update.get_function("update_weights")
 		self.update_weights.prepare("PiiPPPPi")
+
+		self.update_weights_log = mod_update.get_function("update_weights_log")
+		self.update_weights_log.prepare("PiiPPPPi")
 
 		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
+		self.evaluate_leaves_log = mod_update.get_function("evaluate_leaves_log")
+		self.evaluate_leaves_log.prepare("PPPiPPPi")
+
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPPP")
+
+		self.evaluate_final_log = mod_update.get_function("evaluate_final_log")
+		self.evaluate_final_log.prepare("iPPP")
 
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
 
+		self.evaluate_and_groups_log = mod_update.get_function("evaluate_and_groups_log")
+		self.evaluate_and_groups_log.prepare("PPii")
+
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
+		self.propagate_and_group_false_truth_values_log = mod_update.get_function("propagate_and_group_false_truth_values_log")
+		self.propagate_and_group_false_truth_values_log.prepare("PPii")
+
 		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
 		self.propagate_or_group_false_truth_values.prepare("PPPii")
+
+		self.propagate_or_group_false_truth_values_log = mod_update.get_function("propagate_or_group_false_truth_values_log")
+		self.propagate_or_group_false_truth_values_log.prepare("PPPii")
 
 		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
 		self.evaluate_or_groups.prepare("PPii")
 
 		self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
 		self.evaluate_or_alternatives.prepare("PPii")
+
+		self.evaluate_or_alternatives_log = mod_update.get_function("evaluate_or_alternatives_log")
+		self.evaluate_or_alternatives_log.prepare("PPii")
 
 		# CUDA modules for encoding input data
 		mod_encode = SourceModule(kernels.code_encode, no_extern_c=True)
@@ -187,8 +211,8 @@ class CommonTsetlinMachine():
 		# GPU memory for accumulating votes, level by level
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
-			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*8))
-		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*8))
+			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
+		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
 
 		# GPU memory for storing hierarchy structure
 		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
@@ -252,10 +276,10 @@ class CommonTsetlinMachine():
 		None # To be updated
 
 	def initialize_weights_and_ta_states(self):
-		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
+		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_gpu, grid=self.grid, block=self.block)
 		cuda.Context.synchronize()
 
-		self.prepare_hierarchy(self.cuda_rng.state, np.int32(self.number_of_outputs), self.ta_state_hierarchy_gpu, self.clause_weights_gpu, self.class_sum_gpu, grid=self.grid, block=self.block)
+		self.prepare_hierarchy(self.cuda_rng.state, np.int32(self.number_of_outputs), self.ta_state_hierarchy_gpu, self.clause_weights_gpu, grid=self.grid, block=self.block)
 		cuda.Context.synchronize()
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
@@ -281,7 +305,7 @@ class CommonTsetlinMachine():
 		# Propagates votes bottom-up in the hierarchy, starting from the clause components (leaves)
 		for d in range(1, self.depth):
 			if (self.hierarchy_structure[d][0] == AND_GROUP):
-				self.evaluate_and_groups.prepared_call(
+				self.evaluate_and_groups_log.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
@@ -301,7 +325,7 @@ class CommonTsetlinMachine():
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.evaluate_or_alternatives.prepared_call(
+				self.evaluate_or_alternatives_log.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
@@ -358,7 +382,7 @@ class CommonTsetlinMachine():
 				# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 				for d in range(self.depth-1, 0, -1):
 					if self.hierarchy_structure[d][0] != OR_GROUP:
-						self.propagate_and_group_false_truth_values.prepared_call(
+						self.propagate_and_group_false_truth_values_log.prepared_call(
 							self.grid,
 							self.block,
 							self.hierarchy_votes[d-1],
@@ -368,7 +392,7 @@ class CommonTsetlinMachine():
 						)
 						cuda.Context.synchronize()
 					else:
-						self.propagate_or_group_false_truth_values.prepared_call(
+						self.propagate_or_group_false_truth_values_log.prepared_call(
 							self.grid,
 							self.block,
 							self.cuda_rng.state,
@@ -380,7 +404,7 @@ class CommonTsetlinMachine():
 						cuda.Context.synchronize()
 
 				# Updates the clause components (leaves) based on the propagated truth values
-				self.update_hierarchy.prepared_call(
+				self.update_hierarchy_log.prepared_call(
 					self.grid,
 					self.block,
 					self.cuda_rng.state,
@@ -400,7 +424,7 @@ class CommonTsetlinMachine():
 
 				# Updates the clause weights
 				if (self.tm_type in [WEIGHTED_TM, COALESCED_TM]):
-					self.update_weights.prepared_call(
+					self.update_weights_log.prepared_call(
 						self.grid,
 						self.block,
 						self.cuda_rng.state,

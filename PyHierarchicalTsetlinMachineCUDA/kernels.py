@@ -834,7 +834,7 @@ code_update = """
 code_prepare = """
 	extern "C"
     {
-		__global__ void prepare_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *class_sum)
+		__global__ void prepare_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -858,7 +858,7 @@ code_prepare = """
 			state[index] = localState;
 		}
 
-		__global__ void prepare_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *class_sum)
+		__global__ void prepare_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
