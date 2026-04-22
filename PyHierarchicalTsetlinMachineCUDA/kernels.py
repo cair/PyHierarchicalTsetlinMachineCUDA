@@ -23,6 +23,8 @@ code_header = """
 	
 	#define INT_SIZE 32ULL
 
+	#define NEG_INFINITY (-1 * INFINITY)
+
 	#if (LITERALS_PER_LEAF % 32 != 0)
 	#define FILTER_HIERARCHICAL (~(0xffffffff << (LITERALS_PER_LEAF % INT_SIZE)))
 	#else
