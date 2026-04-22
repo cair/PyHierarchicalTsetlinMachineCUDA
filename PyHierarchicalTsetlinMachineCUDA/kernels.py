@@ -380,16 +380,19 @@ code_update = """
 				}
 
 				float weighted_clause_output_sum = 0;
-				for (int clause = 0; clause < CLAUSES; ++clause) {
-						weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause]) * exp2f(clause_output[clause] - clause_output_max);
+				if (clause_output_max != NEG_INFINITY) {
+					for (int clause = 0; clause < CLAUSES; ++clause) {
+						weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
 					}
-				}
 
-				if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
-					float sign = (1 - 2 * (weighted_clause_output_sum < 0));
-					class_sum[class_id] = sign*THRESHOLD;
+					if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
+						float sign = (1 - 2 * (weighted_clause_output_sum < 0));
+						class_sum[class_id] = sign*THRESHOLD;
+					} else {
+						class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
+					}
 				} else {
-					class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
+					class_sum[class_id] = 0;
 				}
 			}
 		}
