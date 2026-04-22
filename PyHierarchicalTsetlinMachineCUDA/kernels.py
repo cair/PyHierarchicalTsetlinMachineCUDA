@@ -353,11 +353,12 @@ code_update = """
 				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 					// Aggregates or alternatives through summation
 					
-					or_alternatives_vote_sum += exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
+					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative]; //exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
 				}
 
 				// Store vote sum as node output
-				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
+				//or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
+				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
 			}
 		}
 
