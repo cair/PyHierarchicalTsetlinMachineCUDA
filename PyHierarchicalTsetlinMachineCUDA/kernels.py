@@ -294,7 +294,6 @@ code_update = """
 				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
 					#if LOG_SCALE == 1
 						component_output = NEG_INFINITY;
-						printf("LOGSCALE\\n");
 					#else
 						component_output = 0;
 					#endif
