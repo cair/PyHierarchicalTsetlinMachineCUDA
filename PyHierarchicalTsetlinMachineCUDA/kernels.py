@@ -370,7 +370,8 @@ code_update = """
 			state[index] = localState;
 		}
 
-		__global__ void evaluate_or_alternatives_log(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		//__global__ void evaluate_or_alternatives_log(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives_log(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -378,7 +379,7 @@ code_update = """
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
 				#if LOG_SCALE == 1
-					float or_alternatives_vote_max = NEG_INFINITY;
+					int or_alternatives_vote_max = NEG_INFINITY;
 					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 						if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] > or_alternatives_vote_max) {
 							or_alternatives_vote_max = child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
@@ -387,7 +388,7 @@ code_update = """
 
 					if (or_alternatives_vote_max != NEG_INFINITY) {
 						// Sum up votes from each or alternative
-						float or_alternatives_vote_sum = 0;
+						int or_alternatives_vote_sum = 0;
 						for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 							// Aggregates or alternatives through summation
 							
@@ -401,7 +402,7 @@ code_update = """
 					}
 				#else
 					// Sum up votes from each or alternative
-					float or_alternatives_vote_sum = 0;
+					int or_alternatives_vote_sum = 0;
 					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
 						// Aggregate same input or alternatives through summation						
 						or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
