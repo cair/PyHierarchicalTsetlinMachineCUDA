@@ -197,7 +197,6 @@ code_update = """
 				return;
 			}
 			
-
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			int absolute_prediction_error = abs(y - class_sum);
@@ -272,18 +271,33 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				// Evaluate clause component
-				float component_output = 0;
+
+				#if LOG_SCALE == 1
+					float component_output = 0;
+				#else
+					float component_output = 1;
+				#endif
+
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						component_output = NEG_INFINITY;
+						#if LOG_SCALE == 1
+							component_output = NEG_INFINITY;
+						#else
+							component_output = 0;
+						#endif
+							
 						break;
 					}
 				}
 
 				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
-					component_output = NEG_INFINITY;
-				}
+					#if LOG_SCALE == 1
+						component_output = NEG_INFINITY;
+						printf("LOGSCALE\\n");
+					#else
+						component_output = 0;
+					#endif				}
 
 				global_component_output[clause_component] = component_output;
 			}
