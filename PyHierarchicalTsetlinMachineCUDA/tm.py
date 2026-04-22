@@ -289,7 +289,9 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
-		self.evaluate_leaves_log.prepared_call(
+
+		self.evaluate_leaves.prepared_call(
+		#self.evaluate_leaves_log.prepared_call(
 			self.grid,
 			self.block,
 			self.ta_state_hierarchy_gpu,
@@ -306,7 +308,8 @@ class CommonTsetlinMachine():
 		# Propagates votes bottom-up in the hierarchy, starting from the clause components (leaves)
 		for d in range(1, self.depth):
 			if (self.hierarchy_structure[d][0] == AND_GROUP):
-				self.evaluate_and_groups_log.prepared_call(
+				self.evaluate_and_groups.prepared_call(
+				#self.evaluate_and_groups_log.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
@@ -326,7 +329,8 @@ class CommonTsetlinMachine():
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.evaluate_or_alternatives_log.prepared_call(
+				self.evaluate_or_alternatives.prepared_call(
+				#self.evaluate_or_alternatives_log.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
@@ -340,7 +344,8 @@ class CommonTsetlinMachine():
 				sys.exit()
 
 		# Adds up the votes from each clause (hierarchy root)
-		self.evaluate_final_log.prepared_call(
+		self.evaluate_final.prepared_call(
+		#self.evaluate_final_log.prepared_call(
 			self.grid,
 			self.block,
 			np.int32(self.number_of_outputs),
@@ -383,7 +388,8 @@ class CommonTsetlinMachine():
 				# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 				for d in range(self.depth-1, 0, -1):
 					if self.hierarchy_structure[d][0] != OR_GROUP:
-						self.propagate_and_group_false_truth_values_log.prepared_call(
+						self.propagate_and_group_false_truth_values.prepared_call(
+						#self.propagate_and_group_false_truth_values_log.prepared_call(
 							self.grid,
 							self.block,
 							self.hierarchy_votes[d-1],
@@ -393,7 +399,8 @@ class CommonTsetlinMachine():
 						)
 						cuda.Context.synchronize()
 					else:
-						self.propagate_or_group_false_truth_values_log.prepared_call(
+						self.propagate_or_group_false_truth_values.prepared_call(
+						#self.propagate_or_group_false_truth_values_log.prepared_call(
 							self.grid,
 							self.block,
 							self.cuda_rng.state,
@@ -405,7 +412,8 @@ class CommonTsetlinMachine():
 						cuda.Context.synchronize()
 
 				# Updates the clause components (leaves) based on the propagated truth values
-				self.update_hierarchy_log.prepared_call(
+				self.update_hierarchy.prepared_call(
+				#self.update_hierarchy_log.prepared_call(
 					self.grid,
 					self.block,
 					self.cuda_rng.state,
@@ -425,7 +433,8 @@ class CommonTsetlinMachine():
 
 				# Updates the clause weights
 				if (self.tm_type in [WEIGHTED_TM, COALESCED_TM]):
-					self.update_weights_log.prepared_call(
+					self.update_weights.prepared_call(
+					#self.update_weights_log.prepared_call(
 						self.grid,
 						self.block,
 						self.cuda_rng.state,
