@@ -145,9 +145,6 @@ class CommonTsetlinMachine():
 		self.update_weights_log = mod_update.get_function("update_weights_log")
 		self.update_weights_log.prepare("PiiPPPPi")
 
-		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
-		self.evaluate_leaves.prepare("PPPiPPPi")
-
 		self.evaluate_leaves_log = mod_update.get_function("evaluate_leaves_log")
 		self.evaluate_leaves_log.prepare("PPPiPPPi")
 
