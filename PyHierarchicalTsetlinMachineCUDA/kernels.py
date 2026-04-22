@@ -262,7 +262,8 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values_log(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		//__global__ void propagate_and_group_false_truth_values_log(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values_log(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;

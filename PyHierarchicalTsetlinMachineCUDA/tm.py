@@ -388,8 +388,8 @@ class CommonTsetlinMachine():
 				# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 				for d in range(self.depth-1, 0, -1):
 					if self.hierarchy_structure[d][0] != OR_GROUP:
-						self.propagate_and_group_false_truth_values.prepared_call(
-						#self.propagate_and_group_false_truth_values_log.prepared_call(
+						#self.propagate_and_group_false_truth_values.prepared_call(
+						self.propagate_and_group_false_truth_values_log.prepared_call(
 							self.grid,
 							self.block,
 							self.hierarchy_votes[d-1],
