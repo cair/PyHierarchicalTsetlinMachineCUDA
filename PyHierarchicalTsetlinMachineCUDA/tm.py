@@ -412,8 +412,8 @@ class CommonTsetlinMachine():
 						cuda.Context.synchronize()
 
 				# Updates the clause components (leaves) based on the propagated truth values
-				self.update_hierarchy.prepared_call(
-				#self.update_hierarchy_log.prepared_call(
+				#self.update_hierarchy.prepared_call(
+				self.update_hierarchy_log.prepared_call(
 					self.grid,
 					self.block,
 					self.cuda_rng.state,
