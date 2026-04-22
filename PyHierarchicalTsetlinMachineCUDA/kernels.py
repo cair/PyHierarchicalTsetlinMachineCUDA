@@ -232,7 +232,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups_log(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups_log(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -241,11 +241,10 @@ code_update = """
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 
-
 				#if LOG_SCALE == 1
-					float and_group_vote_product = 0;
+					int and_group_vote_product = 0;
 				#else
-					float and_group_vote_product = 1;
+					int and_group_vote_product = 1;
 				#endif
 
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
