@@ -388,11 +388,27 @@ code_update = """
 
 			// If a group node is false, all children are made false.
 			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
-				if (group_node_output[group_node] == NEG_INFINITY) {
-					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
-						if (child_input[group_node*number_of_group_node_children + and_factor] != NEG_INFINITY) {
-							child_input[group_node*number_of_group_node_children + and_factor] = NEG_INFINITY;	
+				#if LOG_SCALE == 1
+					if (group_node_output[group_node] == NEG_INFINITY) {
+						for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+							if (child_input[group_node*number_of_group_node_children + and_factor] >= 0) {
+								child_input[group_node*number_of_group_node_children + and_factor] = NEG_INFINITY;	
+							}
 						}
+					}		
+				#else
+					if (group_node_output[group_node] == 0) {
+						for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+							if (child_input[group_node*number_of_group_node_children + and_factor] > 0) {
+								child_input[group_node*number_of_group_node_children + and_factor] = 0;	
+							}
+						}
+					}
+				#endif
+
+				if (group_node_output[group_node] == -1) {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_input[group_node*number_of_group_node_children + and_factor] = -1;	
 					}
 				}
 			}
@@ -429,24 +445,45 @@ code_update = """
 			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
 				int number_of_non_zero_children = 0;
 
-				if (group_node_output[group_node] == -1) {
-					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
-					}
-				}  else if (group_node_output[group_node] == NEG_INFINITY) {
-					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-						if (child_input[group_node*number_of_group_node_children + or_addend] != NEG_INFINITY) {
-							child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
+				#if LOG_SCALE == 1
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == NEG_INFINITY) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
+							}
+						}
+					} else {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								non_zero_children[number_of_non_zero_children] = or_addend;
+								number_of_non_zero_children++;
+							}
 						}
 					}
-				} else {
-					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-						if (child_input[group_node*number_of_group_node_children + or_addend] != NEG_INFINITY) {
-							non_zero_children[number_of_non_zero_children] = or_addend;
-							number_of_non_zero_children++;
+				#else
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == 0) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+							}
+						}
+					} else {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								non_zero_children[number_of_non_zero_children] = or_addend;
+								number_of_non_zero_children++;
+							}
 						}
 					}
-				}
+				#endif
 
 				if (group_node_output[group_node] != -1) {
 					int selected_child;
@@ -526,27 +563,39 @@ code_update = """
 
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
-				float or_alternatives_vote_max = NEG_INFINITY;
-				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-					if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] > or_alternatives_vote_max) {
-						or_alternatives_vote_max = child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+				#if LOG_SCALE == 1
+					float or_alternatives_vote_max = NEG_INFINITY;
+					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+						if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] > or_alternatives_vote_max) {
+							or_alternatives_vote_max = child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+						}
 					}
-				}
 
-				if (or_alternatives_vote_max != NEG_INFINITY) {
+					if (or_alternatives_vote_max != NEG_INFINITY) {
+						// Sum up votes from each or alternative
+						float or_alternatives_vote_sum = 0;
+						for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+							// Aggregates or alternatives through summation
+							
+							or_alternatives_vote_sum += exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
+						}
+
+						// Store vote sum as node output
+						or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
+					} else {
+						or_alternatives_node_output[or_alternatives_node] = NEG_INFINITY;
+					}
+				#else
 					// Sum up votes from each or alternative
 					float or_alternatives_vote_sum = 0;
 					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-						// Aggregates or alternatives through summation
-						
-						or_alternatives_vote_sum += exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
+						// Aggregate same input or alternatives through summation						
+						or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 					}
 
 					// Store vote sum as node output
-					or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
-				} else {
-					or_alternatives_node_output[or_alternatives_node] = NEG_INFINITY;
-				}
+					or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
+				#endif
 			}
 		}
 
@@ -583,28 +632,37 @@ code_update = """
 
 			// Add up the votes from each clause
 			for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
-				float clause_output_max = NEG_INFINITY;
-				for (int clause = 0; clause < CLAUSES; ++clause) {
-					if (clause_output[clause] > clause_output_max) {
-						clause_output_max = clause_output[clause];
-					}
-				}
-
-				if (clause_output_max != NEG_INFINITY) {
-					float weighted_clause_output_sum = 0;
+				#if LOG_SCALE == 1
+					float clause_output_max = NEG_INFINITY;
 					for (int clause = 0; clause < CLAUSES; ++clause) {
-						weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
+						if (clause_output[clause] > clause_output_max) {
+							clause_output_max = clause_output[clause];
+						}
 					}
 
-					if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
-						float sign = (1 - 2 * (weighted_clause_output_sum < 0));
-						class_sum[class_id] = sign*THRESHOLD;
+					if (clause_output_max != NEG_INFINITY) {
+						float weighted_clause_output_sum = 0;
+						for (int clause = 0; clause < CLAUSES; ++clause) {
+							weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
+						}
+
+						if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
+							float sign = (1 - 2 * (weighted_clause_output_sum < 0));
+							class_sum[class_id] = sign*THRESHOLD;
+						} else {
+							class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
+						}
 					} else {
-						class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
+						class_sum[class_id] = 0;
 					}
-				} else {
-					class_sum[class_id] = 0;
-				}
+				#else
+					for (int clause = 0; clause < CLAUSES; ++clause) {
+						if (child_input[clause]) {
+							int clause_weight = clause_weights[class_id*CLAUSES + clause];
+							class_sum[class_id] += clause_weight * child_input[clause];				
+						}
+					}
+				#endif
 			}
 		}
 
@@ -682,7 +740,11 @@ code_update = """
 						printf("%f\\n", local_class_sum);
 					}
 
-					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != NEG_INFINITY, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					#if LOG_SCALE == 1
+						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != NEG_INFINITY, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					#else
+						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != 0, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					#endif
 				}
 			}
 		
@@ -767,7 +829,12 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != NEG_INFINITY, y[example*number_of_outputs + class_id], local_class_sum);
+
+					#if LOG_SCALE == 1
+						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != NEG_INFINITY, y[example*number_of_outputs + class_id], local_class_sum);
+					#else
+						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != 0, y[example*number_of_outputs + class_id], local_class_sum);
+					#endif
 				}
 			}
 		
