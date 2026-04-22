@@ -329,8 +329,8 @@ class CommonTsetlinMachine():
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-				self.evaluate_or_alternatives.prepared_call(
-				#self.evaluate_or_alternatives_log.prepared_call(
+				#self.evaluate_or_alternatives.prepared_call(
+				self.evaluate_or_alternatives_log.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
