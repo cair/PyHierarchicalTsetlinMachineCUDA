@@ -501,7 +501,7 @@ code_update = """
 				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
 
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					float local_class_sum = class_sum[class_id];
+				 	int local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
@@ -524,7 +524,8 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights_log(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, float *class_sum, int *y, int example)
+		//__global__ void update_weights_log(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, float *class_sum, int *y, int example)
+		__global__ void update_weights_log(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, int *class_sum, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -534,7 +535,7 @@ code_update = """
 
 			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
 				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
-					float local_class_sum = class_sum[class_id];
+					int local_class_sum = class_sum[class_id];
 					if (local_class_sum > THRESHOLD) {
 						local_class_sum = THRESHOLD;
 					} else if (local_class_sum < -THRESHOLD) {
