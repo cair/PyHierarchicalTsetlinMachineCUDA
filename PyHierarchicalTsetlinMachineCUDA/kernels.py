@@ -44,8 +44,8 @@ code_header = """
 code_update = """
 	extern "C"
     {
-    	__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, float *clause_weight, int clause_output, int y, float class_sum);
-    	__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, float *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum);
+    	__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, float class_sum);
+    	__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum);
 
     	// Increment the states of each of those 32 Tsetlin Automata flagged in the active bit vector.
 		__device__ inline void inc(unsigned int *ta_state, int chunk, unsigned int active)
