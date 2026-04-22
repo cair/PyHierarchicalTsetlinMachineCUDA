@@ -136,12 +136,6 @@ class CommonTsetlinMachine():
 		self.update_hierarchy = mod_update.get_function("update_hierarchy")
 		self.update_hierarchy.prepare("PiPPPiPPPPPi")
 
-		self.update_hierarchy = mod_update.get_function("update_hierarchy")
-		self.update_hierarchy.prepare("PiPPPiPPPPPi")
-
-		self.update_weights = mod_update.get_function("update_weights")
-		self.update_weights.prepare("PiiPPPPi")
-
 		self.update_weights = mod_update.get_function("update_weights")
 		self.update_weights.prepare("PiiPPPPi")
 
@@ -151,32 +145,17 @@ class CommonTsetlinMachine():
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPPP")
 
-		self.evaluate_final = mod_update.get_function("evaluate_final")
-		self.evaluate_final.prepare("iPPP")
-
-		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
-		self.evaluate_and_groups.prepare("PPii")
-
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
 
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
-
-		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
-		self.propagate_and_group_false_truth_values.prepare("PPii")
-
-		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
-		self.propagate_or_group_false_truth_values.prepare("PPPii")
 
 		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
 		self.propagate_or_group_false_truth_values.prepare("PPPii")
 
 		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
 		self.evaluate_or_groups.prepare("PPii")
-
-		self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
-		self.evaluate_or_alternatives.prepare("PPii")
 
 		self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
 		self.evaluate_or_alternatives.prepare("PPii")
