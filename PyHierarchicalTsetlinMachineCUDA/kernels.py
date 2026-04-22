@@ -657,9 +657,9 @@ code_update = """
 					}
 				#else
 					for (int clause = 0; clause < CLAUSES; ++clause) {
-						if (child_input[clause]) {
+						if (clause_output[clause]) {
 							int clause_weight = clause_weights[class_id*CLAUSES + clause];
-							class_sum[class_id] += clause_weight * child_input[clause];				
+							class_sum[class_id] += clause_weight * clause_output[clause];				
 						}
 					}
 				#endif
