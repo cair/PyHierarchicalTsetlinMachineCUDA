@@ -548,7 +548,7 @@ code_update = """
 					#if LOG_SCALE == 1
 						update_clause_weight_log(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != NEG_INFINITY, y[example*number_of_outputs + class_id], local_class_sum);
 					#else
-						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
+						update_clause_weight_log(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
 					#endif
 				}
 			}
