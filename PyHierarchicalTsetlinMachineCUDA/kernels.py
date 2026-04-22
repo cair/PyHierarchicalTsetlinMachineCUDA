@@ -23,7 +23,7 @@ code_header = """
 	
 	#define INT_SIZE 32ULL
 
-	#define NEG_INFINITY = -INFINITY
+	#define NEG_INFINITY = (-1*INFINITY)
 
 	#if (LITERALS_PER_LEAF % 32 != 0)
 	#define FILTER_HIERARCHICAL (~(0xffffffff << (LITERALS_PER_LEAF % INT_SIZE)))
@@ -524,8 +524,8 @@ code_prepare = """
 
 
 			if (index == 0) {
-				printf("%f == %f\\n", 34.0, exp2(log2f(34)));
-				printf("%f == %f\\n", 0.0, exp2(NEG_INFINITY));
+				printf("%f == %f\\n", 34.0, exp2f(log2f(34)));
+				printf("%f == %f\\n", 0.0, exp2f(NEG_INFINITY));
 			}
 
 			curandState localState = state[index];
