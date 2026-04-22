@@ -84,7 +84,7 @@ code_update = """
 			} 
 		}
 
-		__device__ inline void update_clause_weight_log(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, float class_sum)
+		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, float class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
@@ -144,7 +144,7 @@ code_update = """
 			}
 		}
 
-		__device__ inline void update_component_hierarchy_log(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
+		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 
@@ -235,7 +235,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves_log(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -325,7 +325,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups_log(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -381,7 +381,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values_log(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -431,7 +431,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values_log(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -556,7 +556,7 @@ code_update = """
 			state[index] = localState;
 		}
 
-		__global__ void evaluate_or_alternatives_log(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -625,7 +625,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final_log(int number_of_outputs, float *clause_output, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *clause_output, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -683,7 +683,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy_log(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -813,7 +813,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights_log(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, float *class_sum, int *y, int example)
+		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, float *class_sum, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
