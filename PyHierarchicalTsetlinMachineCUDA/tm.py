@@ -433,8 +433,8 @@ class CommonTsetlinMachine():
 
 				# Updates the clause weights
 				if (self.tm_type in [WEIGHTED_TM, COALESCED_TM]):
-					self.update_weights.prepared_call(
-					#self.update_weights_log.prepared_call(
+					#self.update_weights.prepared_call(
+					self.update_weights_log.prepared_call(
 						self.grid,
 						self.block,
 						self.cuda_rng.state,
