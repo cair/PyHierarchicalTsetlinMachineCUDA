@@ -316,7 +316,7 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		cuda.memcpy_dtoh(self.clause_output, self.self.hierarchy_votes[self.depth-1])
+		cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
