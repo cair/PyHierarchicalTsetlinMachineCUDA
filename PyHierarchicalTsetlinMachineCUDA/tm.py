@@ -318,14 +318,14 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		print("MAX", gpuarray.max(self.clause_output))
+		clause_output_max = gpuarray.max(self.clause_output)
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
 			self.grid,
 			self.block,
 			np.int32(self.number_of_outputs),
 			self.hierarchy_votes[self.depth-1],
-			np.float32(gpuarray.max(self.clause_output)),
+			clause_output_max,
 			self.clause_weights_gpu,
 			self.class_sum_gpu
 		)
