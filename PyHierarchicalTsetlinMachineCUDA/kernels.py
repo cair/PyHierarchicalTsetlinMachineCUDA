@@ -875,8 +875,38 @@ code_update = """
 			state[index] = localState;
 		}
 
+
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *clause_output, int *class_sum, int *y, int example)
+		__global__ void update_weights_log(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *clause_output, int *class_sum, int *y, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+
+			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
+				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
+					float local_class_sum = class_sum[class_id];
+					if (local_class_sum > THRESHOLD) {
+						local_class_sum = THRESHOLD;
+					} else if (local_class_sum < -THRESHOLD) {
+						local_class_sum = -THRESHOLD;
+					}
+
+					#if LOG_SCALE == 1
+						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != NEG_INFINITY, y[example*number_of_outputs + class_id], local_class_sum);
+					#else
+						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
+					#endif
+				}
+			}
+		
+			state[index] = localState;
+		}
+
+		// Update state of Tsetlin Automata team
+		__global__ void update_weights_old(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *clause_output, int *class_sum, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
