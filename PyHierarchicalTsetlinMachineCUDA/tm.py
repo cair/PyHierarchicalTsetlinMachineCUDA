@@ -146,7 +146,7 @@ class CommonTsetlinMachine():
 		self.evaluate_final.prepare("iPPP")
 
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
-		#self.evaluate_and_groups.prepare("PPii")
+		self.evaluate_and_groups.prepare("PPii")
 
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
@@ -189,7 +189,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
-		self.hierarchy_votes.append(GPUArray(self.number_of_clauses, dtype=np.float32))
+		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
 
 		# GPU memory for storing hierarchy structure
 		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
@@ -203,7 +203,7 @@ class CommonTsetlinMachine():
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
-		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
+		self.class_sum_gpu = GPUArray(self.number_of_outputs, dtype=np.float32) #cuda.mem_alloc(self.number_of_outputs*4)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -282,15 +282,13 @@ class CommonTsetlinMachine():
 		# Propagates votes bottom-up in the hierarchy, starting from the clause components (leaves)
 		for d in range(1, self.depth):
 			if (self.hierarchy_structure[d][0] == AND_GROUP):
-				self.evaluate_and_groups(
+				self.evaluate_and_groups.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
 					self.hierarchy_votes[d],
 					self.hierarchy_size[d + 1],
-					self.hierarchy_structure[d][1],
-					grid=self.grid,
-					block=self.block
+					self.hierarchy_structure[d][1]
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_GROUP:
