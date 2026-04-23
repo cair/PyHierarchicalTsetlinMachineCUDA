@@ -318,6 +318,9 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
+
+		print("MAX", self.clause_output.max())
+
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
 			self.grid,
