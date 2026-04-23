@@ -189,9 +189,8 @@ class CommonTsetlinMachine():
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
-		#self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
-		self.clause_output = gpuarray.to_gpu(np.zeros(self.number_of_clauses, dtype=np.float32))
-		self.hierarchy_votes.append(self.clause_output.gpudata)
+		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
+		self.clause_output = np.empty(self.number_of_clauses, dtype=np.float32)
 
 		# GPU memory for storing hierarchy structure
 		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
@@ -317,8 +316,7 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		clause_output = self.clause_output.get()
-		clause_output_max = clause_output.max()
+		cuda.memcpy_dtoh(self.clause_output, self.self.hierarchy_votes[self.depth-1])
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
