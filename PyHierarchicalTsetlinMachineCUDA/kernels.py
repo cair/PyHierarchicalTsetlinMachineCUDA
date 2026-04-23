@@ -366,7 +366,7 @@ code_update = """
 			// Add up the votes of each OR node child
 			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
 				// Add OR addends
-				int or_group_vote_sum = 0;
+
 				int max_vote_sum = 0;
         
 				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
@@ -375,16 +375,8 @@ code_update = """
 					if (child_input[or_group_node*number_of_or_group_addends + or_addend] > max_vote_sum) {
 						max_vote_sum = child_input[or_group_node*number_of_or_group_addends + or_addend];
 					}
-
-					int previous_or_group_vote_sum = or_group_vote_sum; 
-					or_group_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
-					if (or_group_vote_sum < 0) {
-						printf("OR* OVERFLOW %d -> %d\\n", previous_or_group_vote_sum, or_group_vote_sum);						
-						or_group_vote_sum = previous_or_group_vote_sum;
-					}
 				}
 
-				//or_group_node_output[or_group_node] = or_group_vote_sum;
 				or_group_node_output[or_group_node] = max_vote_sum;
 			}
 		}
@@ -502,6 +494,79 @@ code_update = """
 		}
 
 		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int non_zero_children[361];
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				int number_of_non_zero_children = 0;
+
+				#if LOG_SCALE == 1
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == NEG_INFINITY) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
+							}
+						}
+					} else {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								non_zero_children[number_of_non_zero_children] = or_addend;
+								number_of_non_zero_children++;
+							}
+						}
+					}
+				#else
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == 0) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+							}
+						}
+					} else {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								non_zero_children[number_of_non_zero_children] = or_addend;
+								number_of_non_zero_children++;
+							}
+						}
+					}
+				#endif
+
+				if (group_node_output[group_node] != -1) {
+					int selected_child;
+					if (number_of_non_zero_children > 0) {
+						selected_child = non_zero_children[curand(&localState) % number_of_non_zero_children];
+					} else {
+						selected_child = curand(&localState) % number_of_group_node_children;
+					}
+					
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (selected_child != or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;
+						}
+					}
+				}
+			}
+
+			state[index] = localState;
+		}
+
+		__global__ void propagate_or_group_false_truth_values_old(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
