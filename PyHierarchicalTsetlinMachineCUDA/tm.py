@@ -28,7 +28,7 @@ import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
 from pycuda import gpuarray
-from gpuarray import GPUArray 
+from pycuda.gpuarray import GPUArray 
 import sys
 
 from time import time
