@@ -746,8 +746,76 @@ code_update = """
 			}
 		}
 
+				// Update state of Tsetlin Automata team
+		__global__ void update_hierarchy_log(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+			
+			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
+
+			// Calculate clause output first
+			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				if (component_output[clause_component] == -1) {
+					continue;
+				}
+
+				int clause = clause_component / COMPONENTS;
+				int component = clause_component % COMPONENTS;
+
+				// Get state of current clause component
+
+				int component_remainder = component;
+				int feature_chunk_base = 0;
+				int ta_chunk_base = 0;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
+				for (int d = 0; d < depth-1; ++d) {
+					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
+					component_remainder = component_remainder / hierarchy_structure_factors[d];
+
+					if (hierarchy_structure_type[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_type[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
+					}
+				}
+
+				// Get state of current ta team component
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
+
+				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
+					float local_class_sum = class_sum[class_id];
+					if (local_class_sum > THRESHOLD) {
+						local_class_sum = THRESHOLD;
+					} else if (local_class_sum < -THRESHOLD) {
+						local_class_sum = -THRESHOLD;
+					}
+
+					if (index == 0 && example == 0) {
+						printf("%f\\n", local_class_sum);
+					}
+
+					#if LOG_SCALE == 1
+						update_component_hierarchy_log(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != NEG_INFINITY, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					#else
+						update_component_hierarchy_log(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] > 0, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					#endif
+				}
+			}
+		
+			state[index] = localState;
+		}
+
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy_old(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
