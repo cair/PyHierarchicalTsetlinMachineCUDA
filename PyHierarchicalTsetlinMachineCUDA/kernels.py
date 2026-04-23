@@ -451,6 +451,40 @@ code_update = """
 		}
 
 		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		//__global__ void propagate_and_group_false_truth_values_log(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				#if LOG_SCALE == 1
+					if (group_node_output[group_node] == NEG_INFINITY) {
+						for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+							if (child_input[group_node*number_of_group_node_children + and_factor] >= 0) {
+								child_input[group_node*number_of_group_node_children + and_factor] = NEG_INFINITY;	
+							}
+						}
+					}		
+				#else
+					if (group_node_output[group_node] == 0) {
+						for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+							if (child_input[group_node*number_of_group_node_children + and_factor] > 0) {
+								child_input[group_node*number_of_group_node_children + and_factor] = 0;	
+							}
+						}
+					}
+				#endif
+
+				if (group_node_output[group_node] == -1) {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_input[group_node*number_of_group_node_children + and_factor] = -1;	
+					}
+				}
+			}
+		}
+
+		__global__ void propagate_and_group_false_truth_values_old(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
