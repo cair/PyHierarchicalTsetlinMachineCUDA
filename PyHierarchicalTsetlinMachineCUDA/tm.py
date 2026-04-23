@@ -325,7 +325,7 @@ class CommonTsetlinMachine():
 			self.block,
 			np.int32(self.number_of_outputs),
 			self.hierarchy_votes[self.depth-1],
-			clause_output_max,
+			np.float32(clause_output_max),
 			self.clause_weights_gpu,
 			self.class_sum_gpu
 		)
