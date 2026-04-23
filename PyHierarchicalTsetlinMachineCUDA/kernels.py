@@ -21,7 +21,7 @@
 code_header = """
 	#include <curand_kernel.h>
 	
-	#define LOG_SCALE 0
+	#define LOG_SCALE 1
 
 	#define INT_SIZE 32ULL
 
