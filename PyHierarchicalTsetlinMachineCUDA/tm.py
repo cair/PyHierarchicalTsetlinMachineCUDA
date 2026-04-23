@@ -143,7 +143,7 @@ class CommonTsetlinMachine():
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
 		self.evaluate_final = mod_update.get_function("evaluate_final")
-		self.evaluate_final.prepare("iPiPP")
+		self.evaluate_final.prepare("iPfPP")
 
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
