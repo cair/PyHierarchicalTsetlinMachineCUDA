@@ -699,7 +699,6 @@ code_update = """
 			// Add up the votes from each clause
 			for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
 				#if LOG_SCALE == 1
-	
 					if (clause_output_max != NEG_INFINITY) {
 						float weighted_clause_output_sum = 0;
 						for (int clause = 0; clause < CLAUSES; ++clause) {
