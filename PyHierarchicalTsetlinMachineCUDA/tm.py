@@ -320,8 +320,6 @@ class CommonTsetlinMachine():
 		clause_output = self.clause_output.get()
 		clause_output_max = clause_output.max()
 
-		print(clause_output)
-
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
 			self.grid,
