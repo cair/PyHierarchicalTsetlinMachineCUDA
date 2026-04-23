@@ -189,7 +189,7 @@ class CommonTsetlinMachine():
 		self.hierarchy_votes = []
 		for d in range(1, self.depth):
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
-		self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
+		self.hierarchy_votes.append(GPUArray(self.number_of_clauses, dtype=np.float32))
 
 		# GPU memory for storing hierarchy structure
 		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
@@ -203,7 +203,7 @@ class CommonTsetlinMachine():
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
-		self.class_sum_gpu = GPUArray(self.number_of_outputs, dtype=np.float32) #cuda.mem_alloc(self.number_of_outputs*4)
+		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
