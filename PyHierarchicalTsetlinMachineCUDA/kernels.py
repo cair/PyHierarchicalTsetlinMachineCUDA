@@ -159,7 +159,7 @@ code_update = """
 		}
 
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, int *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
+		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -212,7 +212,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_groups(int *child_input, int *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		__global__ void evaluate_or_groups(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -243,7 +243,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_and_groups(int *child_input, int *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
+		__global__ void evaluate_and_groups(float *child_input, float *and_group_node_output, int number_of_and_group_nodes, int number_of_and_group_factors)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -275,7 +275,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_and_group_false_truth_values(int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_and_group_false_truth_values(float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -292,7 +292,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values(curandState *state, int *child_input, int *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -344,7 +344,7 @@ code_update = """
 			state[index] = localState;
 		}
 
-		__global__ void evaluate_or_alternatives(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -371,7 +371,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, int *child_input, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *child_input, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -381,14 +381,14 @@ code_update = """
 				if (child_input[clause]) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						int clause_weight = clause_weights[class_id*CLAUSES + clause];
-						atomicAdd(&class_sum[class_id], clause_weight * child_input[clause]);					
+						atomicAdd(&class_sum[class_id], (int) clause_weight * child_input[clause]);					
 					}
 				}
 			}
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, int *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -441,7 +441,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
+					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, (int) component_output[clause_component], &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
@@ -449,7 +449,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, int *clause_output, int *class_sum, int *y, int example)
+		__global__ void update_weights(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *clause_output, int *class_sum, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -465,7 +465,7 @@ code_update = """
 					} else if (local_class_sum < -THRESHOLD) {
 						local_class_sum = -THRESHOLD;
 					}
-					update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause], y[example*number_of_outputs + class_id], local_class_sum);
+					update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], (int) clause_output[clause], y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
