@@ -84,7 +84,37 @@ code_update = """
 			} 
 		}
 
-		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, int class_sum)
+		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, float *clause_weight, int clause_output, int y, int class_sum)
+		{
+			int target = 1 - 2*(class_sum > y);
+			
+			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
+				return;
+			}
+
+			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
+		
+			float absolute_prediction_error = fabsf(y - class_sum);
+			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+				if (target*sign > 0) {
+					if (clause_output && abs(*clause_weight) < INT_MAX) {
+						(*clause_weight) += sign;
+					}
+				} else if (target*sign < 0 && clause_output) {
+					// Type II Feedback
+
+					(*clause_weight) -= sign;
+					
+					#if FLIP_POLARITY == 0
+						if (*clause_weight == 0) {
+							*clause_weight += sign;
+						}
+					#endif
+				}
+			}
+		}
+
+		__device__ inline void update_clause_weight_old(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
