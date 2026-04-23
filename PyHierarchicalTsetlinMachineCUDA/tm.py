@@ -319,7 +319,7 @@ class CommonTsetlinMachine():
 
 		clause_output_max = np.float32(gpuarray.max(self.clause_output).get())
 
-		print("MAX", gpuarray.max(self.clause_output))
+		print("MAX", clause_output_max)
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
