@@ -21,6 +21,8 @@
 code_header = """
 	#include <curand_kernel.h>
 	
+	#define LOG_SCALE 0
+
 	#define INT_SIZE 32ULL
 
 	#if (LITERALS_PER_LEAF % 32 != 0)
@@ -158,8 +160,77 @@ code_update = """
 			}
 		}
 
+				// Evaluate example
+		__global__ void evaluate_leaves_log(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int *Xi = &X[(unsigned long long)example*LITERAL_CHUNKS];
+
+			// Evaluate each clause component (leaf) in separate threads
+			for (int clause_component = index; clause_component < CLAUSES*COMPONENTS; clause_component += stride) {
+				int clause = clause_component / COMPONENTS;
+				int component = clause_component % COMPONENTS;
+
+				int component_remainder = component;
+				int feature_chunk_base = 0;
+				int ta_chunk_base = 0;
+				int size_feature_chunk_base = 1;
+				int size_ta_chunk_base = 1;
+				for (int d = 0; d < depth-1; ++d) {
+					int depth_d_node_index = component_remainder % hierarchy_structure_factors[d];
+					component_remainder = component_remainder / hierarchy_structure_factors[d];
+
+					if (hierarchy_structure_type[d] != 1) {
+						feature_chunk_base += size_feature_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_feature_chunk_base *= hierarchy_structure_factors[d];
+					}
+
+					if (hierarchy_structure_type[d] != 2) {
+						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
+						size_ta_chunk_base *= hierarchy_structure_factors[d];
+					}
+				}
+
+				// Get state of current ta team component
+				unsigned int *ta_state = &global_ta_state[clause*COMPONENTS*TA_CHUNKS_PER_LEAF*STATE_BITS + ta_chunk_base*STATE_BITS];
+
+				// Evaluate clause component
+
+				#if LOG_SCALE == 1
+					float component_output = 0;
+				#else
+					float component_output = 1;
+				#endif
+
+				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
+					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
+					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+						#if LOG_SCALE == 1
+							component_output = NEG_INFINITY;
+						#else
+							component_output = 0;
+						#endif
+							
+						break;
+					}
+				}
+
+				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+					#if LOG_SCALE == 1
+						component_output = NEG_INFINITY;
+					#else
+						component_output = 0;
+					#endif
+				}
+
+				global_component_output[clause_component] = component_output;
+			}
+		}
+
 		// Evaluate example
-		__global__ void evaluate_leaves(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
+		__global__ void evaluate_leaves_old(unsigned int *global_ta_state, int *component_weights, float *global_component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, int *X, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
