@@ -706,10 +706,6 @@ code_update = """
 						}
 					}
 
-					if (clause_output_max != max_clause_output) {
-						printf("%f != %d\\n", clause_output_max, max_clause_output);
-					}
-
 					if (clause_output_max != NEG_INFINITY) {
 						float weighted_clause_output_sum = 0;
 						for (int clause = 0; clause < CLAUSES; ++clause) {
