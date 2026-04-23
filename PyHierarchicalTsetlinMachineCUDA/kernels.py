@@ -84,7 +84,7 @@ code_update = """
 			} 
 		}
 
-		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, float *clause_weight, int clause_output, int y, int class_sum)
+		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, int class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
 			
