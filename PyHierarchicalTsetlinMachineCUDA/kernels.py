@@ -689,7 +689,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final_log(int number_of_outputs, float *clause_output, int *clause_weights, int *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *clause_output, int *clause_weights, int *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
