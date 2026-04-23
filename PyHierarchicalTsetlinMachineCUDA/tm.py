@@ -190,7 +190,9 @@ class CommonTsetlinMachine():
 		for d in range(1, self.depth):
 			self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*int(self.hierarchy_size[d])*4))
 		#self.hierarchy_votes.append(cuda.mem_alloc(self.number_of_clauses*4))
-		self.hierarchy_votes.append(gpuarray.to_gpu(np.empty(self.number_of_clauses)).gpudata)
+		self.clause_output = gpuarray.to_gpu(np.empty(self.number_of_clauses))
+		self.hierarchy_votes.append(self.clause_output.gpudata)
+		print(self.hierarchy_size[d], self.clause_output)
 
 		# GPU memory for storing hierarchy structure
 		self.hierarchy_structure_factors_gpu = cuda.mem_alloc((self.depth-1)*4)
