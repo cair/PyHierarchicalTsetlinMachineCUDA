@@ -318,6 +318,7 @@ class CommonTsetlinMachine():
 				sys.exit()
 
 		clause_output = self.clause_output.get()
+		clause_output_max = clause_output.max()
 
 		print(clause_output)
 
