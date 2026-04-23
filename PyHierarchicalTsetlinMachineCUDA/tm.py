@@ -146,7 +146,7 @@ class CommonTsetlinMachine():
 		self.evaluate_final.prepare("iPPP")
 
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
-		self.evaluate_and_groups.prepare("PPii")
+		#self.evaluate_and_groups.prepare("PPii")
 
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
@@ -282,13 +282,15 @@ class CommonTsetlinMachine():
 		# Propagates votes bottom-up in the hierarchy, starting from the clause components (leaves)
 		for d in range(1, self.depth):
 			if (self.hierarchy_structure[d][0] == AND_GROUP):
-				self.evaluate_and_groups.prepared_call(
+				self.evaluate_and_groups(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
 					self.hierarchy_votes[d],
 					self.hierarchy_size[d + 1],
-					self.hierarchy_structure[d][1]
+					self.hierarchy_structure[d][1],
+					grid=self.grid,
+					block=self.block
 				)
 				cuda.Context.synchronize()
 			elif self.hierarchy_structure[d][0] == OR_GROUP:
