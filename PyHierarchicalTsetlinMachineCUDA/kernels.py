@@ -23,6 +23,8 @@ code_header = """
 	
 	#define LOG_SCALE 1
 
+	#define NEG_INFINITY (-1 * INFINITY)
+
 	#define INT_SIZE 32ULL
 
 	#if (LITERALS_PER_LEAF % 32 != 0)
