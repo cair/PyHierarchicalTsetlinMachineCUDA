@@ -106,6 +106,8 @@ class CommonTsetlinMachine():
 		else:
 			self.cuda_rng = curandom.XORWOWRandomNumberGenerator() 
 
+		self.class_sum = np.empty(self.number_of_outputs, dtype=np.float32)
+
 		self.cuda_modules()
 
 		self.first = True
@@ -262,7 +264,7 @@ class CommonTsetlinMachine():
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
-		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		self.class_sum[:] = 0
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
@@ -330,6 +332,10 @@ class CommonTsetlinMachine():
 			self.class_sum_gpu
 		)
 		cuda.Context.synchronize()
+
+		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
+		self.class_sum *= clause_output_max
+		cuda.memcpy_dtoh(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
@@ -428,14 +434,12 @@ class CommonTsetlinMachine():
 		self.encode_X(X, encoded_X_hierarchy_test_gpu)
 
 		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
-		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
 
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
-			cuda.memcpy_dtoh(class_sum_example, self.class_sum_gpu)
-			class_sum[:, e] = class_sum_example
-		
+			class_sum[:, e] = self.class_sum
+				
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
 		return class_sum
