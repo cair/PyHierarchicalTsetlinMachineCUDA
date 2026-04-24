@@ -701,7 +701,7 @@ code_update = """
 				if (clause_output_max != NEG_INFINITY) {
 					for (int clause = index; clause < CLAUSES; clause += stride) {
 						for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
+							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max));
 						}
 					}
 				}
