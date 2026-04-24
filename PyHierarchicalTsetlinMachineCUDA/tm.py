@@ -334,7 +334,7 @@ class CommonTsetlinMachine():
 
 		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
 		self.class_sum *= clause_output_max
-		cuda.memcpy_dtoh(self.class_sum_gpu, self.class_sum)
+		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
