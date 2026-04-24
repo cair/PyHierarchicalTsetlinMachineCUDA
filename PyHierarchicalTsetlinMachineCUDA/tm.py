@@ -106,8 +106,6 @@ class CommonTsetlinMachine():
 		else:
 			self.cuda_rng = curandom.XORWOWRandomNumberGenerator() 
 
-		self.class_sum = np.empty(self.number_of_outputs, dtype=np.float32)
-
 		self.cuda_modules()
 
 		self.first = True
@@ -207,7 +205,8 @@ class CommonTsetlinMachine():
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
-
+		self.class_sum = np.empty(self.number_of_outputs, dtype=np.float32)
+		
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
 		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
@@ -439,7 +438,7 @@ class CommonTsetlinMachine():
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
 			class_sum[:, e] = self.class_sum
-				
+
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
 		return class_sum
