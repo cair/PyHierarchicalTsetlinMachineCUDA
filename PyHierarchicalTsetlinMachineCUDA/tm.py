@@ -206,7 +206,7 @@ class CommonTsetlinMachine():
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 		self.class_sum = np.empty(self.number_of_outputs, dtype=np.float32)
-		
+
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
 		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
@@ -264,7 +264,7 @@ class CommonTsetlinMachine():
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
 		self.class_sum[:] = 0
-		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
+		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
 		self.evaluate_leaves.prepared_call(
