@@ -334,6 +334,7 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
 		if self.log_scale:
+			print("LOGSCALE")
 			self.max_clause_output.prepared_call(
 				self.grid,
 				self.block,
