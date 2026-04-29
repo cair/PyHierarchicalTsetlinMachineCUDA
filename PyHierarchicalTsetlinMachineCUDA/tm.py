@@ -327,14 +327,10 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		#cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
-		#clause_output_max = self.clause_output.max()
-
 		self.clause_output_max[:] = np.finfo(np.float32).min
 		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
 		if self.log_scale:
-			print("LOGSCALE")
 			self.max_clause_output.prepared_call(
 				self.grid,
 				self.block,
@@ -468,7 +464,7 @@ class CommonTsetlinMachine():
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
 			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-			class_sum[:, e] = self.class_sum
+			class_sum[:, e] = self.class_sum.astype(np.int32)
 	
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
