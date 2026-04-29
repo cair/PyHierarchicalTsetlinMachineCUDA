@@ -699,7 +699,7 @@ code_update = """
 
 			// Add up the votes from each clause
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				atomicMax((int *)&clause_output_max[class_id], __float_as_int(clause_output[clause]));
+				atomicMax((int *)&clause_output_max[0], __float_as_int(clause_output[clause]));
 			}
 		}
 
