@@ -44,12 +44,13 @@ COALESCED_TM = 2
 
 class CommonTsetlinMachine():
 
-	def __init__(self, number_of_clauses, T, s, q=1.0, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
 		self.T = int(T)
 		self.s = s
 		self.q = q
+		self.log_scale = log_scale
 		self.hierarchy_structure = hierarchy_structure
 		self.depth = len(hierarchy_structure)
 
@@ -123,10 +124,11 @@ class CommonTsetlinMachine():
 	#define S %f
 	#define THRESHOLD %d
 	#define Q %f
+	#define LOG_SCALE %d
 
 	#define NEGATIVE_CLAUSES %d
 	#define FLIP_POLARITY %d
-		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.negative_clauses, self.flip_polarity)
+		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.log_scale, self.negative_clauses, self.flip_polarity)
 		
 		mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 		self.prepare_weights = mod_prepare.get_function("prepare_weights")
@@ -331,7 +333,7 @@ class CommonTsetlinMachine():
 		self.clause_output_max[:] = np.finfo(np.float32).min
 		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
-		if True:
+		if self.log_scale:
 			self.max_clause_output.prepared_call(
 				self.grid,
 				self.block,
@@ -353,7 +355,7 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-		if True:
+		if self.log_scale:
 			self.rescale_final.prepared_call(
 				self.grid,
 				self.block,
@@ -362,26 +364,6 @@ class CommonTsetlinMachine():
 				self.class_sum_gpu
 			)
 			cuda.Context.synchronize()
-
-		# if True:#self.log_scale:
-		# 	cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-		# 	cuda.memcpy_dtoh(self.clause_output_max, self.clause_output_max_gpu)
-
-		# 	clause_output_max = self.clause_output_max[0]
-
-		# 	for i in range(self.number_of_outputs):
-		# 		if np.exp2(class_sum[i]) > 0:
-		# 			if np.log2(np.absolute(self.class_sum[i])) + clause_output_max >= np.log2(self.T):
-		# 				if self.class_sum[i] >= 0:
-		# 					self.class_sum[i] = self.T
-		# 				else:
-		# 					self.class_sum[i] = -1*self.T
-		# 			else:
-		# 				self.class_sum[i] *= np.exp2(clause_output_max)
-		# 		else:
-		# 			class_sum[i] = 0
-
-		# 	cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
@@ -689,9 +671,9 @@ class CommonTsetlinMachine():
 
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.negative_clauses = 1
-		super().__init__(number_of_clauses, T, s, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(number_of_clauses, T, s, q=q, log_scale=log_scale, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -715,12 +697,12 @@ class MultiOutputTsetlinMachine(CommonTsetlinMachine):
 		return (self.score(X) >= 0).astype(np.uint32).transpose()
 
 class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.negative_clauses = 1
 		self.tm_type = COALESCED_TM
 		self.flip_polarity = 1
 
-		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(number_of_clauses, T, s, q=q, log_scale=log_scale, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -747,13 +729,14 @@ class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
 		return np.argmax(self.score(X), axis=0)
 
 class MultiClassTsetlinMachine:
-	def __init__(self, number_of_clauses, T, s, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.T = T
 		self.s = s
+		self.q = q
+		self.log_scale = log_scale
 		self.weighted_clauses = weighted_clauses
 		self.hierarchy_structure = hierarchy_structure
-		self.q = q
 		self.boost_true_positive_feedback = boost_true_positive_feedback
 		self.number_of_state_bits = number_of_state_bits
 		self.append_negated = append_negated
@@ -769,7 +752,7 @@ class MultiClassTsetlinMachine:
 		if not self.configured:
 			self.tms = []
 			for i in range(self.number_of_outputs):
-				self.tms.append(TsetlinMachine(self.number_of_clauses, self.T, self.s, weighted_clauses=self.weighted_clauses, hierarchy_structure=self.hierarchy_structure, q=self.q, boost_true_positive_feedback=self.boost_true_positive_feedback, number_of_state_bits=self.number_of_state_bits, append_negated=self.append_negated, grid=self.grid, block=self.block, seed=self.seed+i))
+				self.tms.append(TsetlinMachine(self.number_of_clauses, self.T, self.s, q=self.q, log_scale=self.log_scale, weighted_clauses=self.weighted_clauses, hierarchy_structure=self.hierarchy_structure, boost_true_positive_feedback=self.boost_true_positive_feedback, number_of_state_bits=self.number_of_state_bits, append_negated=self.append_negated, grid=self.grid, block=self.block, seed=self.seed+i))
 
 			self.configured = True
 
@@ -831,7 +814,7 @@ class MultiClassTsetlinMachine:
 		self.configured = True
 
 class TsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), q=1.0, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.negative_clauses = 1
 		self.flip_polarity = 0
 
@@ -840,7 +823,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 		else:
 			self.tm_type = VANILLA_TM
 
-		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, q=q, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(number_of_clauses, T, s, q=q, log_scale=log_scale, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -864,11 +847,11 @@ class TsetlinMachine(CommonTsetlinMachine):
 		return (self.score(X) >= 0).astype(np.int32)
 
 class RegressionTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, log_scale=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.negative_clauses = 0
 		self.flip_polarity = 0
 
-		super().__init__(number_of_clauses, T, s, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(number_of_clauses, T, s, log_scale=log_scale, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
 
 	def fit(self, X, Y, epochs=100, incremental=False):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
