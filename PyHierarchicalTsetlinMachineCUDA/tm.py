@@ -143,7 +143,7 @@ class CommonTsetlinMachine():
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
 		self.max_clause_output = mod_update.get_function("max_clause_output")
-		self.evaluate_final.prepare("iPP")
+		self.max_clause_output.prepare("iPP")
 
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPfPP")
