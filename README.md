@@ -11,7 +11,7 @@ or
 git clone git@github.com:cair/PyHierarchicalTsetlinMachineCUDA.git
 cd PyHierarchicalTsetlinMachineCUDA
 python ./setup.py sdist
-pip install dist/PyHierarchicalTsetlinMachineCUDA-0.2.6.tar.gz 
+pip install dist/PyHierarchicalTsetlinMachineCUDA-0.2.8.tar.gz 
 ```
 
 ## Examples
