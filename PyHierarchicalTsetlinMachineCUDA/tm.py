@@ -142,6 +142,9 @@ class CommonTsetlinMachine():
 		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
+		self.max_clause_output = mod_update.get_function("max_clause_output")
+		self.evaluate_final.prepare("iPP")
+
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPfPP")
 
@@ -206,6 +209,8 @@ class CommonTsetlinMachine():
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
+		self.clause_output_max_gpu = cuda.mem_alloc(self.number_of_outputs*4)
+		self.clause_output_max = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -317,8 +322,24 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
-		clause_output_max = self.clause_output.max()
+		#cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
+		#clause_output_max = self.clause_output.max()
+
+		self.clause_output_max[:] = np.finfo(np.float32).min
+		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
+
+		self.max_clause_output.prepared_call(
+			self.grid,
+			self.block,
+			np.int32(self.number_of_outputs),
+			self.hierarchy_votes[self.depth-1],
+			self.clause_output_max_gpu
+		)
+		cuda.Context.synchronize()
+
+		cuda.memcpy_dtoh(self.clause_output_max, self.clause_output_max_gpu)
+
+		clause_output_max = self.clause_output_max.max()
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
