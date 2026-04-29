@@ -712,7 +712,7 @@ code_update = """
 			#if LOG_SCALE == 1
 				if (clause_output_max[0] != NEG_INFINITY) {
 					for (int clause = index; clause < CLAUSES; clause += stride) {
-						int output = exp2f(clause_output[clause] - clause_output_max[0])
+						int output = exp2f(clause_output[clause] - clause_output_max[0]);
 						for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * output);
 						}
