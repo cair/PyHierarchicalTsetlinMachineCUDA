@@ -148,6 +148,9 @@ class CommonTsetlinMachine():
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPPPP")
 
+		self.rescale_final = mod_update.get_function("rescale_final")
+		self.rescale_final.prepare("iPP")
+
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
 
@@ -350,25 +353,35 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-		if True:#self.log_scale:
-			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-			cuda.memcpy_dtoh(self.clause_output_max, self.clause_output_max_gpu)
-			
-			clause_output_max = self.clause_output_max[0]
+		if True:
+			self.rescale_final.prepared_call(
+				self.grid,
+				self.block,
+				np.int32(self.number_of_outputs),
+				self.clause_output_max_gpu,
+				self.class_sum_gpu
+			)
+			cuda.Context.synchronize()
 
-			for i in range(self.number_of_outputs):
-				if np.exp2(class_sum[i]) > 0:
-					if np.log2(np.absolute(self.class_sum[i])) + clause_output_max >= np.log2(self.T):
-						if self.class_sum[i] >= 0:
-							self.class_sum[i] = self.T
-						else:
-							self.class_sum[i] = -1*self.T
-					else:
-						self.class_sum[i] *= np.exp2(clause_output_max)
-				else:
-					class_sum[i] = 0
+		# if True:#self.log_scale:
+		# 	cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
+		# 	cuda.memcpy_dtoh(self.clause_output_max, self.clause_output_max_gpu)
 
-			cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
+		# 	clause_output_max = self.clause_output_max[0]
+
+		# 	for i in range(self.number_of_outputs):
+		# 		if np.exp2(class_sum[i]) > 0:
+		# 			if np.log2(np.absolute(self.class_sum[i])) + clause_output_max >= np.log2(self.T):
+		# 				if self.class_sum[i] >= 0:
+		# 					self.class_sum[i] = self.T
+		# 				else:
+		# 					self.class_sum[i] = -1*self.T
+		# 			else:
+		# 				self.class_sum[i] *= np.exp2(clause_output_max)
+		# 		else:
+		# 			class_sum[i] = 0
+
+		# 	cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:

@@ -745,6 +745,27 @@ code_update = """
 			}
 		}
 
+		__global__ void rescale_final(int number_of_outputs, float *clause_output_max, int *class_sum)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes from each clause
+
+			if (clause_output_max[0] > NEG_INFINITY) {
+				for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
+					float rescaled_class_sum = log2f(class_sum[class_id]) + clause_output_max[0];
+					if (rescaled_class_sum >= THRESHOLD) {
+						class_sum[class_id] = THRESHOLD;
+					} else if (rescaled_class_sum <= -1*THRESHOLD) {
+						class_sum[class_id] = -1*THRESHOLD;
+					} else {
+						class_sum[class_id] = exp2f(rescaled_class_sum);
+					}
+				}
+			}
+		}
+
 		// Update state of Tsetlin Automata team
 		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
 		{
