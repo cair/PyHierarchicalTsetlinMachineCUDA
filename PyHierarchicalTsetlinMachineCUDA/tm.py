@@ -337,7 +337,7 @@ class CommonTsetlinMachine():
 
 			for i in range(self.number_of_outputs):
 				if np.exp2(class_sum[i]) > 0:
-					if np.log2(np.log2(np.absolute(self.class_sum[i]))) + clause_output_max >= np.log2(self.T):
+					if np.log2(np.absolute(self.class_sum[i])) + clause_output_max >= np.log2(self.T):
 						if self.class_sum[i] >= 0:
 							self.class_sum[i] = self.T
 						else:
