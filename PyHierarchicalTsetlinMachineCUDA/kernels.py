@@ -691,6 +691,20 @@ code_update = """
 			}
 		}
 
+
+		__global__ void max_clause_output(int number_of_outputs, float *clause_output, float *clause_output_max)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes from each clause
+			for (int clause = index; clause < CLAUSES; clause += stride) {
+				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
+					atomicMax((int *)&clause_output_max[class_id], __float_as_int(clause_output[clause]));
+				}
+			}
+		}
+
 		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float clause_output_max, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;

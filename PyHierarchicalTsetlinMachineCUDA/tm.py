@@ -205,7 +205,7 @@ class CommonTsetlinMachine():
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
-		self.class_sum = np.empty(self.number_of_outputs, dtype=np.float32)
+		self.class_sum = np.ascontiguousarray(np.empy(self.number_of_outputs)).astype(np.int32)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -263,8 +263,8 @@ class CommonTsetlinMachine():
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
-		self.class_sum[:] = 0
-		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
+		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
 		self.evaluate_leaves.prepared_call(
@@ -332,9 +332,17 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-		self.class_sum *= clause_output_max
-		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
+		if self.log_scale:
+			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
+			for i in range(self.number_of_outputs):
+				if np.log2(np.log2(np.absolute(self.class_sum[i]))) + clause_output_max >= np.log2(self.T):
+					if self.class_sum[i] >= 0:
+						self.class_sum[i] = self.T
+					else:
+						self.class_sum[i] = -1*self.T
+				else:
+					self.class_sum[i] *= np.exp2(clause_output_max)
+			cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
@@ -437,8 +445,9 @@ class CommonTsetlinMachine():
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
+			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
 			class_sum[:, e] = self.class_sum
-
+	
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
 		return class_sum
