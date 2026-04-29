@@ -205,7 +205,7 @@ class CommonTsetlinMachine():
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
-		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.int32)
+		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[1]*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
