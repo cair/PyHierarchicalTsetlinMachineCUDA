@@ -335,13 +335,17 @@ class CommonTsetlinMachine():
 		if True:#self.log_scale:
 			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
 			for i in range(self.number_of_outputs):
-				if np.log2(np.log2(np.absolute(self.class_sum[i]))) + clause_output_max >= np.log2(self.T):
-					if self.class_sum[i] >= 0:
-						self.class_sum[i] = self.T
+				if np.exp2(class_sum[i]) > 0:
+					if np.log2(np.log2(np.absolute(self.class_sum[i]))) + clause_output_max >= np.log2(self.T):
+						if self.class_sum[i] >= 0:
+							self.class_sum[i] = self.T
+						else:
+							self.class_sum[i] = -1*self.T
 					else:
-						self.class_sum[i] = -1*self.T
+						self.class_sum[i] *= np.exp2(clause_output_max)
 				else:
-					self.class_sum[i] *= np.exp2(clause_output_max)
+					class_sum[i] = 0
+					
 			cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
