@@ -699,23 +699,22 @@ code_update = """
 
 			// Add up the votes from each clause
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-					atomicMax((int *)&clause_output_max, __float_as_int(clause_output[clause]));
-				}
+				atomicMax((int *)&clause_output_max[class_id], __float_as_int(clause_output[clause]));
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float clause_output_max, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float *clause_output_max, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes from each clause
 			#if LOG_SCALE == 1
-				if (clause_output_max != NEG_INFINITY) {
+				if (clause_output_max[0] != NEG_INFINITY) {
 					for (int clause = index; clause < CLAUSES; clause += stride) {
+						int output = exp2f(clause_output[clause] - clause_output_max[0])
 						for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max));
+							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * output);
 						}
 					}
 				}
