@@ -745,7 +745,7 @@ code_update = """
 			}
 		}
 
-		__global__ void rescale_final(int number_of_outputs, float *clause_output_max, int *class_sum)
+		__global__ void rescale_final(int number_of_outputs, float *clause_output_max, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
