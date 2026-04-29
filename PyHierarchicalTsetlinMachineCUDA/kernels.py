@@ -692,7 +692,7 @@ code_update = """
 		}
 
 
-		__global__ void void max_clause_output(int number_of_outputs, float *clause_output, float *clause_output_max)
+		__global__ void max_clause_output(int number_of_outputs, float *clause_output, float *clause_output_max)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
