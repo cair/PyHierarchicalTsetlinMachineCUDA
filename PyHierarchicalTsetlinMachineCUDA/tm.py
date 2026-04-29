@@ -334,7 +334,7 @@ class CommonTsetlinMachine():
 
 		if True:#self.log_scale:
 			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-			print(self.class_sum)
+
 			for i in range(self.number_of_outputs):
 				if np.exp2(class_sum[i]) > 0:
 					if np.log2(np.log2(np.absolute(self.class_sum[i]))) + clause_output_max >= np.log2(self.T):
