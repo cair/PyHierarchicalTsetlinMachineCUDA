@@ -754,13 +754,15 @@ code_update = """
 
 			if (clause_output_max[0] > NEG_INFINITY) {
 				for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
-					float rescaled_class_sum = log2f(class_sum[class_id]) + clause_output_max[0];
-					if (rescaled_class_sum >= THRESHOLD) {
-						class_sum[class_id] = THRESHOLD;
-					} else if (rescaled_class_sum <= -1*THRESHOLD) {
-						class_sum[class_id] = -1*THRESHOLD;
+					float rescaled_abs_class_sum = log2f(fabsf(class_sum[class_id])) + clause_output_max[0];
+					if (rescaled_class_sum >= log2f(THRESHOLD)) {
+						if (class_sum[class_id] >= 0) {
+							class_sum[class_id] = THRESHOLD;
+						} else {
+							class_sum[class_id] = -1*THRESHOLD;
+						}
 					} else {
-						class_sum[class_id] = exp2f(rescaled_class_sum);
+						class_sum[class_id] = class_sum[class_id] * exp2f(clause_output_max[0]);
 					}
 				}
 			}
