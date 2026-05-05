@@ -152,6 +152,12 @@ code_update = """
 				return;
 			}
 
+			#if LOG_SCALE == 1
+				// ...
+			#else
+				/...
+			#endif
+
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float absolute_prediction_error = fabsf(y - class_sum);
