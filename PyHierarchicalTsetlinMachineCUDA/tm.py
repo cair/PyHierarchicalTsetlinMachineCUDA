@@ -357,7 +357,7 @@ class CommonTsetlinMachine():
 
 		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
 		self.class_sum *= clause_output_max
-		cuda.memcpy_dtoh(self.class_sum_gpu, self.class_sum)
+		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 		# Adds up the votes from each clause (hierarchy root)
 #		self.evaluate_final.prepared_call(
