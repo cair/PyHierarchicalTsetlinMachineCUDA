@@ -701,20 +701,23 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float *clause_output_max, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float clause_output_max, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
-			// Add up the votes from each clause
+
+			for (int clause = index; clause < CLAUSES; clause += stride) {
+				int output = exp2f(clause_output[clause] - clause_output_max);
+				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
+					atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * output);
+				}
+			}
+
+/*			// Add up the votes from each clause
 			#if LOG_SCALE == 1
-				if (clause_output_max[0] != NEG_INFINITY) {
-					for (int clause = index; clause < CLAUSES; clause += stride) {
-						int output = exp2f(clause_output[clause] - clause_output_max[0]);
-						for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * output);
-						}
-					}
+				if (clause_output_max != NEG_INFINITY) {
+					
 				}
 			#else
 				for (int clause = index; clause < CLAUSES; clause += stride) {
@@ -724,7 +727,7 @@ code_update = """
 						}	
 					}
 				}
-			#endif
+			#endif */
 		}
 
 		__global__ void evaluate_final_old(int number_of_outputs, float *child_input, int *clause_weights, int *class_sum)
