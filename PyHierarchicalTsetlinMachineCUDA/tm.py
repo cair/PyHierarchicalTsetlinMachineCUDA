@@ -148,7 +148,7 @@ class CommonTsetlinMachine():
 		self.max_clause_output.prepare("iPP")
 
 		self.evaluate_final = mod_update.get_function("evaluate_final")
-		self.evaluate_final.prepare("iPPPP")
+		self.evaluate_final.prepare("iPfPP")
 
 		self.rescale_final = mod_update.get_function("rescale_final")
 		self.rescale_final.prepare("iPP")
