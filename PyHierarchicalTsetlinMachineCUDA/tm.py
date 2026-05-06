@@ -317,8 +317,8 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
-		clause_output_max = self.clause_output.max()
+#		cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
+#		clause_output_max = self.clause_output.max()
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
@@ -332,9 +332,9 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-		self.class_sum *= clause_output_max
-		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
+#		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
+#		self.class_sum *= clause_output_max
+#		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
