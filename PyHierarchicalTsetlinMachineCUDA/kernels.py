@@ -708,7 +708,12 @@ code_update = """
 
 
 			for (int clause = index; clause < CLAUSES; clause += stride) {
-				int output = exp2f(clause_output[clause] - clause_output_max);
+				#if LOG_SCALE == 1
+					float output = exp2f(clause_output[clause] - clause_output_max);
+				#else
+					float output = clause_output[clause] / clause_output_max;
+				#endif
+
 				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 					atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * output);
 				}
