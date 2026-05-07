@@ -701,7 +701,39 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float *clause_output_max, int *clause_weights, float *class_sum)
+		__global__ void evaluate_final(int number_of_outputs, float *clause_output, float *clause_output_max_org, int *clause_weights, float *class_sum)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes from each clause
+			for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
+				float clause_output_max = NEG_INFINITY;
+				for (int clause = 0; clause < CLAUSES; ++clause) {
+					if (clause_output[clause] > clause_output_max) {
+						clause_output_max = clause_output[clause];
+					}
+				}
+
+				if (clause_output_max != NEG_INFINITY) {
+					float weighted_clause_output_sum = 0;
+					for (int clause = 0; clause < CLAUSES; ++clause) {
+						weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
+					}
+
+					if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
+						float sign = (1 - 2 * (weighted_clause_output_sum < 0));
+						class_sum[class_id] = sign*THRESHOLD;
+					} else {
+						class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
+					}
+				} else {
+					class_sum[class_id] = 0;
+				}
+			}
+		}
+
+		__global__ void evaluate_final_org(int number_of_outputs, float *clause_output, float *clause_output_max, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
