@@ -327,18 +327,18 @@ class CommonTsetlinMachine():
 				printf("Unknown node type!")
 				sys.exit()
 
-		self.clause_output_max[:] = np.finfo(np.float32).min
-		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
+		# self.clause_output_max[:] = np.finfo(np.float32).min
+		# cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
-		if self.log_scale:
-			self.max_clause_output.prepared_call(
-				self.grid,
-				self.block,
-				np.int32(self.number_of_outputs),
-				self.hierarchy_votes[self.depth-1],
-				self.clause_output_max_gpu
-			)
-			cuda.Context.synchronize()
+		# if self.log_scale:
+		# 	self.max_clause_output.prepared_call(
+		# 		self.grid,
+		# 		self.block,
+		# 		np.int32(self.number_of_outputs),
+		# 		self.hierarchy_votes[self.depth-1],
+		# 		self.clause_output_max_gpu
+		# 	)
+		# 	cuda.Context.synchronize()
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
@@ -352,15 +352,15 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-		if self.log_scale:
-			self.rescale_final.prepared_call(
-				self.grid,
-				self.block,
-				np.int32(self.number_of_outputs),
-				self.clause_output_max_gpu,
-				self.class_sum_gpu
-			)
-			cuda.Context.synchronize()
+		# if self.log_scale:
+		# 	self.rescale_final.prepared_call(
+		# 		self.grid,
+		# 		self.block,
+		# 		np.int32(self.number_of_outputs),
+		# 		self.clause_output_max_gpu,
+		# 		self.class_sum_gpu
+		# 	)
+		# 	cuda.Context.synchronize()
 
 	def _fit(self, X, encoded_Y, epochs=100, incremental=False):
 		if self.number_of_features_hierarchy != X.shape[1]:
