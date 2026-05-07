@@ -333,7 +333,7 @@ class CommonTsetlinMachine():
 		)
 		cuda.Context.synchronize()
 
-#		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
+		cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
 #		self.class_sum *= clause_output_max
 #		cuda.memcpy_htod(self.class_sum_gpu, self.class_sum)
 
