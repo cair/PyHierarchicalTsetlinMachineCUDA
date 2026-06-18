@@ -453,14 +453,13 @@ class CommonTsetlinMachine():
 					)
 					cuda.Context.synchronize()
 
-
-			self.print_class_sums.prepared_call(
-		 		self.grid,
-		 		self.block,
-		 		np.int32(self.number_of_outputs),
-		 		self.class_sum_gpu
-		 	)
-		 	cuda.Context.synchronize()
+				self.print_class_sums.prepared_call(
+					self.grid,
+					self.block,
+					np.int32(self.number_of_outputs),
+					self.class_sum_gpu
+				)
+				cuda.Context.synchronize()
 
 		return
        
