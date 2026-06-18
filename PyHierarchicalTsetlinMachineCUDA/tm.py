@@ -153,6 +153,9 @@ class CommonTsetlinMachine():
 		self.rescale_final = mod_update.get_function("rescale_final")
 		self.rescale_final.prepare("iPP")
 
+		self.print_class_sums = mod_update.get_function("print_class_sums")
+		self.print_class_sums.prepare("iP")
+
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
 
@@ -449,6 +452,16 @@ class CommonTsetlinMachine():
 						np.int32(e)
 					)
 					cuda.Context.synchronize()
+
+
+			self.print_class_sums.prepared_call(
+		 		self.grid,
+		 		self.block,
+		 		np.int32(self.number_of_outputs),
+		 		self.class_sum_gpu
+		 	)
+		 	cuda.Context.synchronize()
+
 		return
        
 	def _score(self, X):
