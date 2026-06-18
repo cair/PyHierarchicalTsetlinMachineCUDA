@@ -273,7 +273,7 @@ class CommonTsetlinMachine():
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
-		class_sum = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		class_sum = np.zeros(self.number_of_outputs, dtype=np.float32)
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
 
 		# Evaluates all the hierarchy leaves in parallel
@@ -324,8 +324,7 @@ class CommonTsetlinMachine():
 				)
 				cuda.Context.synchronize()
 			else:
-				printf("Unknown node type!")
-				sys.exit()
+				raise ValueError("Unknown Node Type!")
 
 		self.clause_output_max[:] = np.finfo(np.float32).min
 		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
@@ -542,8 +541,8 @@ class CommonTsetlinMachine():
 		encoded_X_hierarchy_test_gpu = gpuarray.empty((number_of_examples, self.number_of_literal_chunks), dtype=np.uint32)
 		self.encode_X(X, encoded_X_hierarchy_test_gpu.gpudata)
 
-		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
-		class_sum_example = np.ascontiguousarray(np.zeros(self.number_of_outputs)).astype(np.int32)
+		class_sum = np.zeros((self.number_of_outputs, number_of_examples), dtype=np.float32)
+		class_sum_example = np.zeros(self.number_of_outputs, dtype=np.float32)
 		hierarchy_votes = []
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu.gpudata, e)
@@ -553,7 +552,7 @@ class CommonTsetlinMachine():
 
 			hierarchy_votes_example = []
 			for d in range(self.depth):
-				temp_arr = np.empty(self.number_of_clauses*int(self.hierarchy_size[d+1]), dtype=np.int32)
+				temp_arr = np.zeros(self.number_of_clauses*int(self.hierarchy_size[d+1]), dtype=np.float32)
 				cuda.memcpy_dtoh(temp_arr, self.hierarchy_votes[d])
 				hierarchy_votes_example.append(temp_arr.reshape((self.number_of_clauses, int(self.hierarchy_size[d+1]))))
 
