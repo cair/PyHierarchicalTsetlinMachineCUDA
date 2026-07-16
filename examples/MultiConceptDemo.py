@@ -5,7 +5,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 import argparse
 
 clauses = 32
-s = 1.0
+s = 2.1
 T = 64
 elements = 10
 noise = 0.0
@@ -24,7 +24,7 @@ for i in range(examples):
 		X_train[i, j*features + x[0]] = 1
 		X_train[i, j*features + elements + x[1]] = 1
 
-	Y_train[i] = np.logical_xor(x[0] % 2, x[1] % 2)
+	Y_trainr[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
 Y_train = np.where(np.random.rand(examples) <= noise, 1 - Y_train, Y_train)  # Adds noise
 
