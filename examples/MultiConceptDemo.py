@@ -19,10 +19,10 @@ X_train = np.zeros((examples, features*copies), dtype=np.uint32)
 Y_train = np.zeros(examples, dtype=np.uint32)
 for i in range(examples):
     x = np.random.randint(elements, size=(2))
-    
-    for j in range(copies):
-	    X_train[i, j*features + x[0]] = 1
-    	X_train[i, j*features + elements + x[1]] = 1
+
+	for j in range(copies):
+		X_train[i, j*features + x[0]] = 1
+		X_train[i, j*features + elements + x[1]] = 1
    	
    	Y_train[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
