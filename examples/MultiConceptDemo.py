@@ -1,157 +1,56 @@
-import argparse
-import logging
-
-from tmu.models.classification.vanilla_classifier import TMClassifier
+from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
+from time import time
+import PyHierarchicalTsetlinMachineCUDA.tm as tm
+import argparse
 
-_LOGGER = logging.getLogger(__name__)
+clauses = 32
+s = 25.0
+T = 250
+elements = 10
+noise = 0.0
+examples = 5000
+alternatives = 10
+copies = 1
 
-def metrics(args):
-    return dict(
-        accuracy=[],
-        class_0_precision_positive=[],
-        class_0_recall_positive=[],
-        class_0_recall_negative=[],
-        class_0_precision_negative=[],
-        class_1_precision_positive=[],
-        class_1_recall_positive=[],
-        class_1_recall_negative=[],
-        class_1_precision_negative=[],
-        literal_frequency=None,
-        args=vars(args)
-    )
+features = elements*2
 
-def main(args):
-    experiment_results = metrics(args)
+X_train = np.zeros((examples, features*copies), dtype=np.uint32)
+Y_train = np.zeros(examples, dtype=np.uint32)
+for i in range(examples):
+    x = np.random.randint(elements, size=(2))
+    
+    for j in range(copies):
+	    X_train[i, j*features + x[0]] = 1
+    	X_train[i, j*features + elements + x[1]] = 1
+   	
+   	Y_train[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
-    X_train = np.zeros((5000, args.number_of_features*2), dtype=np.uint32)
-    Y_train = np.zeros(5000, dtype=np.uint32)
-    for i in range(5000):
-        x = np.random.randint(args.number_of_features, size=(2))
+Y_train = np.where(np.random.rand(examples) <= noise, 1 - Y_train, Y_train)  # Adds noise
 
-        X_train[i, x[0]] = 1
-        X_train[i, args.number_of_features + x[1]] = 1
-        if (x[0] % 2) != (x[1] % 2):
-            Y_train[i] = 1
-        else:
-            Y_train[i] = 0
+X_test = np.zeros((examples, features*copies), dtype=np.uint32)
+Y_test = np.zeros(examples, dtype=np.uint32)
+for i in range(examples):
+    x = np.random.randint(elements, size=(2))
 
+    for j in range(copies):
+    	X_test[i, j*features + x[0]] = 1
+    	X_test[i, j*features + elements + x[1]] = 1
+   	
+   	Y_test[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
+tm = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, elements*alternatives), (tm.AND_GROUP, 1)))
 
-    X_train = np.random.randint(0, 2, size=(5000, args.number_of_features), dtype=np.uint32)
-    Y_train = np.logical_xor(X_train[:, 0], X_train[:, 1]).astype(dtype=np.uint32)
-    Y_train = np.where(np.random.rand(5000) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
+print("\nAccuracy over 1000 epochs:\n")
+for e in range(1000):
+	start_training = time()
+	tm.fit(X_train, Y_train, epochs=10, incremental=True)
+	stop_training = time()
 
-    X_test = np.random.randint(0, 2, size=(5000, args.number_of_features), dtype=np.uint32)
-    Y_test = np.logical_xor(X_test[:, 0], X_test[:, 1]).astype(dtype=np.uint32)
+	start_testing = time()
+	result = 100*(tm.predict(X_test) == Y_test).mean()
+	stop_testing = time()
 
-    tm = TMClassifier(args.number_of_clauses, args.T, args.s, platform=args.platform, boost_true_positive_feedback=0)
+	tm.print_hierarchy()
 
-    for i in range(20):
-        tm.fit(X_train, Y_train)
-        accuracy = 100 * (tm.predict(X_test) == Y_test).mean()
-        experiment_results["accuracy"].append(accuracy)
-        print("Accuracy:", accuracy)
-
-    np.set_printoptions(threshold=np.inf, linewidth=200, precision=2, suppress=True)
-
-    print("\nClass 0 Positive Clauses:\n")
-    precision = tm.clause_precision(0, 0, X_test, Y_test)
-    recall = tm.clause_recall(0, 0, X_test, Y_test)
-    experiment_results["class_0_precision_positive"].append(list(np.asarray(precision)))
-    experiment_results["class_0_recall_positive"].append(list(np.asarray(recall)))
-
-    for j in range(args.number_of_clauses // 2):
-        print("Clause #%d W:%d P:%.2f R:%.2f " % (j, tm.get_weight(0, 0, j), precision[j], recall[j]), end=' ')
-        l = []
-        for k in range(args.number_of_features * 2):
-            if tm.get_ta_action(j, k, the_class=0, polarity=0):
-                if k < args.number_of_features:
-                    l.append(" x%d(%d)" % (k, tm.get_ta_state(j, k, the_class=0, polarity=0)))
-                else:
-                    l.append("¬x%d(%d)" % (k - args.number_of_features, tm.get_ta_state(j, k, the_class=0, polarity=0)))
-        print(" ∧ ".join(l))
-
-    print("\nClass 0 Negative Clauses:\n")
-
-    precision = tm.clause_precision(0, 1, X_test, Y_test)
-    recall = tm.clause_recall(0, 1, X_test, Y_test)
-    experiment_results["class_0_precision_negative"].append(list(np.asarray(precision)))
-    experiment_results["class_0_recall_negative"].append(list(np.asarray(recall)))
-
-    for j in range(args.number_of_clauses // 2):
-        print("Clause #%d W:%d P:%.2f R:%.2f " % (j, tm.get_weight(0, 1, j), precision[j], recall[j]), end=' ')
-        l = []
-        for k in range(args.number_of_features * 2):
-            if tm.get_ta_action(j, k, the_class=0, polarity=1):
-                if k < args.number_of_features:
-                    l.append(" x%d(%d)" % (k, tm.get_ta_state(j, k, the_class=0, polarity=1)))
-                else:
-                    l.append("¬x%d(%d)" % (k - args.number_of_features, tm.get_ta_state(j, k, the_class=0, polarity=1)))
-        print(" ∧ ".join(l))
-
-    print("\nClass 1 Positive Clauses:\n")
-
-    precision = tm.clause_precision(1, 0, X_test, Y_test)
-    recall = tm.clause_recall(1, 0, X_test, Y_test)
-    experiment_results["class_1_precision_positive"].append(list(np.asarray(precision)))
-    experiment_results["class_1_recall_positive"].append(list(np.asarray(recall)))
-
-    for j in range(args.number_of_clauses // 2):
-        print("Clause #%d W:%d P:%.2f R:%.2f " % (j, tm.get_weight(1, 0, j), precision[j], recall[j]), end=' ')
-        l = []
-        for k in range(args.number_of_features * 2):
-            if tm.get_ta_action(j, k, the_class=1, polarity=0):
-                if k < args.number_of_features:
-                    l.append(" x%d(%d)" % (k, tm.get_ta_state(j, k, the_class=1, polarity=0)))
-                else:
-                    l.append("¬x%d(%d)" % (k - args.number_of_features, tm.get_ta_state(j, k, the_class=1, polarity=0)))
-        print(" ∧ ".join(l))
-
-    print("\nClass 1 Negative Clauses:\n")
-
-    precision = tm.clause_precision(1, 1, X_test, Y_test)
-    recall = tm.clause_recall(1, 1, X_test, Y_test)
-    experiment_results["class_1_precision_negative"].append(list(np.asarray(precision)))
-    experiment_results["class_1_recall_negative"].append(list(np.asarray(recall)))
-
-    for j in range(args.number_of_clauses // 2):
-        print("Clause #%d W:%d P:%.2f R:%.2f " % (j, tm.get_weight(1, 1, j), precision[j], recall[j]), end=' ')
-        l = []
-        for k in range(args.number_of_features * 2):
-            if tm.get_ta_action(j, k, the_class=1, polarity=1):
-                if k < args.number_of_features:
-                    l.append(" x%d(%d)" % (k, tm.get_ta_state(j, k, the_class=1, polarity=1)))
-                else:
-                    l.append("¬x%d(%d)" % (k - args.number_of_features, tm.get_ta_state(j, k, the_class=1, polarity=1)))
-        print(" ∧ ".join(l))
-
-    print("\nClause Co-Occurence Matrix:\n")
-    print(tm.clause_co_occurrence(X_test, percentage=True).toarray())
-
-    print("\nLiteral Frequency:\n")
-    print(tm.literal_clause_frequency())
-    experiment_results["literal_frequency"] = tm.literal_clause_frequency().tolist()
-
-    return experiment_results
-
-
-def default_args(**kwargs):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--epochs", default=250, type=int)
-    parser.add_argument("--number-of-clauses", default=10, type=int)
-    parser.add_argument("--platform", default='CPU', type=str)
-    parser.add_argument("--T", default=10, type=int)
-    parser.add_argument("--s", default=3.0, type=float)
-    parser.add_argument("--number-of-features", default=20, type=int)
-    parser.add_argument("--noise", default=0.1, type=float, help="Noisy XOR")
-    args = parser.parse_args()
-    for key, value in kwargs.items():
-        if key in args.__dict__:
-            setattr(args, key, value)
-    return args
-
-
-if __name__ == "__main__":
-    results = main(default_args())
-    _LOGGER.info(results)
+	print("\n#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, result, stop_training-start_training, stop_testing-start_testing))
