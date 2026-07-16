@@ -10,7 +10,7 @@ T = 250
 elements = 10
 noise = 0.0
 examples = 5000
-alternatives = 10
+alternatives = 1
 copies = 1
 
 features = elements*2
