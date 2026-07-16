@@ -7,7 +7,7 @@ import argparse
 clauses = 32
 s = 2.1
 T = 64
-elements = 10
+elements = 2
 noise = 0.0
 examples = 5000
 alternatives = 1
