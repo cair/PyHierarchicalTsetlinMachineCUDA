@@ -5,8 +5,8 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 import argparse
 
 clauses = 32
-s = 25.0
-T = 250
+s = 1.0
+T = 64
 elements = 10
 noise = 0.0
 examples = 5000
