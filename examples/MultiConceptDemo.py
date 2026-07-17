@@ -15,10 +15,10 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-elements", default=2, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	args = parser.parse_args()
-    for key, value in kwargs.items():
-        if key in args.__dict__:
-            setattr(args, key, value)
-    return args
+	for key, value in kwargs.items():
+		if key in args.__dict__:
+			setattr(args, key, value)
+	return args
 
 args = default_args()
 
