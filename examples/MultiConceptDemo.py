@@ -39,10 +39,10 @@ Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_
 
 X_test = np.zeros((args.number_of_examples, features*args.number_of_copies), dtype=np.uint32)
 Y_test = np.zeros(args.number_of_examples, dtype=np.uint32)
-for i in range(examples):
+for i in range(args.number_of_examples):
 	x = np.random.randint(args.number_of_elements, size=(2))
 
-	for j in range(copies):
+	for j in range(args.number_of_copies):
 		X_test[i, j*features + x[0]] = 1
 		X_test[i, j*features + args.number_of_elements + x[1]] = 1
 
