@@ -4,19 +4,28 @@ from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 import argparse
 
-clauses = 32
-s = 2.1
-T = 64
-elements = 2
-noise = 0.0
-examples = 5000
-alternatives = 1
-copies = 1
+def default_args(**kwargs):
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--epochs", default=250, type=int)
+	parser.add_argument("--number-of-clauses", default=32, type=int)
+	parser.add_argument("--number-of-examples", default=5000, type=int)
+	parser.add_argument("--T", default=64, type=int)
+	parser.add_argument("--s", default=2.1, type=float)
+	parser.add_argument("--copies", default=1, type=int)
+	parser.add_argument("--number-of-elements", default=2, type=int)
+	parser.add_argument("--noise", default=0.0, type=float)
+	args = parser.parse_args()
+    for key, value in kwargs.items():
+        if key in args.__dict__:
+            setattr(args, key, value)
+    return args
 
-features = elements*2
+args = default_args()
 
-X_train = np.zeros((examples, features*copies), dtype=np.uint32)
-Y_train = np.zeros(examples, dtype=np.uint32)
+features = args.number_of_elements*2
+
+X_train = np.zeros((args.number_of_examples, features*copies), dtype=np.uint32)
+Y_train = np.zeros(args.number_of_examples, dtype=np.uint32)
 for i in range(examples):
 	x = np.random.randint(elements, size=(2))
 
@@ -42,7 +51,7 @@ for i in range(examples):
 tm = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, alternatives), (tm.AND_GROUP, 1)))
 
 print("\nAccuracy over 1000 epochs:\n")
-for e in range(1000):
+for e in range(args.epochs):
 	start_training = time()
 	tm.fit(X_train, Y_train, epochs=10, incremental=True)
 	stop_training = time()
