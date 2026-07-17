@@ -12,6 +12,7 @@ def default_args(**kwargs):
 	parser.add_argument("--T", default=64, type=int)
 	parser.add_argument("--s", default=2.1, type=float)
 	parser.add_argument("--number-of-copies", default=1, type=int)
+	parser.add_argument("--number-of-alternatives", default=1, type=int)
 	parser.add_argument("--number-of-elements", default=2, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	args = parser.parse_args()
@@ -48,7 +49,7 @@ for i in range(args.number_of_examples):
 
 	Y_test[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
-tm = TsetlinMachine(args.number_of_clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, alternatives), (tm.AND_GROUP, 1)))
+tm = TsetlinMachine(args.number_of_clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, args.number_of_alternatives), (tm.AND_GROUP, 1)))
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
