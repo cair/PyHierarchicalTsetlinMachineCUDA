@@ -54,7 +54,7 @@ tm = TsetlinMachine(args.number_of_clauses, args.T, args.s, number_of_state_bits
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
 	start_training = time()
-	tm.fit(X_train, Y_train, sincremental=True)
+	tm.fit(X_train, Y_train, incremental=True)
 	stop_training = time()
 
 	start_testing = time()
