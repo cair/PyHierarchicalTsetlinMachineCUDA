@@ -49,7 +49,7 @@ for i in range(args.number_of_examples):
 
 	Y_test[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
-tm = TsetlinMachine(args.number_of_clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, args.number_of_alternatives), (tm.AND_GROUP, 1)))
+tm = TsetlinMachine(args.number_of_clauses, args.T, args.s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, features), (tm.OR_ALTERNATIVES, args.number_of_alternatives), (tm.AND_GROUP, args.number_of_copies)))
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(args.epochs):
