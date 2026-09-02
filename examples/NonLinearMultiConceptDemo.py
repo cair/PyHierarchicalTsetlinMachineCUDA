@@ -116,7 +116,7 @@ tm = MultiClassTsetlinMachine(
 		(tm.OR_ALTERNATIVES, args.number_of_alternatives),
 		(tm.AND_ALTERNATIVES, args.number_of_copies)
 	),
-	append_negated=False
+	append_negated=True
 )
 
 print("\nAccuracy over %d epochs:\n" % (args.epochs))
