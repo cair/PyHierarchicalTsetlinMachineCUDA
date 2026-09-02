@@ -62,7 +62,6 @@ for i in range(args.number_of_examples):
 				X_train[i, 2*args.number_of_elements + x[1]] = 1
 				X_train[i, 3*args.number_of_elements + x[1]] = 1
 			
-
 	Y_train[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
 Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
@@ -72,9 +71,38 @@ Y_test = np.zeros(args.number_of_examples, dtype=np.uint32)
 for i in range(args.number_of_examples):
 	x = np.random.randint(args.number_of_elements, size=(2))
 
-	X_test[i, x[0]] = 1
-	X_test[i, args.number_of_elements + x[1]] = 1
+	for j in range(args.number_of_elements):
+		if x[0] == j:
+			if np.random.random() <= 0.5:
+				X_test[i, x[0]] = 1
+				X_test[i, args.number_of_elements + x[0]] = 0
+			else:
+				X_test[i, x[0]] = 0
+				X_test[i, args.number_of_elements + x[0]] = 1
+		else:
+			if np.random.random() <= 0.5:
+				X_test[i, x[0]] = 0
+				X_test[i, args.number_of_elements + x[0]] = 0
+			else:
+				X_test[i, x[0]] = 1
+				X_test[i, args.number_of_elements + x[0]] = 1
 
+	for j in range(args.number_of_elements):
+		if x[1] == j:
+			if np.random.random() <= 0.5:
+				X_test[i, 2*args.number_of_elements + x[1]] = 1
+				X_test[i, 3*args.number_of_elements + x[1]] = 0
+			else:
+				X_test[i, 2*args.number_of_elements + x[1]] = 0
+				X_test[i, 3*args.number_of_elements + x[1]] = 1
+		else:
+			if np.random.random() <= 0.5:
+				X_test[i, 2*args.number_of_elements + x[1]] = 0
+				X_test[i, 3*args.number_of_elements + x[1]] = 0
+			else:
+				X_test[i, 2*args.number_of_elements + x[1]] = 1
+				X_test[i, 3*args.number_of_elements + x[1]] = 1
+			
 	Y_test[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
 tm = MultiClassTsetlinMachine(
