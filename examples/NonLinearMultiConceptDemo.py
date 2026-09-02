@@ -84,10 +84,9 @@ tm = MultiClassTsetlinMachine(
 	number_of_state_bits=8,
 	boost_true_positive_feedback=0,
 	hierarchy_structure=(
-		(tm.AND_GROUP, features), # Picks out words or word combinations
-		(tm.OR_ALTERNATIVES, args.number_of_alternatives), # Creates synonoms
-		(tm.AND_ALTERNATIVES, args.number_of_concepts), # Extract multiple concepts and combine them
-		(tm.AND_GROUP, 2), # Connects current and following paragraph
+		(tm.AND_GROUP, features),
+		(tm.OR_ALTERNATIVES, args.number_of_alternatives),
+		(tm.AND_ALTERNATIVES, args.number_of_copies)
 	),
 	append_negated=False
 )
