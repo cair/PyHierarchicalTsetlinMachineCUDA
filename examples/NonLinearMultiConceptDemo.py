@@ -23,7 +23,7 @@ def default_args(**kwargs):
 
 args = default_args()
 
-features = args.number_of_elements*4
+features = args.number_of_elements*8
 
 X_train = np.zeros((args.number_of_examples, features), dtype=np.uint32)
 Y_train = np.zeros(args.number_of_examples, dtype=np.uint32)
@@ -35,32 +35,48 @@ for i in range(args.number_of_examples):
 			if np.random.random() <= 0.5:
 				X_train[i, x[0]] = 1
 				X_train[i, args.number_of_elements + x[0]] = 0
+				X_train[i, 2*args.number_of_elements + x[0]] = 0
+				X_train[i, 3*args.number_of_elements + x[0]] = 1
 			else:
 				X_train[i, x[0]] = 0
 				X_train[i, args.number_of_elements + x[0]] = 1
+				X_train[i, 2*args.number_of_elements + x[0]] = 1
+				X_train[i, 3*args.number_of_elements + x[0]] = 0
 		else:
 			if np.random.random() <= 0.5:
-				X_train[i, x[0]] = 0
-				X_train[i, args.number_of_elements + x[0]] = 0
-			else:
 				X_train[i, x[0]] = 1
+				X_train[i, args.number_of_elements + x[0]] = 0
+				X_train[i, 2*args.number_of_elements + x[0]] = 1
+				X_train[i, 3*args.number_of_elements + x[0]] = 0
+			else:
+				X_train[i, x[0]] = 0
 				X_train[i, args.number_of_elements + x[0]] = 1
+				X_train[i, 2*args.number_of_elements + x[0]] = 0
+				X_train[i, 3*args.number_of_elements + x[0]] = 1
 
 	for j in range(args.number_of_elements):
 		if x[1] == j:
 			if np.random.random() <= 0.5:
-				X_train[i, 2*args.number_of_elements + x[1]] = 1
-				X_train[i, 3*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 1
 			else:
-				X_train[i, 2*args.number_of_elements + x[1]] = 0
-				X_train[i, 3*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 0
 		else:
 			if np.random.random() <= 0.5:
-				X_train[i, 2*args.number_of_elements + x[1]] = 0
-				X_train[i, 3*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 0
 			else:
-				X_train[i, 2*args.number_of_elements + x[1]] = 1
-				X_train[i, 3*args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 1
+				X_train[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 0
+				X_train[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 1
 			
 	Y_train[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
@@ -76,32 +92,48 @@ for i in range(args.number_of_examples):
 			if np.random.random() <= 0.5:
 				X_test[i, x[0]] = 1
 				X_test[i, args.number_of_elements + x[0]] = 0
+				X_test[i, 2*args.number_of_elements + x[0]] = 0
+				X_test[i, 3*args.number_of_elements + x[0]] = 1
 			else:
 				X_test[i, x[0]] = 0
 				X_test[i, args.number_of_elements + x[0]] = 1
+				X_test[i, 2*args.number_of_elements + x[0]] = 1
+				X_test[i, 3*args.number_of_elements + x[0]] = 0
 		else:
 			if np.random.random() <= 0.5:
-				X_test[i, x[0]] = 0
-				X_test[i, args.number_of_elements + x[0]] = 0
-			else:
 				X_test[i, x[0]] = 1
+				X_test[i, args.number_of_elements + x[0]] = 0
+				X_test[i, 2*args.number_of_elements + x[0]] = 1
+				X_test[i, 3*args.number_of_elements + x[0]] = 0
+			else:
+				X_test[i, x[0]] = 0
 				X_test[i, args.number_of_elements + x[0]] = 1
+				X_test[i, 2*args.number_of_elements + x[0]] = 0
+				X_test[i, 3*args.number_of_elements + x[0]] = 1
 
 	for j in range(args.number_of_elements):
 		if x[1] == j:
 			if np.random.random() <= 0.5:
-				X_test[i, 2*args.number_of_elements + x[1]] = 1
-				X_test[i, 3*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 1
 			else:
-				X_test[i, 2*args.number_of_elements + x[1]] = 0
-				X_test[i, 3*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 0
 		else:
 			if np.random.random() <= 0.5:
-				X_test[i, 2*args.number_of_elements + x[1]] = 0
-				X_test[i, 3*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 0
 			else:
-				X_test[i, 2*args.number_of_elements + x[1]] = 1
-				X_test[i, 3*args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + args.number_of_elements + x[1]] = 1
+				X_test[i, 4*args.number_of_elements + 2*args.number_of_elements + x[1]] = 0
+				X_test[i, 4*args.number_of_elements + 3*args.number_of_elements + x[1]] = 1
 			
 	Y_test[i] = np.logical_xor(x[0] % 2, x[1] % 2)
 
@@ -116,7 +148,7 @@ tm = MultiClassTsetlinMachine(
 		(tm.OR_ALTERNATIVES, args.number_of_alternatives),
 		(tm.AND_ALTERNATIVES, args.number_of_copies)
 	),
-	append_negated=True
+	append_negated=False
 )
 
 print("\nAccuracy over %d epochs:\n" % (args.epochs))
