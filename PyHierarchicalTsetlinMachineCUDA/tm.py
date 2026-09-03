@@ -500,7 +500,7 @@ class CommonTsetlinMachine():
 				continue
 
 			n_children = self.hierarchy_structure[level][1]
-			is_alt = (self.hierarchy_structure[level][0] == OR_ALTERNATIVES)
+			is_alt = self.hierarchy_structure[level][0] in (OR_ALTERNATIVES, AND_ALTERNATIVES)
 			for child_pos in range(n_children):
 				child_id = node_id * n_children + child_pos
 				if is_alt:

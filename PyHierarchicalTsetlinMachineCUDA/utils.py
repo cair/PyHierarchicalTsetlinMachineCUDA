@@ -3,17 +3,31 @@ from collections import deque
 import networkx as nx
 import numpy as np
 
-from .tm import OR_ALTERNATIVES, CommonTsetlinMachine
+from .tm import AND_ALTERNATIVES, AND_GROUP, OR_ALTERNATIVES, OR_GROUP, CommonTsetlinMachine
+
+DEFAULT_NODE_TYPE_LABELS: dict[int, str] = {
+	AND_GROUP: ' ∧* ',
+	AND_ALTERNATIVES: ' ∧ ',
+	OR_GROUP: ' ∨* ',
+	OR_ALTERNATIVES: ' ∨ ',
+}
 
 
-def make_hierarchy_graph(G: nx.Graph, hier: list[tuple[int, int]]):
+def make_hierarchy_graph(
+	G: nx.Graph,
+	hier: list[tuple[int, int]],
+	node_type_labels: dict[int, str] | None = None,
+):
 	"""Create Graph from the hierarchy."""
+	node_type_labels = {**DEFAULT_NODE_TYPE_LABELS, **(node_type_labels or {})}
+
 	# BFS
 	q = deque()
 	q.append((len(hier), 0))  # (level, idx)
 	while q:
 		level, idx = q.popleft()
-		G.add_node((level, idx), label=hier[level - 1][0], op=hier[level - 1][0])
+		op = hier[level - 1][0]
+		G.add_node((level, idx), label=node_type_labels.get(op, op), op=op)
 		if level == 1:
 			continue
 		branching = hier[level - 1][1]
@@ -29,6 +43,7 @@ def clause_to_nx(
 	negation_prefix: str = '¬',
 	clause_literals: np.ndarray | None = None,
 	ta_to_fid_mapping=None,
+	node_type_labels: dict[int, str] | None = None,
 ):
 	"""
 	Create a networkx Graph for a single clause.
@@ -39,6 +54,7 @@ def clause_to_nx(
 		`negation_prefix`: Prefix for negated features (default: '¬').
 		`clause_literals`: Optional pre-extracted literals for the clause, must have shape (n_components, literals_per_component). If None, literals will be extracted from the model.
 		`ta_to_fid_mapping`: Optional mapping from (component_id, literal_id) to feature_id. If None, it will be obtained from the model.
+		`node_type_labels`: Optional dict overriding the display symbol for one or more hierarchy node types (`AND_GROUP`/`AND_ALTERNATIVES`/`OR_GROUP`/`OR_ALTERNATIVES`). Merged over `DEFAULT_NODE_TYPE_LABELS`; unset keys fall back to the default.
 	"""
 
 	assert tm.hierarchy_structure is not None, (
@@ -62,7 +78,7 @@ def clause_to_nx(
 	lits_per_comp = tm.number_of_literals_per_leaf
 
 	G = nx.Graph()
-	make_hierarchy_graph(G, tm.hierarchy_structure)
+	make_hierarchy_graph(G, tm.hierarchy_structure, node_type_labels)
 
 	feat_per_comp = lits_per_comp // 2 if tm.append_negated else lits_per_comp
 
@@ -95,6 +111,7 @@ def clause_bank_to_nx(
 	tm: CommonTsetlinMachine,
 	feature_names: list[str] | None = None,
 	negation_prefix: str = '¬',
+	node_type_labels: dict[int, str] | None = None,
 ):
 	"""
 	Create a networkx Graph for the entire clause bank.
@@ -102,15 +119,18 @@ def clause_bank_to_nx(
 		`tm`: The model.
 		`feature_names`: Optional list of feature names for labeling. If None, defaults to 'x0', 'x1', ...
 		`negation_prefix`: Prefix for negated features (default: '¬').
+		`node_type_labels`: Optional dict overriding the display symbol for one or more hierarchy node types. Merged over `DEFAULT_NODE_TYPE_LABELS`; unset keys fall back to the default.
 	"""
+	node_type_labels = {**DEFAULT_NODE_TYPE_LABELS, **(node_type_labels or {})}
+
 	literals = tm.get_literals()
 	ta_to_fid = tm.map_ta_id_to_feature_id()
 	G = nx.Graph()
 	cb_root = 'CB_ROOT'
-	G.add_node(cb_root, label=OR_ALTERNATIVES, op=OR_ALTERNATIVES)
+	G.add_node(cb_root, label=node_type_labels.get(OR_ALTERNATIVES, OR_ALTERNATIVES), op=OR_ALTERNATIVES)
 	for ci in range(tm.number_of_clauses):
 		clause_G = clause_to_nx(
-			tm, ci, feature_names, negation_prefix, literals[ci], ta_to_fid
+			tm, ci, feature_names, negation_prefix, literals[ci], ta_to_fid, node_type_labels
 		)
 		mapping = {node: (ci, node) for node in clause_G.nodes}
 		G = nx.compose(G, nx.relabel_nodes(clause_G, mapping))
@@ -124,6 +144,7 @@ def active_path_graph(
 	X: np.ndarray,
 	feature_names: list[str] | None = None,
 	negation_prefix: str = '¬',
+	node_type_labels: dict[int, str] | None = None,
 ):
 	"""
 	Show the activated path, and vote calculation for a single sample `X`.
@@ -132,6 +153,7 @@ def active_path_graph(
 		`X`: A single sample with shape (n_features,).
 		`feature_names`: Optional list of feature names for labeling. If None, defaults to 'x0', 'x1', ...
 		`negation_prefix`: Prefix for negated features (default: '¬').
+		`node_type_labels`: Optional dict overriding the display symbol for one or more hierarchy node types. Merged over `DEFAULT_NODE_TYPE_LABELS`; unset keys fall back to the default.
 	Returns:
 		A list of networkx Graphs for each clause, with 'active' and 'vote' attributes on nodes and edges, and class sums for each class.
 	"""
@@ -139,7 +161,7 @@ def active_path_graph(
 
 	hierarchy_votes, class_sums = tm.calc_hierarchy_votes(X.reshape(1, -1))
 	hierarchy_votes = hierarchy_votes[0]
-	class_sums = class_sums[0]
+	class_sums = class_sums[:, 0]
 
 	literals = tm.get_literals()
 	ta_to_fid = tm.map_ta_id_to_feature_id()
@@ -147,7 +169,7 @@ def active_path_graph(
 	feat_per_comp = lits_per_comp // 2 if tm.append_negated else lits_per_comp
 
 	G = [
-		clause_to_nx(tm, ci, feature_names, negation_prefix, literals[ci], ta_to_fid)
+		clause_to_nx(tm, ci, feature_names, negation_prefix, literals[ci], ta_to_fid, node_type_labels)
 		for ci in range(tm.number_of_clauses)
 	]
 	for ci in range(tm.number_of_clauses):
