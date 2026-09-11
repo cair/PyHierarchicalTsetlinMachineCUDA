@@ -125,7 +125,7 @@ class CommonTsetlinMachine():
 	#define STATE_BITS %d
 	#define BOOST_TRUE_POSITIVE_FEEDBACK %d
 	#define S %f
-	#define THRESHOLD %d
+	#define THRESHOLD %f
 	#define Q %f
 	#define LOG_SCALE %d
 
