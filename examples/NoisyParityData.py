@@ -1,9 +1,9 @@
 import numpy as np
 
 
-noise = 0.2
-number_of_features = 12
-number_of_variables = 4
+noise = 0.0
+number_of_features = 4
+number_of_variables = 2
 number_of_examples = 200000
 
 X_train = np.random.randint(2, size=(number_of_examples, number_of_features), dtype=np.uint32)
