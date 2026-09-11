@@ -95,7 +95,7 @@ code_update = """
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float absolute_prediction_error = fabsf(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/2.0) {
 				if (target*sign > 0) {
 					if (clause_output && abs(*clause_weight) < INT_MAX) {
 						(*clause_weight) += sign;
@@ -125,7 +125,7 @@ code_update = """
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float absolute_prediction_error = fabsf(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/2.0) {
 				if (target*sign > 0) {
 					// Type I Feedback
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
