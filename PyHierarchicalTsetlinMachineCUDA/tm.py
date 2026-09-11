@@ -824,7 +824,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 		self.max_y = None
 		self.min_y = None
 		
-		encoded_Y = np.where(Y == 1, 2, -2).astype(np.int32)
+		encoded_Y = np.where(Y == 1, 3, -3).astype(np.int32)
 
 		self._fit(X, encoded_Y)
 
