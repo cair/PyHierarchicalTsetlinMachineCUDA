@@ -18,16 +18,16 @@ Y_test = test_data[:,-1]
 
 print("\nAccuracy over 1000 epochs:\n")
 for e in range(1000):
-	tm = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 4), (tm.AND_GROUP, 2)))
+	tsetlin_machine = TsetlinMachine(clauses, T, s, number_of_state_bits=8, boost_true_positive_feedback=0, hierarchy_structure=((tm.AND_GROUP, 2), (tm.OR_ALTERNATIVES, 4), (tm.AND_GROUP, 2)))
 
 	start_training = time()
-	tm.fit(X_train, Y_train)
+	tsetlin_machine.fit(X_train, Y_train)
 	stop_training = time()
 
 	start_testing = time()
-	result = 100*(tm.predict(X_test) == Y_test).mean()
+	result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
 	stop_testing = time()
 
-	tm.print_hierarchy(print_ta_state=True)
+	tsetlin_machine.print_hierarchy(print_ta_state=True)
 
 	print("\n#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, result, stop_training-start_training, stop_testing-start_testing))
