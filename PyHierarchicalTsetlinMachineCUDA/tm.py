@@ -47,7 +47,7 @@ class CommonTsetlinMachine():
 	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
-		self.T = int(T)
+		self.T = T
 		self.s = s
 		self.q = q
 		self.log_scale = log_scale
