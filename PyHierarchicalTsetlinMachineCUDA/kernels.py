@@ -435,12 +435,12 @@ code_update = """
 						or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
 					}
 
-					if (or_alternatives_vote_sum > T) {
-						or_alternatives_vote_sum = T;
+					if (or_alternatives_vote_sum > THRESHOLD) {
+						or_alternatives_vote_sum = THRESHOLD;
 					}
 
 					// Store vote sum as node output
-					or_alternatives_node_output[or_alternatives_node] = 1.0*or_alternatives_vote_sum/T;
+					or_alternatives_node_output[or_alternatives_node] = 1.0*or_alternatives_vote_sum/THRESHOLD;
 				#endif
 			}
 		}
