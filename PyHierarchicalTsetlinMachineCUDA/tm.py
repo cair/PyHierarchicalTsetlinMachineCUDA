@@ -455,6 +455,7 @@ class CommonTsetlinMachine():
 	
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
+		print(class_sum)
 		return class_sum
 
 	def get_ta_states(self) -> np.ndarray:
