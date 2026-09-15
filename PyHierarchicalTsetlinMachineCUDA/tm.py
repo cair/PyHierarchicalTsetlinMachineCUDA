@@ -47,7 +47,7 @@ class CommonTsetlinMachine():
 	def __init__(self, number_of_clauses, T, s, q=1.0, log_scale=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
-		self.T = int(T)
+		self.T = float(T)
 		self.s = s
 		self.q = q
 		self.log_scale = log_scale
@@ -445,13 +445,13 @@ class CommonTsetlinMachine():
 		encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
 		self.encode_X(X, encoded_X_hierarchy_test_gpu)
 
-		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.int32)
+		class_sum = np.ascontiguousarray(np.zeros((self.number_of_outputs, number_of_examples))).astype(np.float32)
 
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
 			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-			class_sum[:, e] = self.class_sum.astype(np.int32)
+			class_sum[:, e] = self.class_sum.astype(np.float32)
 	
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 
