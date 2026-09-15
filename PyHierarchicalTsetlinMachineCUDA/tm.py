@@ -760,7 +760,7 @@ class MultiClassTsetlinMachine:
 		return
 
 	def score(self, X):
-		class_sums = np.empty((self.number_of_outputs, X.shape[0]), dtype=np.int32)
+		class_sums = np.empty((self.number_of_outputs, X.shape[0]), dtype=np.float32)
 		for i in range(self.number_of_outputs):
 			class_sums[i,:] = self.tms[i].score(X)
 
