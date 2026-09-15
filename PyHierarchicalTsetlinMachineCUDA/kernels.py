@@ -342,7 +342,7 @@ code_update = """
 
 				// "Turn off" the sub-hierarchies that are not selected 
 				for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-					if (curand_uniform(localState) <= 1.0*group_node_output[group_node]/THRESHOLD) {
+					if (curand_uniform(&localState) <= 1.0*group_node_output[group_node]/THRESHOLD) {
 						child_input[group_node*number_of_group_node_children + or_addend] = -1;
 					}
 				}
