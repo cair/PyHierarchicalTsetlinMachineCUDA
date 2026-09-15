@@ -167,6 +167,9 @@ class CommonTsetlinMachine():
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
+		self.propagate_or_alternatives_false_truth_values = mod_update.get_function("propagate_or_alternatives_false_truth_values")
+		self.propagate_or_alternatives_false_truth_values.prepare("PPPii")
+
 		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
 		self.propagate_or_group_false_truth_values.prepare("PPPii")
 
@@ -385,10 +388,20 @@ class CommonTsetlinMachine():
 			# Propagates the root value and any intermittent node values back to the leaves.
 			# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 			for d in range(self.depth-1, 0, -1):
-				if self.hierarchy_structure[d][0] != OR_GROUP:
+				if self.hierarchy_structure[d][0] == AND_GROUP or self.hierarchy_structure[d][0] == AND_ALTERNATIVES:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
+						self.hierarchy_votes[d-1],
+						self.hierarchy_votes[d],
+						self.hierarchy_size[d + 1],
+						self.hierarchy_structure[d][1]
+					)
+				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
+					self.propagate_or_alternatives_false_truth_values.prepared_call(
+						self.grid,
+						self.block,
+						self.cuda_rng.state,
 						self.hierarchy_votes[d-1],
 						self.hierarchy_votes[d],
 						self.hierarchy_size[d + 1],

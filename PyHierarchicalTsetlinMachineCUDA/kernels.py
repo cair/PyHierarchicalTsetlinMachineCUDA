@@ -125,7 +125,7 @@ code_update = """
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float absolute_prediction_error = fabsf(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			if (1) { //curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					// Type I Feedback
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
@@ -310,6 +310,37 @@ code_update = """
 				if (group_node_output[group_node] == -1) {
 					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
 						child_input[group_node*number_of_group_node_children + and_factor] = -1;	
+					}
+				}
+			}
+		}
+
+
+		__global__ void propagate_or_alternatives_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				if (group_node_output[group_node] == 0) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+						}
+					}
+				}
+
+				if (group_node_output[group_node] == -1) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+					}
+				}
+
+				// "Turn off" the sub-hierarchies that are not selected 
+				for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+					if (curand_uniform(localState) <= 1.0*group_node_output[group_node]/THRESHOLD) {
+						child_input[group_node*number_of_group_node_children + or_addend] = -1;
 					}
 				}
 			}
