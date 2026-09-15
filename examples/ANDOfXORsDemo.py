@@ -100,6 +100,7 @@ for i in range(10):
 			args.T,
 			args.s,
 			number_of_state_bits=args.number_of_state_bits,
+			boost_true_positive_feedback=0,
 			hierarchy_structure=(
 				(tm.AND_GROUP, 2 + args.number_of_irrelevant_features),
 				(tm.OR_ALTERNATIVES, args.number_of_alternatives),
