@@ -339,15 +339,6 @@ class CommonTsetlinMachine():
 		self.clause_output_max[:] = np.finfo(np.float32).min
 		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
-		# if self.log_scale:
-		# 	self.max_clause_output.prepared_call(
-		# 		self.grid,
-		# 		self.block,
-		# 		np.int32(self.number_of_outputs),
-		# 		self.hierarchy_votes[self.depth-1],
-		# 		self.clause_output_max_gpu
-		# 	)
-
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
 			self.grid,
@@ -357,15 +348,6 @@ class CommonTsetlinMachine():
 			self.clause_weights_gpu,
 			self.class_sum_gpu
 		)
-
-		# if self.log_scale:
-		# 	self.rescale_final.prepared_call(
-		# 		self.grid,
-		# 		self.block,
-		# 		np.int32(self.number_of_outputs),
-		# 		self.clause_output_max_gpu,
-		# 		self.class_sum_gpu
-		# 	)
 
 	def _fit(self, X, encoded_Y):
 		if self.number_of_features_hierarchy != X.shape[1]:
@@ -395,7 +377,7 @@ class CommonTsetlinMachine():
 			# Propagates the root value and any intermittent node values back to the leaves.
 			# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 			for d in range(self.depth-1, 0, -1):
-				if self.hierarchy_structure[d][0] == AND_GROUP or AND_ALTERNATIVES:
+				if (self.hierarchy_structure[d][0] == AND_GROUP) or (self.hierarchy_structure[d][0] == AND_ALTERNATIVES):
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,

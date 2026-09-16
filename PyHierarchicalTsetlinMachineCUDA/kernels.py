@@ -422,6 +422,146 @@ code_update = """
 			state[index] = localState;
 		}
 
+		__global__ void propagate_and_group_update_p(float *child_input, float *group_node_output, float *child_update_p, float *node_update_p, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {			
+				if (group_node_output[group_node] == -1) {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_input[group_node*number_of_group_node_children + and_factor] = -1;	
+					}
+				} else {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2] =
+							node_update_p[group_node*2];
+
+						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2 + 1] =
+							node_update_p[group_node*2 + 1];
+					}
+				}
+
+				if (group_node_output[group_node] == 0) {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						if (child_input[group_node*number_of_group_node_children + and_factor] > 0) {
+							child_input[group_node*number_of_group_node_children + and_factor] = 0;	
+						}
+					}
+				}
+			}
+		}
+
+		__global__ void propagate_or_alternatives_update_p(float *child_input, float *group_node_output, float *child_update_p, float *node_update_p, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				if (group_node_output[group_node] == -1) {
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_input[group_node*number_of_group_node_children + and_factor] = -1;	
+					}
+				} else {
+					float clipped_vote_sum = group_node_output[group_node];
+					if (clipped_vote_sum > THRESHOLD) {
+						clipped_vote_sum = THRESHOLD;
+					}
+					
+					for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
+						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2] =
+							node_update_p[group_node*2] * (1.0 - clipped_vote_sum / THRESHOLD);
+
+						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2 + 1] =
+							node_update_p[group_node*2 + 1] * (clipped_vote_sum / THRESHOLD);
+					}
+				}
+			}
+		}
+
+		__global__ void propagate_or_group_update_p(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			int child_input_sum;
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+
+			// If a group node is false, all children are made false.
+			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
+				#if LOG_SCALE == 1
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == NEG_INFINITY) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
+							}
+						}
+					} else {
+						child_input_sum = 0;
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
+								child_input_sum += np.exp2f(child_input[group_node*number_of_group_node_children + or_addend]); // Needs normalization
+							}
+						}
+					}
+				#else
+					if (group_node_output[group_node] == -1) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+						}
+					}  else if (group_node_output[group_node] == 0) {
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								child_input[group_node*number_of_group_node_children + or_addend] = 0;	
+							}
+						}
+					} else {
+						child_input_sum = 0;
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+								child_input_sum += child_input[group_node*number_of_group_node_children + or_addend];
+							}
+						}
+					}
+				#endif
+
+				// Skip node if "turned off" (-1)
+				if (group_node_output[group_node] != -1) {
+					int selected_child;
+					if (group_node_output[group_node] > 0) {
+						int random_child_value = curand(&localState) % child_input_sum;
+						child_input_sum = 0;
+						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+							child_input_sum += child_input[group_node*number_of_group_node_children + or_addend];
+							if (child_input_sum > random_child_value) {
+								selected_child = or_addend;
+								break;
+							}
+						}
+					} else {
+						selected_child = curand(&localState) % number_of_group_node_children;
+					}
+					
+					// "Turn off" the sub-hierarchies that were not selected 
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (selected_child != or_addend) {
+							child_input[group_node*number_of_group_node_children + or_addend] = -1;
+						}
+					}
+				}
+			}
+
+			state[index] = localState;
+		}
+
 		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		//__global__ void evaluate_or_alternatives_log(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
 		{
