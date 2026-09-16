@@ -304,7 +304,7 @@ code_update = """
 					clipped_vote_sum = THRESHOLD;
 				}
 
-				printf("VOTE SUM: %f\n\n", clipped_vote_sum);
+				printf("VOTE SUM: %f\\n", clipped_vote_sum);
 				
 				for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
 					child_update_p[group_node*number_of_group_node_children*2 + and_factor*2] =
