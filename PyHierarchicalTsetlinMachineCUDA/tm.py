@@ -423,6 +423,7 @@ class CommonTsetlinMachine():
 					sys.exit(-1)
 
 			for d in range(self.depth-1, 0, -1):
+				print("HI")
 				if self.hierarchy_structure[d][0] == AND_GROUP or hierarchy_structure[d][0] == AND_ALTERNATIVES:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
