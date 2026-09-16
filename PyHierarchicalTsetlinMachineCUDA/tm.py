@@ -422,7 +422,7 @@ class CommonTsetlinMachine():
 					sys.exit(-1)
 
 			for d in range(self.depth-1, 0, -1):
-				if self.hierarchy_structure[d][0] == AND_GROUP or self.hierarchy_structure[d][0] == AND_ALTERNATIVES:
+				if self.hierarchy_structure[d][0] != OR_GROUP:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
@@ -433,18 +433,7 @@ class CommonTsetlinMachine():
 						self.hierarchy_size[d + 1],
 						self.hierarchy_structure[d][1]
 					)
-				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-					self.propagate_or_alternatives_false_truth_values.prepared_call(
-						self.grid,
-						self.block,
-						self.hierarchy_votes[d-1],
-						self.hierarchy_votes[d],
-						self.hierarchy_update_p[d-1],
-						self.hierarchy_update_p[d],
-						self.hierarchy_size[d + 1],
-						self.hierarchy_structure[d][1]
-					)
-				elif self.hierarchy_structure[d][0] == OR_GROUP:
+				else:
 					self.propagate_or_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
@@ -454,9 +443,6 @@ class CommonTsetlinMachine():
 						self.hierarchy_size[d + 1],
 						self.hierarchy_structure[d][1]
 					)
-				else:
-					print("Unknown node type!")
-					sys.exit(-1)
 
 			# Updates the clause components (leaves) based on the propagated truth values
 			self.update_hierarchy.prepared_call(
