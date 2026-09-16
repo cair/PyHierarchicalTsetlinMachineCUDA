@@ -144,7 +144,7 @@ class CommonTsetlinMachine():
 
 		mod_update = SourceModule(parameters + kernels.code_header + kernels.code_update, no_extern_c=True)		
 		self.update_hierarchy = mod_update.get_function("update_hierarchy")
-		self.update_hierarchy.prepare("PiPPPiPPPPPi")
+		self.update_hierarchy.prepare("PiPPPPiPPPPPi")
 
 		self.update_weights = mod_update.get_function("update_weights")
 		self.update_weights.prepare("PiiPPPPi")
@@ -440,6 +440,7 @@ class CommonTsetlinMachine():
 				self.ta_state_hierarchy_gpu,
 				self.clause_weights_gpu,
 				self.hierarchy_votes[0],
+				self.hierarchy_update_p[0],
 				self.depth,
 				self.hierarchy_structure_factors_gpu,
 				self.hierarchy_structure_type_gpu,

@@ -114,7 +114,7 @@ code_update = """
 			}
 		}
 
-		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
+		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum, float local_type_i_update_p, float local_type_ii_update_p)
 		{
 			int target = 1 - 2*(class_sum > y);
 
@@ -124,8 +124,15 @@ code_update = """
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
+			float local_update_p;
+			if (target * sign > 0) {
+				local_update_p = local_type_i_update_p;
+			} else {
+				local_update_p = local_type_ii_update_p;
+			}
+
 			float absolute_prediction_error = fabsf(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {
+			if (curand_uniform(localState) <= 1.0*local_update_p*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					// Type I Feedback
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
@@ -544,7 +551,7 @@ code_update = """
 		}
 
 		// Update state of Tsetlin Automata team
-		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
+		__global__ void update_hierarchy(curandState *state, int number_of_outputs, unsigned int *global_ta_state, int *clause_weights, float *component_output, float *component_update_p, int depth, int *hierarchy_structure_factors, int *hierarchy_structure_type, float *class_sum, int *X, int *y, int example)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -596,11 +603,8 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					#if LOG_SCALE == 1
-						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] != NEG_INFINITY, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
-					#else
-						update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] > 0, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum);
-					#endif
+
+					update_component_hierarchy(&localState, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], ta_state, component_output[clause_component] > 0, &Xi[feature_chunk_base], y[example*number_of_outputs + class_id], local_class_sum, component_update_p[clause_component*2], component_update_p[clause_component*2 + 1]);
 				}
 			}
 		
