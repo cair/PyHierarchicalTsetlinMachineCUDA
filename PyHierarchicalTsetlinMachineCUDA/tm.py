@@ -165,7 +165,7 @@ class CommonTsetlinMachine():
 		self.evaluate_and_groups.prepare("PPii")
 
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
-		self.propagate_and_group_false_truth_values.prepare("PPii")
+		self.propagate_and_group_false_truth_values.prepare("PPPPii")
 
 		self.propagate_or_alternatives_false_truth_values = mod_update.get_function("propagate_or_alternatives_false_truth_values")
 		self.propagate_or_alternatives_false_truth_values.prepare("PPPPii")
@@ -401,6 +401,8 @@ class CommonTsetlinMachine():
 						self.block,
 						self.hierarchy_votes[d-1],
 						self.hierarchy_votes[d],
+						self.hierarchy_update_p[d-1],
+						self.hierarchy_update_p[d],
 						self.hierarchy_size[d + 1],
 						self.hierarchy_structure[d][1]
 					)
