@@ -403,7 +403,7 @@ code_update = """
 				// Skip node if "turned off" (-1)
 				if (group_node_output[group_node] != -1) {
 					int selected_child;
-					if (child_input_sum > 0) {
+					if (group_node_output[group_node] > 0) {
 						int random_child_value = curand(&localState) % child_input_sum;
 						child_input_sum = 0;
 						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
