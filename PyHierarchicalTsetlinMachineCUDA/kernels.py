@@ -339,45 +339,24 @@ code_update = """
 
 			// If a group node is false, all children are made false.
 			for (int group_node = index; group_node < CLAUSES*number_of_group_nodes; group_node += stride) {
-				#if LOG_SCALE == 1
-					if (group_node_output[group_node] == -1) {
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
-						}
-					}  else if (group_node_output[group_node] == NEG_INFINITY) {
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
-								child_input[group_node*number_of_group_node_children + or_addend] = NEG_INFINITY;	
-							}
-						}
-					} else {
-						child_input_sum = 0;
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							if (child_input[group_node*number_of_group_node_children + or_addend] >= 0) {
-								child_input_sum += np.exp2f(child_input[group_node*number_of_group_node_children + or_addend]); // Needs normalization
-							}
+				if (group_node_output[group_node] == -1) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						child_input[group_node*number_of_group_node_children + or_addend] = -1;	
+					}
+				}  else if (group_node_output[group_node] == 0) {
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							child_input[group_node*number_of_group_node_children + or_addend] = 0;	
 						}
 					}
-				#else
-					if (group_node_output[group_node] == -1) {
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							child_input[group_node*number_of_group_node_children + or_addend] = -1;	
-						}
-					}  else if (group_node_output[group_node] == 0) {
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
-								child_input[group_node*number_of_group_node_children + or_addend] = 0;	
-							}
-						}
-					} else {
-						child_input_sum = 0;
-						for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
-							if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
-								child_input_sum += child_input[group_node*number_of_group_node_children + or_addend];
-							}
+				} else {
+					child_input_sum = 0;
+					for (int or_addend = 0; or_addend < number_of_group_node_children; ++or_addend) {
+						if (child_input[group_node*number_of_group_node_children + or_addend] > 0) {
+							child_input_sum += child_input[group_node*number_of_group_node_children + or_addend];
 						}
 					}
-				#endif
+				}
 
 				// Skip node if "turned off" (-1)
 				if (group_node_output[group_node] != -1) {
@@ -416,39 +395,15 @@ code_update = """
 
 			// Add up the votes from the children of each OR node
 			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
-				#if LOG_SCALE == 1
-					float or_alternatives_vote_max = NEG_INFINITY;
-					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-						if (child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] > or_alternatives_vote_max) {
-							or_alternatives_vote_max = child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
-						}
-					}
+				// Sum up votes from each or alternative
+				int or_alternatives_vote_sum = 0;
+				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+					// Aggregate same input or alternatives through summation						
+					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+				}
 
-					if (or_alternatives_vote_max != NEG_INFINITY) {
-						// Sum up votes from each or alternative
-						float or_alternatives_vote_sum = 0;
-						for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-							// Aggregates or alternatives through summation
-							
-							or_alternatives_vote_sum += exp2f(child_input[or_alternatives_node * number_of_or_alternatives + or_alternative] - or_alternatives_vote_max);
-						}
-
-						// Store vote sum as node output
-						or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_max + log2f(or_alternatives_vote_sum);
-					} else {
-						or_alternatives_node_output[or_alternatives_node] = NEG_INFINITY;
-					}
-				#else
-					// Sum up votes from each or alternative
-					int or_alternatives_vote_sum = 0;
-					for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-						// Aggregate same input or alternatives through summation						
-						or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
-					}
-
-					// Store vote sum as node output
-					or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
-				#endif
+				// Store vote sum as node output
+				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
 			}
 		}
 
