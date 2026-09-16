@@ -134,7 +134,7 @@ code_update = """
 			}
 
 			//if (local_update_p < 1.0) {
-				printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
+			//	printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
 			//}
 
 			float absolute_prediction_error = fabsf(y - class_sum);
