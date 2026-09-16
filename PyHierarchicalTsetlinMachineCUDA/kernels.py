@@ -256,20 +256,12 @@ code_update = """
 			for (int and_group_node = index; and_group_node < CLAUSES*number_of_and_group_nodes; and_group_node += stride) {
 				// Multiply and factors
 
-				#if LOG_SCALE == 1
-					float and_group_vote_product = 0;
-				#else
-					float and_group_vote_product = 1;
-				#endif
+				float and_group_vote_product = 1;
 
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-					#if LOG_SCALE == 1
-				 		and_group_vote_product += child_input[and_group_node*number_of_and_group_factors + and_factor];
-				 	#else
-				 		and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
-				 	#endif	
+				 	and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
 				}
 				
 				and_group_node_output[and_group_node] = and_group_vote_product;
