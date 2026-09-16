@@ -133,7 +133,7 @@ code_update = """
 				local_update_p = local_type_ii_update_p;
 			}
 
-			if (local_update_p > 0.0) {
+			if (local_update_p < 1.0) {
 				printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
 			}
 
