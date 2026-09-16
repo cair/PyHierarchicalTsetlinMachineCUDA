@@ -15,6 +15,8 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-elements", default=16, type=int)
 	parser.add_argument("--number-of-copies", default=2, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
+	parser.add_argument('--local_update_p', action='store_true')
+
 	args = parser.parse_args()
 	for key, value in kwargs.items():
 		if key in args.__dict__:
@@ -53,6 +55,7 @@ tm = MultiClassTsetlinMachine(
 	args.s,
 	number_of_state_bits=8,
 	boost_true_positive_feedback=0,
+	local_update_p=args.local_update_p,
 	hierarchy_structure=(
 		(tm.AND_GROUP, features),
 		(tm.OR_ALTERNATIVES, args.number_of_alternatives),
