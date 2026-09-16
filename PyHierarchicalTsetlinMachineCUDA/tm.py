@@ -385,7 +385,7 @@ class CommonTsetlinMachine():
 			# Propagates the root value and any intermittent node values back to the leaves.
 			# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 			for d in range(self.depth-1, 0, -1):
-				if self.hierarchy_structure[d][0] == AND_GROUP or hierarchy_structure[d][0] == AND_ALTERNATIVES:
+				if self.hierarchy_structure[d][0] == AND_GROUP or self.hierarchy_structure[d][0] == AND_ALTERNATIVES:
 					self.propagate_and_group_update_p.prepared_call(
 						self.grid,
 						self.block,
@@ -424,7 +424,7 @@ class CommonTsetlinMachine():
 
 			for d in range(self.depth-1, 0, -1):
 				print("HI")
-				if self.hierarchy_structure[d][0] == AND_GROUP or hierarchy_structure[d][0] == AND_ALTERNATIVES:
+				if self.hierarchy_structure[d][0] == AND_GROUP or self.hierarchy_structure[d][0] == AND_ALTERNATIVES:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
