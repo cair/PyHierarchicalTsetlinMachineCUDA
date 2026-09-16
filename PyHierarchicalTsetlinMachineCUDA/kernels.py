@@ -206,31 +206,18 @@ code_update = """
 
 				// Evaluate clause component
 
-				#if LOG_SCALE == 1
-					float component_output = 0;
-				#else
-					float component_output = 1;
-				#endif
-
+		
+				float component_output = 1;
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						#if LOG_SCALE == 1
-							component_output = NEG_INFINITY;
-						#else
-							component_output = 0;
-						#endif
-							
+						component_output = 0;
 						break;
 					}
 				}
 
 				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
-					#if LOG_SCALE == 1
-						component_output = NEG_INFINITY;
-					#else
-						component_output = 0;
-					#endif
+					component_output = 0;
 				}
 
 				global_component_output[clause_component] = component_output;
