@@ -125,7 +125,9 @@ code_update = """
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float local_update_p;
-			if (target * sign > 0) {
+			if (LOCAL_UPDATE_P == 0) {
+				local_p = 1.0;
+			} (target * sign > 0) {
 				local_update_p = local_type_i_update_p;
 			} else {
 				local_update_p = local_type_ii_update_p;
@@ -387,99 +389,18 @@ code_update = """
 			state[index] = localState;
 		}
 
-		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
-		//__global__ void evaluate_or_alternatives_log(int *child_input, int *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
-		{
-			int index = blockIdx.x * blockDim.x + threadIdx.x;
-			int stride = blockDim.x * gridDim.x;
-
-			// Add up the votes from the children of each OR node
-			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
-				// Sum up votes from each or alternative
-				int or_alternatives_vote_sum = 0;
-				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
-					// Aggregate same input or alternatives through summation						
-					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
-				}
-
-				// Store vote sum as node output
-				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
-			}
-		}
-
-		__global__ void max_clause_output(int number_of_outputs, float *clause_output, float *clause_output_max)
-		{
-			int index = blockIdx.x * blockDim.x + threadIdx.x;
-			int stride = blockDim.x * gridDim.x;
-
-			// Add up the votes from each clause
-			for (int clause = index; clause < CLAUSES; clause += stride) {
-				atomicMax((int *)&clause_output_max[0], __float_as_int(clause_output[clause]));
-			}
-		}
-
 		__global__ void evaluate_final(int number_of_outputs, float *clause_output, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
 
 			// Add up the votes from each clause
-			#if LOG_SCALE == 1
-				// Add up the votes from each clause
-				for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
-					float clause_output_max = NEG_INFINITY;
-					for (int clause = 0; clause < CLAUSES; ++clause) {
-						if (clause_output[clause] > clause_output_max) {
-							clause_output_max = clause_output[clause];
-						}
-					}
 
-					if (clause_output_max != NEG_INFINITY) {
-						float weighted_clause_output_sum = 0;
-						for (int clause = 0; clause < CLAUSES; ++clause) {
-							weighted_clause_output_sum += clause_weights[class_id*CLAUSES + clause] * exp2f(clause_output[clause] - clause_output_max);
-						}
-
-						if (log2f(fabs(weighted_clause_output_sum)) + clause_output_max >= log2f(THRESHOLD)) {
-							float sign = (1 - 2 * (weighted_clause_output_sum < 0));
-							class_sum[class_id] = sign*THRESHOLD;
-						} else {
-							class_sum[class_id] = weighted_clause_output_sum * exp2f(clause_output_max);
-						}
-					} else {
-						class_sum[class_id] = 0;
-					}
-				}
-			#else
-				for (int clause = index; clause < CLAUSES; clause += stride) {
-					if (clause_output[clause]) {
-						for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * clause_output[clause]);
-						}	
-					}
-				}
-			#endif
-		}
-
-		__global__ void rescale_final(int number_of_outputs, float *clause_output_max, float *class_sum)
-		{
-			int index = blockIdx.x * blockDim.x + threadIdx.x;
-			int stride = blockDim.x * gridDim.x;
-
-			// Add up the votes from each clause
-
-			if (clause_output_max[0] > NEG_INFINITY) {
-				for (int class_id = index; class_id < number_of_outputs; class_id += stride) {
-					float rescaled_abs_class_sum = log2f(fabsf(class_sum[class_id])) + clause_output_max[0];
-					if (rescaled_abs_class_sum >= log2f(THRESHOLD)) {
-						if (class_sum[class_id] >= 0) {
-							class_sum[class_id] = THRESHOLD;
-						} else {
-							class_sum[class_id] = -1*THRESHOLD;
-						}
-					} else {
-						class_sum[class_id] = class_sum[class_id] * exp2f(clause_output_max[0]);
-					}
+			for (int clause = index; clause < CLAUSES; clause += stride) {
+				if (clause_output[clause]) {
+					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
+						atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * clause_output[clause]);
+					}	
 				}
 			}
 		}
@@ -563,11 +484,7 @@ code_update = """
 						local_class_sum = -THRESHOLD;
 					}
 
-					#if LOG_SCALE == 1
-						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] != NEG_INFINITY, y[example*number_of_outputs + class_id], local_class_sum);
-					#else
-						update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
-					#endif
+					update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		
