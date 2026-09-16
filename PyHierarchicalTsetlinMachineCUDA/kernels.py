@@ -126,8 +126,8 @@ code_update = """
 		
 			float local_update_p;
 			if (LOCAL_UPDATE_P == 0) {
-				local_p = 1.0;
-			} (target * sign > 0) {
+				local_update_p = 1.0;
+			} else if (target * sign > 0) {
 				local_update_p = local_type_i_update_p;
 			} else {
 				local_update_p = local_type_ii_update_p;
