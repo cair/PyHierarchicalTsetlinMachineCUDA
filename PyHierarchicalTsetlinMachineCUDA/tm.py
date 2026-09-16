@@ -366,6 +366,9 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(Y_gpu, encoded_Y)
 
 		for e in range(number_of_examples):
+			a = np.zeros(self.number_of_clauses*2, dtype=np.float32)
+			cuda.memcpy_dtoh(np.ones(self.number_of_clauses*2, dtype=np.float32), self.hierarchy_update_p[-1])
+
 			self.evaluate_hierarchy(encoded_X_hierarchy_training_gpu, e)
 
 			# Propagates the root value and any intermittent node values back to the leaves.
