@@ -133,7 +133,9 @@ code_update = """
 				local_update_p = local_type_ii_update_p;
 			}
 
-			//printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
+			if (local_update_p > 0.0) {
+				printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
+			}
 
 			float absolute_prediction_error = fabsf(y - class_sum);
 			if (curand_uniform(localState) <= 1.0*local_update_p*absolute_prediction_error/(2*THRESHOLD)) {
