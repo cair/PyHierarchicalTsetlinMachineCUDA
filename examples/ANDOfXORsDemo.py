@@ -18,7 +18,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-ands", default=4, type=int)
 	parser.add_argument("--noise", default=0.01, type=float)
 	parser.add_argument('--vanilla', action='store_true')
-	parser.add_argument('--local_update_p', action='store_false')
+	parser.add_argument('--local_update_p', action='store_true')
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
