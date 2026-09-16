@@ -168,7 +168,7 @@ class CommonTsetlinMachine():
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
 		self.propagate_or_alternatives_false_truth_values = mod_update.get_function("propagate_or_alternatives_false_truth_values")
-		self.propagate_and_group_false_truth_values.prepare("PPPPii")
+		self.propagate_or_alternatives_false_truth_values.prepare("PPPPii")
 
 		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
 		self.propagate_or_group_false_truth_values.prepare("PPPii")
