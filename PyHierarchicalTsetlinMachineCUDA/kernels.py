@@ -389,6 +389,25 @@ code_update = """
 			state[index] = localState;
 		}
 
+		__global__ void evaluate_or_alternatives(float *child_input, float *or_alternatives_node_output, int number_of_or_alternatives_nodes, int number_of_or_alternatives)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes from the children of each OR node
+			for (int or_alternatives_node = index; or_alternatives_node < CLAUSES*number_of_or_alternatives_nodes; or_alternatives_node += stride) {
+				// Sum up votes from each or alternative
+				int or_alternatives_vote_sum = 0;
+				for (int or_alternative = 0; or_alternative < number_of_or_alternatives; ++or_alternative) {
+					// Aggregate same input or alternatives through summation						
+					or_alternatives_vote_sum += child_input[or_alternatives_node * number_of_or_alternatives + or_alternative];
+				}
+
+				// Store vote sum as node output
+				or_alternatives_node_output[or_alternatives_node] = or_alternatives_vote_sum;
+			}
+		}
+
 		__global__ void evaluate_final(int number_of_outputs, float *clause_output, int *clause_weights, float *class_sum)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
