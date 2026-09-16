@@ -152,14 +152,8 @@ class CommonTsetlinMachine():
 		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
-		self.max_clause_output = mod_update.get_function("max_clause_output")
-		self.max_clause_output.prepare("iPP")
-
 		self.evaluate_final = mod_update.get_function("evaluate_final")
 		self.evaluate_final.prepare("iPPP")
-
-		self.rescale_final = mod_update.get_function("rescale_final")
-		self.rescale_final.prepare("iPP")
 
 		self.evaluate_and_groups = mod_update.get_function("evaluate_and_groups")
 		self.evaluate_and_groups.prepare("PPii")
