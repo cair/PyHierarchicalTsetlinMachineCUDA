@@ -267,7 +267,7 @@ code_update = """
 				for (int and_factor = 0; and_factor < number_of_and_group_factors; ++and_factor) {
 					// Aggregate votes from each child node through multiplication
 					
-				 	and_group_vote_product *= child_input[and_group_node*number_of_and_group_factors + and_factor];
+					and_group_vote_product *= powf(child_input[and_group_node*number_of_and_group_factors + and_factor], 1.0/number_of_and_group_factors);
 				}
 				
 				and_group_node_output[and_group_node] = and_group_vote_product;
