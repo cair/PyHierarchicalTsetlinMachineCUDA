@@ -416,7 +416,7 @@ class CommonTsetlinMachine():
 				self.ta_state_hierarchy_gpu,
 				self.clause_weights_gpu,
 				self.hierarchy_votes[0],
-				self.hierarchy_update_p[0],
+				self.hierarchy_update_p[self.depth-1],
 				self.depth,
 				self.hierarchy_structure_factors_gpu,
 				self.hierarchy_structure_type_gpu,
