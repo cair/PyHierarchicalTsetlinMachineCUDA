@@ -383,6 +383,7 @@ class CommonTsetlinMachine():
 						self.hierarchy_structure[d][1]
 					)
 				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
+					print("Depth", d)
 					self.propagate_or_alternatives_false_truth_values.prepared_call(
 						self.grid,
 						self.block,

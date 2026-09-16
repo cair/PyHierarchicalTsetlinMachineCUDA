@@ -326,6 +326,10 @@ code_update = """
 						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2] =
 							node_update_p[group_node*2] * (1.0 - clipped_vote_sum / THRESHOLD);
 
+						if ((1.0 - clipped_vote_sum / THRESHOLD) < 1.0) {
+							printf("%.f\\n", (1.0 - clipped_vote_sum / THRESHOLD));
+						}
+
 						child_update_p[group_node*number_of_group_node_children*2 + and_factor*2 + 1] =
 							node_update_p[group_node*2 + 1] * (clipped_vote_sum / THRESHOLD);
 					}
