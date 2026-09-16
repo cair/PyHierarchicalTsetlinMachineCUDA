@@ -133,9 +133,9 @@ code_update = """
 				local_update_p = local_type_ii_update_p;
 			}
 
-			if (local_update_p < 1.0) {
-				printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
-			}
+			//if (local_update_p < 1.0) {
+			//	printf("%d %f\\n", LOCAL_UPDATE_P, local_update_p);
+			//}
 
 			float absolute_prediction_error = fabsf(y - class_sum);
 			if (curand_uniform(localState) <= 1.0*local_update_p*absolute_prediction_error/(2*THRESHOLD)) {
@@ -304,8 +304,6 @@ code_update = """
 					clipped_vote_sum = THRESHOLD;
 				}
 
-				printf("VOTE SUM: %f\\n", clipped_vote_sum);
-				
 				for (int and_factor = 0; and_factor < number_of_group_node_children; ++and_factor) {
 					child_update_p[group_node*number_of_group_node_children*2 + and_factor*2] =
 						node_update_p[group_node*2] * (1.0 - clipped_vote_sum / THRESHOLD);

@@ -397,7 +397,6 @@ class CommonTsetlinMachine():
 						self.hierarchy_structure[d][1]
 					)
 				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-					print("Depth", d)
 					self.propagate_or_alternatives_update_p.prepared_call(
 						self.grid,
 						self.block,
@@ -423,7 +422,6 @@ class CommonTsetlinMachine():
 					sys.exit(-1)
 
 			for d in range(self.depth-1, 0, -1):
-				print("HI")
 				if self.hierarchy_structure[d][0] == AND_GROUP or self.hierarchy_structure[d][0] == AND_ALTERNATIVES:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
@@ -436,7 +434,6 @@ class CommonTsetlinMachine():
 						self.hierarchy_structure[d][1]
 					)
 				elif self.hierarchy_structure[d][0] == OR_ALTERNATIVES:
-					print("Depth", d)
 					self.propagate_or_alternatives_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
