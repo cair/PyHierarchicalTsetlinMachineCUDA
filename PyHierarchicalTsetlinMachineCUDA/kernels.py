@@ -138,7 +138,7 @@ code_update = """
 			//}
 
 			float absolute_prediction_error = fabsf(y - class_sum);
-			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD) {// 1.0*local_update_p*absolute_prediction_error/(2*THRESHOLD)) {
+			if (curand_uniform(localState) <= 1.0*absolute_prediction_error/(2*THRESHOLD)) {// 1.0*local_update_p*absolute_prediction_error/(2*THRESHOLD)) {
 				if (target*sign > 0) {
 					// Type I Feedback
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
