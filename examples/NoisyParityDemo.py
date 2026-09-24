@@ -17,7 +17,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-alternatives-1", default=3, type=int)
 	parser.add_argument("--number-of-alternatives-2", default=3, type=int)
 	parser.add_argument('--vanilla', action='store_true')
-	parser.add_argument('--and-group-normalizatiovn', action='store_true')
+	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 
 	args = parser.parse_args()
