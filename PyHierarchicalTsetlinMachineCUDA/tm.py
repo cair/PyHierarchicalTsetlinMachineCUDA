@@ -278,7 +278,7 @@ class CommonTsetlinMachine():
 	def initialize_weights_and_ta_states(self):
 		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_gpu, grid=self.grid, block=self.block)
 
-		self.prepare_hierarchy(np.int32(self.number_of_outputs), self.ta_state_hierarchy_gpu, grid=self.grid, block=self.block)
+		self.prepare_hierarchy(self.cuda_rng.state, np.int32(self.number_of_outputs), self.ta_state_hierarchy_gpu, grid=self.grid, block=self.block)
 
 	def evaluate_hierarchy(self, encoded_X_hierarchy, e):
 		# Initializes class sums to zero
