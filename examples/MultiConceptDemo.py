@@ -15,7 +15,7 @@ def default_args(**kwargs):
 	parser.add_argument("--s", default=21.1, type=float)
 	parser.add_argument("--number-of-alternatives", default=64, type=int)
 	parser.add_argument("--number-of-elements", default=16, type=int)
-	parser.add_argument("--number-of-copies", default=2, type=int)
+	parser.add_argument("--number-of-concepts", default=2, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
@@ -61,7 +61,7 @@ for r in range(args.runs):
 	seed = np.random.randint(10000)
 	if args.vanilla:
 		tsetlin_machine = MultiClassTsetlinMachine(
-			args.number_of_clauses * args.number_of_alternatives * args.number_of_copies,
+			args.number_of_clauses * args.number_of_alternatives * args.number_of_concepts,
 			args.T,
 			args.s,
 			binary_inference=args.binary_inference,
@@ -90,11 +90,13 @@ for r in range(args.runs):
 			boost_true_positive_feedback=0,
 			no_clipping=args.no_clipping,
 			append_negated=False,
+
 			hierarchy_structure=(
 				(tm.AND_GROUP, features),
 				(tm.OR_ALTERNATIVES, args.number_of_alternatives),
-				(tm.AND_ALTERNATIVES, args.number_of_copies)
+				(tm.AND_ALTERNATIVES, args.number_of_concepts)
 			)
+		
 		)
 
 	print("\nAccuracy over %d epochs:\n" % (args.epochs,))
