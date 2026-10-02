@@ -102,7 +102,7 @@ for r in range(args.runs):
 
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
-	for i in range(args.epochs):
+	for e in range(args.epochs):
 		start_training = time()
 		tm.fit(X_train, Y_train)
 		stop_training = time()
