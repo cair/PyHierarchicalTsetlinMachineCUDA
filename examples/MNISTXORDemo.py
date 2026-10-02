@@ -20,6 +20,7 @@ def default_args(**kwargs):
 	parser.add_argument('--vanilla', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
+	parser.add_argument('--weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
 
 	args = parser.parse_args()
@@ -81,6 +82,7 @@ tm = MultiClassTsetlinMachine(
 	clauses,
 	T,
 	s,
+	weighted_clauses=args.weighted_clauses,
 	binary_inference=args.binary_inference,
 	constant_update_p=args.constant_update_p,
 	and_group_normalization=args.and_group_normalization,
