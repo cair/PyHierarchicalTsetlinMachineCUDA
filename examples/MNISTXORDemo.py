@@ -8,6 +8,7 @@ import argparse
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--epochs", default=100, type=int)
+	parser.add_argument("--runs", default=100, type=int)
 	parser.add_argument("--number-of-clauses", default=4, type=int)
 	parser.add_argument("--number-of-state-bits", default=10, type=int)
 	parser.add_argument("--number-of-examples", default=10000, type=int)
@@ -20,7 +21,7 @@ def default_args(**kwargs):
 	parser.add_argument('--vanilla', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
-	parser.add_argument('--non-weighted-clauses', action='store_true')
+	parser.add_argument('--weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
 
 	args = parser.parse_args()
@@ -82,7 +83,7 @@ tm = TsetlinMachine(
 	clauses,
 	T,
 	s,
-	weighted_clauses=not args.non_weighted_clauses,
+	weighted_clauses=args.weighted_clauses,
 	binary_inference=args.binary_inference,
 	constant_update_p=args.constant_update_p,
 	and_group_normalization=args.and_group_normalization,
