@@ -1,4 +1,4 @@
-from PyHierarchicalTsetlinMachineCUDA.tm import MultiClassTsetlinMachine
+from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
@@ -7,11 +7,11 @@ import argparse
 
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--epochs", default=1000, type=int)
-	parser.add_argument("--number-of-clauses", default=10, type=int)
-	parser.add_argument("--number-of-state-bits", default=8, type=int)
+	parser.add_argument("--epochs", default=100, type=int)
+	parser.add_argument("--number-of-clauses", default=4, type=int)
+	parser.add_argument("--number-of-state-bits", default=10, type=int)
 	parser.add_argument("--number-of-examples", default=10000, type=int)
-	parser.add_argument("--T", default=100, type=int)
+	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--number-of-alternatives", default=20, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
@@ -20,7 +20,7 @@ def default_args(**kwargs):
 	parser.add_argument('--vanilla', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
-	parser.add_argument('--weighted-clauses', action='store_true')
+	parser.add_argument('--non-weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
 
 	args = parser.parse_args()
@@ -78,11 +78,11 @@ else:
 
 seed = np.random.randint(10000)
 
-tm = MultiClassTsetlinMachine(
+tm = TsetlinMachine(
 	clauses,
 	T,
 	s,
-	weighted_clauses=args.weighted_clauses,
+	weighted_clauses=not args.non_weighted_clauses,
 	binary_inference=args.binary_inference,
 	constant_update_p=args.constant_update_p,
 	and_group_normalization=args.and_group_normalization,
