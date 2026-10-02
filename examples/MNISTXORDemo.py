@@ -7,7 +7,7 @@ import argparse
 
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--epochs", default=100, type=int)
+	parser.add_argument("--epochs", default=250, type=int)
 	parser.add_argument("--runs", default=100, type=int)
 	parser.add_argument("--number-of-clauses", default=4, type=int)
 	parser.add_argument("--number-of-state-bits", default=10, type=int)
@@ -97,8 +97,8 @@ tm = TsetlinMachine(
 	)
 )
 
-print("\nAccuracy over 500 epochs:\n")
-for i in range(500):
+print("\nAccuracy over %d epochs:\n" % (args.epochs))
+for i in range(args.epochs):
 	start_training = time()
 	tm.fit(X_train, Y_train)
 	stop_training = time()
