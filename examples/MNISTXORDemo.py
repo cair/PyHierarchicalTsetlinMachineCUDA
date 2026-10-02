@@ -77,35 +77,42 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
-seed = np.random.randint(10000)
+f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
 
-tm = TsetlinMachine(
-	clauses,
-	T,
-	s,
-	weighted_clauses=args.weighted_clauses,
-	binary_inference=args.binary_inference,
-	constant_update_p=args.constant_update_p,
-	and_group_normalization=args.and_group_normalization,
-	seed=seed,
-	number_of_state_bits=args.number_of_state_bits,
-	no_clipping=args.no_clipping,
-	hierarchy_structure=(
-		(tm.AND_GROUP, 28*28),
-		(tm.OR_ALTERNATIVES, or_alternatives),
-		(tm.AND_GROUP, 2)
+for r in range(args.runs):
+	seed = np.random.randint(10000)
+
+	tm = TsetlinMachine(
+		clauses,
+		T,
+		s,
+		weighted_clauses=args.weighted_clauses,
+		binary_inference=args.binary_inference,
+		constant_update_p=args.constant_update_p,
+		and_group_normalization=args.and_group_normalization,
+		seed=seed,
+		number_of_state_bits=args.number_of_state_bits,
+		no_clipping=args.no_clipping,
+		hierarchy_structure=(
+			(tm.AND_GROUP, 28*28),
+			(tm.OR_ALTERNATIVES, or_alternatives),
+			(tm.AND_GROUP, 2)
+		)
 	)
-)
 
-print("\nAccuracy over %d epochs:\n" % (args.epochs))
-for i in range(args.epochs):
-	start_training = time()
-	tm.fit(X_train, Y_train)
-	stop_training = time()
+	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
+	for i in range(args.epochs):
+		start_training = time()
+		tm.fit(X_train, Y_train)
+		stop_training = time()
 
-	start_testing = time()
-	result = 100*(tm.predict(X_test) == Y_test).mean()
-	stop_testing = time()
+		start_testing = time()
+		result = 100*(tm.predict(X_test) == Y_test).mean()
+		stop_testing = time()
 
-	print("#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (i+1, result, stop_training-start_training, stop_testing-start_testing))
+		print("#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (i+1, result, stop_training-start_training, stop_testing-start_testing))
+
+		f.write("%d %d %.2f\n" % (r, e, result))
+		f.flush()
+f.close()
