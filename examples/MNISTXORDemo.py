@@ -88,7 +88,6 @@ tm = MultiClassTsetlinMachine(
 	number_of_state_bits=args.number_of_state_bits,
 	boost_true_positive_feedback=0,
 	no_clipping=args.no_clipping,
-	append_negated=False,
 	hierarchy_structure=(
 		(tm.AND_GROUP, 28*28),
 		(tm.OR_ALTERNATIVES, or_alternatives),
