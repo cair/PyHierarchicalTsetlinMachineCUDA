@@ -82,7 +82,7 @@ f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" %
 for r in range(args.runs):
 	seed = np.random.randint(10000)
 
-	tm = TsetlinMachine(
+	tsetlin_machine = TsetlinMachine(
 		clauses,
 		T,
 		s,
@@ -104,11 +104,11 @@ for r in range(args.runs):
 
 	for e in range(args.epochs):
 		start_training = time()
-		tm.fit(X_train, Y_train)
+		tsetlin_machine.fit(X_train, Y_train)
 		stop_training = time()
 
 		start_testing = time()
-		result = 100*(tm.predict(X_test) == Y_test).mean()
+		result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
 		stop_testing = time()
 
 		print("#%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (e+1, result, stop_training-start_training, stop_testing-start_testing))
