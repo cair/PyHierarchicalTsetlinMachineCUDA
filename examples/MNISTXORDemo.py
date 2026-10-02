@@ -91,7 +91,7 @@ tm = MultiClassTsetlinMachine(
 		(tm.AND_GROUP, 28*28),
 		(tm.OR_ALTERNATIVES, or_alternatives),
 		(tm.AND_GROUP, 2)
-		)
+	)
 )
 
 print("\nAccuracy over 500 epochs:\n")
