@@ -14,5 +14,5 @@ for run in range(int(runs)):
 
 	#print(m[m[:,0]==run][i])
 
-print("Average max accuracy %.2f +/- %.2f" % (max_accuracies.mean(), max_accuracies.stddev() / np.sqrt(runs)))
+print("Average max accuracy %.2f +/- %.2f" % (max_accuracies.mean(), max_accuracies.std() / np.sqrt(runs)))
 print("Average epochs to max accuracy %.2f" % (epochs_to_max_accuracies.mean()))
