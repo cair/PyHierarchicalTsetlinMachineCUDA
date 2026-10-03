@@ -14,11 +14,13 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-examples", default=10000, type=int)
 	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
-	parser.add_argument("--number-of-alternatives", default=20, type=int)
+	parser.add_argument("--number-of-or-alternatives", default=20, type=int)
+	parser.add_argument("--number-of-and-alternatives", default=4, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
+	parser.add_argument('--and-alternatives', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
@@ -32,7 +34,7 @@ def default_args(**kwargs):
 
 args = default_args()
 
-or_alternatives = args.number_of_alternatives
+or_alternatives = args.number_of_or_alternatives
 clauses = args.number_of_clauses
 T = args.T
 s = args.s
@@ -77,14 +79,14 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
-f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
+f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_or_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses * args.number_of_alternatives,
+			args.number_of_clauses * args.number_of_or_alternatives,
 			args.T,
 			args.s,
 			weighted_clauses=args.weighted_clauses,
@@ -97,6 +99,24 @@ for r in range(args.runs):
 			hierarchy_structure=(
 				(tm.AND_GROUP, 28*28*2),
 				(tm.AND_GROUP, 1)
+			)
+		)
+	elif args.and_alternatives:
+		tsetlin_machine = TsetlinMachine(
+			clauses,
+			T,
+			s,
+			weighted_clauses=args.weighted_clauses,
+			binary_inference=args.binary_inference,
+			constant_update_p=args.constant_update_p,
+			and_group_normalization=args.and_group_normalization,
+			seed=seed,
+			number_of_state_bits=args.number_of_state_bits,
+			no_clipping=args.no_clipping,
+			hierarchy_structure=(
+				(tm.AND_GROUP, 28*28*2),
+				(tm.OR_ALTERNATIVES, or_alternatives),
+				(tm.AND_ALTERNATIVES, args.number_of_and_alternatives)
 			)
 		)
 	else:
