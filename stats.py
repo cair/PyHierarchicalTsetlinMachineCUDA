@@ -5,13 +5,14 @@ m = np.loadtxt(sys.argv[1])
 
 runs = int(m[:,0].max())+1
 
-average_max_accuracy = 0.0
-average_epochs_to_max_accuracy = 0.0
+max_accuracies = np.empty(int(runs))
+epochs_to_max_accuracies = np.empty(int(runs))
 for run in range(int(runs)):
 	i = m[m[:,0]==run][:,2].argmax()
-	average_max_accuracy += m[m[:,0]==run][i,2] / float(runs)
-	average_epochs_to_max_accuracy += m[m[:,0]==run][i,1] / float(runs)
+	max_accuracies[run] = m[m[:,0]==run][i,2]
+	epochs_to_max_accuracies[run] = m[m[:,0]==run][i,1]
+
 	#print(m[m[:,0]==run][i])
 
-print("Average max accuracy %.2f" % (average_max_accuracy))
-print("Average epochs to max accuracy %.2f" % (average_epochs_to_max_accuracy))
+print("Average max accuracy %.2f +/- %.2f" % (max_accuracies.mean(), max_accuracies.stddev() / np.sqrt(runs)))
+print("Average epochs to max accuracy %.2f" % (epochs_to_max_accuracies.mean()))
