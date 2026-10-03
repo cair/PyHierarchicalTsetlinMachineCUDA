@@ -82,23 +82,41 @@ f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" %
 for r in range(args.runs):
 	seed = np.random.randint(10000)
 
-	tsetlin_machine = TsetlinMachine(
-		clauses,
-		T,
-		s,
-		weighted_clauses=args.weighted_clauses,
-		binary_inference=args.binary_inference,
-		constant_update_p=args.constant_update_p,
-		and_group_normalization=args.and_group_normalization,
-		seed=seed,
-		number_of_state_bits=args.number_of_state_bits,
-		no_clipping=args.no_clipping,
-		hierarchy_structure=(
-			(tm.AND_GROUP, 28*28),
-			(tm.OR_ALTERNATIVES, or_alternatives),
-			(tm.AND_GROUP, 2)
+	if args.vanilla:
+		tsetlin_machine = TsetlinMachine(
+			args.number_of_clauses * args.number_of_alternatives,
+			args.T,
+			args.s,
+			weighted_clauses=args.weighted_clauses,
+			binary_inference=args.binary_inference,
+			constant_update_p=args.constant_update_p,
+			and_group_normalization=args.and_group_normalization,
+			seed=seed,
+			number_of_state_bits=args.number_of_state_bits,
+			no_clipping=args.no_clipping,
+			hierarchy_structure=(
+				(tm.AND_GROUP, 28*28*2),
+				(tm.AND_GROUP, 1)
+			)
 		)
-	)
+	else:
+		tsetlin_machine = TsetlinMachine(
+			clauses,
+			T,
+			s,
+			weighted_clauses=args.weighted_clauses,
+			binary_inference=args.binary_inference,
+			constant_update_p=args.constant_update_p,
+			and_group_normalization=args.and_group_normalization,
+			seed=seed,
+			number_of_state_bits=args.number_of_state_bits,
+			no_clipping=args.no_clipping,
+			hierarchy_structure=(
+				(tm.AND_GROUP, 28*28),
+				(tm.OR_ALTERNATIVES, or_alternatives),
+				(tm.AND_GROUP, 2)
+			)
+		)
 
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
