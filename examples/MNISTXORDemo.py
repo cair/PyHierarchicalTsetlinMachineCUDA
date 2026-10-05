@@ -57,7 +57,7 @@ if args.generate_data:
 
 		Y_train[i] = np.logical_xor(x[0], x[1])
 
-	np.savetxt("examples/MNISTXORTrainingData.txt", np.append(X_train, Y_train.reshape((number_of_examples, 1)), axis=1), fmt='%d')
+	np.savetxt("examples/MNISTXORTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 
 	X_test = np.empty((args.number_of_examples, 28*28*2))
 	Y_test = np.empty(args.number_of_examples)
@@ -69,7 +69,7 @@ if args.generate_data:
 
 		Y_test[i] = np.logical_xor(x[0], x[1])
 
-	np.savetxt("examples/MNISTXORTestingData.txt", np.append(X_test, Y_test.reshape((number_of_examples, 1)), axis=1), fmt='%d')
+	np.savetxt("examples/MNISTXORTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 else:
 	train_data = np.loadtxt("./examples/MNISTXORTrainingData.txt").astype(np.uint32)
 	X_train = train_data[:,0:-1]
