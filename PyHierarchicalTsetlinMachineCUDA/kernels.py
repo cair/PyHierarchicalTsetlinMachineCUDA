@@ -167,7 +167,7 @@ code_update = """
 							}
 						}
 
-						if (component_output && included_literals <= MAX_INCLUDED_LITERALS) {
+						if (component_output && included_literals <= LITERAL_BUDGET) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
 								inc(ta_state, ta_chunk, X[ta_chunk]);
 							#else

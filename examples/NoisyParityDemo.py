@@ -20,7 +20,7 @@ def default_args(**kwargs):
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
-	parser.add_argument('--max-included-literals', default=2, type=int)
+	parser.add_argument('--literal-budget', default=2, type=int)
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -38,7 +38,7 @@ test_data = np.loadtxt("./examples/NoisyParityTestingData.txt").astype(np.uint32
 X_test = test_data[:,0:-1]
 Y_test = test_data[:,-1]
 
-f = open("noisy_parity_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_alternatives_1, args.number_of_alternatives_2, args.no_clipping, args.epochs, args.max_included_literals), "w")
+f = open("noisy_parity_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%d_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_alternatives_1, args.number_of_alternatives_2, args.no_clipping, args.epochs, args.literal_budget), "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
@@ -47,7 +47,7 @@ for r in range(args.runs):
 			args.number_of_clauses * 3 * args.number_of_alternatives_1 * 2 * args.number_of_alternatives_2 * 2 / 12,
 			args.T,
 			args.s,
-			max_included_literals=args.max_included_literals,
+			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
@@ -65,7 +65,7 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
-			max_included_literals=args.max_included_literals,
+			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
