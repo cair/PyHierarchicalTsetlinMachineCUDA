@@ -19,6 +19,8 @@ def default_args(**kwargs):
 	parser.add_argument('--vanilla', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
+	parser.add_argument('--weighted-clauses', action='store_true')
+	parser.add_argument('--literal-budget', default=2, type=int)
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
