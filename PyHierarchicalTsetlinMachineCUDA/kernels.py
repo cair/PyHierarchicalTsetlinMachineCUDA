@@ -51,7 +51,7 @@ code_update = """
 	            number_of_include_actions += __popc(ta_state[ta_pos]);
 	        }
 	        unsigned int ta_pos = (TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS-1;
-	        number_of_include_actions += __popc(ta_state[ta_pos] & FILTER);
+	        number_of_include_actions += __popc(ta_state[ta_pos] & FILTER_HIERARCHICAL);
 
 	        return(number_of_include_actions);
 	    }
