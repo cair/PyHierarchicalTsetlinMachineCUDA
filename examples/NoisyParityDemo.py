@@ -20,7 +20,7 @@ def default_args(**kwargs):
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
-	parser.add_argument('--literal-budget', default=2, type=int)
+	parser.add_argument('--max-included-literals', default=2, type=int)
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -47,7 +47,7 @@ for r in range(args.runs):
 			args.number_of_clauses * 3 * args.number_of_alternatives_1 * 2 * args.number_of_alternatives_2 * 2 / 12,
 			args.T,
 			args.s,
-			literal_budget=args.literal_budget,
+			max_included_literals=args.max_included_literals,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
@@ -65,7 +65,7 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
-			literal_budget=args.literal_budget,
+			max_included_literals=args.max_included_literals,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
