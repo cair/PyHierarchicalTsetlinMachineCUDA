@@ -41,6 +41,21 @@ code_header = """
 code_update = """
 	extern "C"
     {
+
+    	// Counts number of include actions for a given clause component
+	    __device__ inline int number_of_include_actions(unsigned int *ta_state)
+	    {
+	        int number_of_include_actions = 0;
+	        for (int k = 0; k < TA_CHUNKS_PER_LEAF-1; ++k) {
+	            unsigned int ta_pos = k*STATE_BITS + STATE_BITS-1;
+	            number_of_include_actions += __popc(ta_state[ta_pos]);
+	        }
+	        unsigned int ta_pos = (TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS-1;
+	        number_of_include_actions += __popc(ta_state[ta_pos] & FILTER_HIERARCHICAL);
+
+	        return(number_of_include_actions);
+	    }
+
     	// Increment the states of each of those 32 Tsetlin Automata flagged in the active bit vector.
 		__device__ inline void inc(unsigned int *ta_state, int chunk, unsigned int active)
 		{
@@ -140,6 +155,9 @@ code_update = """
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
 					// Type I Feedback
+
+					int included_literals = number_of_include_actions(ta_state);
+
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
 						// Generate random bit values
 						unsigned int la_feedback = 0;
@@ -149,7 +167,7 @@ code_update = """
 							}
 						}
 
-						if (component_output) {
+						if (component_output && included_literals <= LITERAL_BUDGET) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
 								inc(ta_state, ta_chunk, X[ta_chunk]);
 							#else
