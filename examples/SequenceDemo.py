@@ -42,8 +42,7 @@ T = args.T
 s = args.s
 
 if args.generate_data:
-	numbers = np.arange(args.sequence_length)
-	permutations = itertools.permutations(numbers)
+	permutations = itertools.permutations(range(args.sequence_length))
 	for p in permutations:
 		print(p)
 
