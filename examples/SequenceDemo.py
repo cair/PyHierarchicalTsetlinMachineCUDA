@@ -18,6 +18,7 @@ def default_args(**kwargs):
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--sequence-length", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=20, type=int)
+	parser.add_argument("--number-of-and-alternatives", default=20, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
@@ -138,8 +139,8 @@ for r in range(args.runs):
 			append_negated=False,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
-				(tm.OR_ALTERNATIVES, or_alternatives),
-				(tm.AND_GROUP, args.sequence_length)
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.AND_GROUP, args.number_of_and_alternatives)
 			)
 		)
 
