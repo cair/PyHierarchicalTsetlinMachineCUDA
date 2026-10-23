@@ -27,6 +27,7 @@ def default_args(**kwargs):
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
+	parser.add_argument('--literal-budget', default=2, type=int)
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -87,6 +88,7 @@ for r in range(args.runs):
 			args.number_of_clauses * args.number_of_and_alternatives,
 			args.T,
 			args.s,
+			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
@@ -105,6 +107,7 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
+			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
@@ -124,6 +127,7 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
+			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
