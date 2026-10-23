@@ -130,7 +130,7 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
-			append_negated=False,
+			#append_negated=False,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
 				(tm.OR_GROUP, args.sequence_length),
