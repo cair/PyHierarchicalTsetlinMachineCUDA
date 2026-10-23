@@ -43,40 +43,28 @@ T = args.T
 s = args.s
 
 if args.generate_data:
-	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length), dtype=np.uint32)
-	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
+	X_unique = np.ones((math.faculty(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
+	Y_unique = np.empty(math.faculty(args.sequence_length), dtype=np.uint32)
 
 	permutations = itertools.permutations(range(args.sequence_length))
 	example = 0
 	for p in permutations:
 		for i in range(args.sequence_length):
-			X_train[example, i*args.sequence_length + p[i]] = 1
+			X_unique[example, i*args.sequence_length + p[i]] = 0
 
-		Y_train[example] = np.random.randint(2)
-		print(p)
-		print(X_train[example])
+		Y_unique[example] = np.random.randint(2)
 		example += 1
-	
-	for i in range(args.number_of_examples):
-		x = np.random.randint(2, size=(2))
 
-		X_train[i,:28*28] = X_mnist_train[Y_mnist_train == x[0]][np.random.randint(x_mnist_train_count[x[0]])]
-		X_train[i,28*28:] = X_mnist_train[Y_mnist_train == x[1]][np.random.randint(x_mnist_train_count[x[1]])]	
+	train_indices = np.random.choice(math.faculty(args.sequence_length), size=args.number_of_examples, replace=True)
+	X_train = X_train_unique[train_indices].copy()
+	Y_train = Y_train_unique[train_indices].copy()
+	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
-		Y_train[i] = np.logical_xor(x[0], x[1])
+	test_indices = np.random.choice(math.faculty(args.sequence_length), size=args.number_of_examples, replace=True)
+	X_test = X_test_unique[test_indices].copy()
+	Y_test = Y_test_unique[test_indices].copy()
 
 	np.savetxt("examples/SequenceTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
-
-	X_test = np.empty((args.number_of_examples, 28*28*2))
-	Y_test = np.empty(args.number_of_examples)
-	for i in range(args.number_of_examples):
-		x = np.random.randint(2, size=(2))
-
-		X_test[i,:28*28] = X_mnist_train[Y_mnist_train == x[0]][np.random.randint(x_mnist_train_count[x[0]])]
-		X_test[i,28*28:] = X_mnist_train[Y_mnist_train == x[1]][np.random.randint(x_mnist_train_count[x[1]])]	
-
-		Y_test[i] = np.logical_xor(x[0], x[1])
-
 	np.savetxt("examples/SequenceTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 else:
 	train_data = np.loadtxt("./examples/SequenceTrainingData.txt").astype(np.uint32)
@@ -87,7 +75,7 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
-f = open("mnist_xor_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_or_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
+f = open("sequence_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_or_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
