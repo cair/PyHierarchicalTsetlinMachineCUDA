@@ -84,7 +84,7 @@ for r in range(args.runs):
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses * args.number_of_or_alternatives,
+			args.number_of_clauses * args.number_of_and_alternatives,
 			args.T,
 			args.s,
 			weighted_clauses=args.weighted_clauses,
@@ -94,8 +94,9 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
+			append_negated=False,
 			hierarchy_structure=(
-				(tm.AND_GROUP, 28*28*2),
+				(tm.AND_GROUP, args.sequence_length*args.sequence_length),
 				(tm.AND_GROUP, 1)
 			)
 		)
