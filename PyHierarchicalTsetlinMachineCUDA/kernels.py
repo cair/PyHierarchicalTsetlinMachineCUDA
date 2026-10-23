@@ -319,7 +319,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values_convolution(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
