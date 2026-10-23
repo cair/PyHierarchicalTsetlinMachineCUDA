@@ -13,7 +13,7 @@ def default_args(**kwargs):
 	parser.add_argument("--runs", default=100, type=int)
 	parser.add_argument("--number-of-clauses", default=4, type=int)
 	parser.add_argument("--number-of-state-bits", default=10, type=int)
-	parser.add_argument("--number-of-examples", default=10000, type=int)
+	parser.add_argument("--number-of-examples", default=10, type=int)
 	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--sequence-length", default=3, type=int)
@@ -43,8 +43,8 @@ T = args.T
 s = args.s
 
 if args.generate_data:
-	X_unique = np.ones((math.faculty(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
-	Y_unique = np.empty(math.faculty(args.sequence_length), dtype=np.uint32)
+	X_unique = np.ones((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
+	Y_unique = np.empty(math.factorial(args.sequence_length), dtype=np.uint32)
 
 	permutations = itertools.permutations(range(args.sequence_length))
 	example = 0
@@ -52,17 +52,25 @@ if args.generate_data:
 		for i in range(args.sequence_length):
 			X_unique[example, i*args.sequence_length + p[i]] = 0
 
+		print(p)
 		Y_unique[example] = np.random.randint(2)
 		example += 1
 
-	train_indices = np.random.choice(math.faculty(args.sequence_length), size=args.number_of_examples, replace=True)
-	X_train = X_train_unique[train_indices].copy()
-	Y_train = Y_train_unique[train_indices].copy()
+	print(X_unique)
+
+	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	
+	print(train_indices)
+	X_train = X_unique[train_indices].copy()
+	Y_train = Y_unique[train_indices].copy()
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
-	test_indices = np.random.choice(math.faculty(args.sequence_length), size=args.number_of_examples, replace=True)
-	X_test = X_test_unique[test_indices].copy()
-	Y_test = Y_test_unique[test_indices].copy()
+	print(X_train)
+	print(Y_train)
+	
+	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	X_test = X_unique[test_indices].copy()
+	Y_test = Y_unique[test_indices].copy()
 
 	np.savetxt("examples/SequenceTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 	np.savetxt("examples/SequenceTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
