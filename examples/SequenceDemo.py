@@ -5,6 +5,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 import argparse
 import itertools
+import math
 
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
@@ -15,7 +16,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-examples", default=10000, type=int)
 	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
-	parser.add_argument("--sequence-length", default=5, type=int)
+	parser.add_argument("--sequence-length", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=20, type=int)
 	parser.add_argument("--number-of-and-alternatives", default=4, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
@@ -42,9 +43,18 @@ T = args.T
 s = args.s
 
 if args.generate_data:
+	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length), dtype=np.uint32)
+	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
+
 	permutations = itertools.permutations(range(args.sequence_length))
+	example = 0
 	for p in permutations:
+		for i in range(args.sequence_length):
+			X_train[example, i*args.sequence_length + p[i]] = 1
+
+		Y_train[example] = np.random.randint(2)
 		print(p)
+		print(X_train[example])
 
 	(X_mnist_train, Y_mnist_train), (X_mnist_test, Y_mnist_test) = mnist.load_data()
 
@@ -53,8 +63,7 @@ if args.generate_data:
 
 	x_mnist_train_count = [X_mnist_train[Y_mnist_train == 0].shape[0], X_mnist_train[Y_mnist_train == 1].shape[0]]
 
-	X_train = np.empty((args.number_of_examples, 28*28*2))
-	Y_train = np.empty(args.number_of_examples)
+	
 	for i in range(args.number_of_examples):
 		x = np.random.randint(2, size=(2))
 
