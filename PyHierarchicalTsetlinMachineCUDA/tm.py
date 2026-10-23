@@ -37,6 +37,7 @@ AND_GROUP = 0
 AND_ALTERNATIVES = 1
 OR_GROUP = 2
 OR_ALTERNATIVES = 3
+OR_GROUP_CONVOLUTION = 4
 
 VANILLA_TM = 0
 WEIGHTED_TM = 1
@@ -79,7 +80,7 @@ class CommonTsetlinMachine():
 		# Calculates total number of features spanned by the hierarchy
 		self.number_of_features_hierarchy = 1
 		for d in range(self.depth - 1, -1, -1):
-			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP):
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == OR_GROUP_CONVOLUTION or self.hierarchy_structure[d][0] == AND_GROUP):
 				self.number_of_features_hierarchy *= self.hierarchy_structure[d][1]
 
 		# Calculates literal chunks per leaf
@@ -101,13 +102,13 @@ class CommonTsetlinMachine():
 
 		self.number_of_ta_teams = 1
 		for d in range(self.depth - 1):
-			if self.hierarchy_structure[d][0] != OR_GROUP: # OR_GROUP reuses the same TA
+			if self.hierarchy_structure[d][0] != OR_GROUP_CONVOLUTION: # OR_GROUP_CONVOLUTION reuses the same TA
 				self.number_of_ta_teams = self.hierarchy_structure[self.depth - d - 1][1] * self.number_of_ta_teams
 
 		# Calculates number of literal chunks overall for the feature vector (ignores OR- and AND alternatives)
 		self.number_of_literal_chunks = self.number_of_literal_chunks_per_leaf
 		for d in range(self.depth - 1, 0, -1):
-			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == AND_GROUP): # OR_GROUP and AND_GROUP join the features of their children
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == OR_GROUP_CONVOLUTION or self.hierarchy_structure[d][0] == AND_GROUP): # OR_GROUP and AND_GROUP join the features of their children
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 
 		self.np_rng = np.random.default_rng(seed)
@@ -142,11 +143,12 @@ class CommonTsetlinMachine():
 	#define AND_GROUP %d
 	#define AND_ALTERNATIVES %d
 	#define OR_GROUP %d
+	#define OR_GROUP_CONVOLUTION %d
 	#define OR_ALTERNATIVES %d
 
 	#define NEGATIVE_CLAUSES %d
 	#define FLIP_POLARITY %d
-		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_ta_teams, self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.literal_budget, self.binary_inference, self.constant_update_p, self.and_group_normalization, AND_GROUP, AND_ALTERNATIVES, OR_GROUP, OR_ALTERNATIVES, self.negative_clauses, self.flip_polarity)
+		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_ta_teams, self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.literal_budget, self.binary_inference, self.constant_update_p, self.and_group_normalization, AND_GROUP, AND_ALTERNATIVES, OR_GROUP, OR_GROUP_CONVOLUTION, OR_ALTERNATIVES, self.negative_clauses, self.flip_polarity)
 
 		mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 		self.prepare_weights = mod_prepare.get_function("prepare_weights")
@@ -177,11 +179,11 @@ class CommonTsetlinMachine():
 		self.propagate_and_group_false_truth_values = mod_update.get_function("propagate_and_group_false_truth_values")
 		self.propagate_and_group_false_truth_values.prepare("PPii")
 
-		self.propagate_or_group_false_truth_values = mod_update.get_function("propagate_or_group_false_truth_values")
-		self.propagate_or_group_false_truth_values.prepare("PPPii")
+		self.propagate_or_group_false_truth_values_convolution = mod_update.get_function("propagate_or_group_false_truth_values_convolution")
+		self.propagate_or_group_false_truth_values_convolution.prepare("PPPii")
 
-		self.evaluate_or_groups = mod_update.get_function("evaluate_or_groups")
-		self.evaluate_or_groups.prepare("PPii")
+		self.evaluate_or_groups_convolution = mod_update.get_function("evaluate_or_groups_convolution")
+		self.evaluate_or_groups_convolution.prepare("PPii")
 
 		self.evaluate_or_alternatives = mod_update.get_function("evaluate_or_alternatives")
 		self.evaluate_or_alternatives.prepare("PPii")
@@ -315,8 +317,8 @@ class CommonTsetlinMachine():
 					self.hierarchy_size[d + 1],
 					self.hierarchy_structure[d][1]
 				)
-			elif self.hierarchy_structure[d][0] == OR_GROUP:
-				self.evaluate_or_groups.prepared_call(
+			elif self.hierarchy_structure[d][0] == OR_GROUP_CONVOLUTION:
+				self.evaluate_or_groups_convolution.prepared_call(
 					self.grid,
 					self.block,
 					self.hierarchy_votes[d-1],
@@ -377,7 +379,7 @@ class CommonTsetlinMachine():
 			# Propagates the root value and any intermittent node values back to the leaves.
 			# The purpose is to determine which leaves only has True nodes on the path from leaf to root.
 			for d in range(self.depth-1, 0, -1):
-				if self.hierarchy_structure[d][0] != OR_GROUP:
+				if self.hierarchy_structure[d][0] != OR_GROUP_CONVOLUTION:
 					self.propagate_and_group_false_truth_values.prepared_call(
 						self.grid,
 						self.block,
@@ -387,7 +389,7 @@ class CommonTsetlinMachine():
 						self.hierarchy_structure[d][1]
 					)
 				else:
-					self.propagate_or_group_false_truth_values.prepared_call(
+					self.propagate_or_group_false_truth_values_convolution.prepared_call(
 						self.grid,
 						self.block,
 						self.cuda_rng.state,
@@ -575,7 +577,7 @@ class CommonTsetlinMachine():
 					elif previous_index[d-1] != depth_d_node_index:
 						if self.hierarchy_structure[d][0] in [AND_GROUP, AND_ALTERNATIVES]:
 							inside.append(" ∧ ")
-						elif self.hierarchy_structure[d][0] in [OR_GROUP, OR_ALTERNATIVES]:
+						elif self.hierarchy_structure[d][0] in [OR_GROUP, OR_GROUP_CONVOLUTION, OR_ALTERNATIVES]:
 							inside.append(" ∨ ")
 					
 					previous_index[d-1] = depth_d_node_index

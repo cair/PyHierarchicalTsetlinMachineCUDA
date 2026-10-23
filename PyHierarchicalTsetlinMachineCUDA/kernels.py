@@ -218,7 +218,7 @@ code_update = """
 					}
 
 					// Support reuse of the same Tsetlin Automata when doing OR to group different feature chunks
-					if (hierarchy_structure_type[d] != OR_GROUP) {
+					if (hierarchy_structure_type[d] != OR_GROUP_CONVOLUTION) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
@@ -248,7 +248,7 @@ code_update = """
 			}
 		}
 
-		__global__ void evaluate_or_groups(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		__global__ void evaluate_or_groups_convolution(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -489,7 +489,7 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_type[d] != OR_GROUP) {
+					if (hierarchy_structure_type[d] != OR_GROUP_CONVOLUTION) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
