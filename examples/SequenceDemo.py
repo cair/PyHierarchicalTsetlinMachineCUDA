@@ -55,14 +55,7 @@ if args.generate_data:
 		Y_train[example] = np.random.randint(2)
 		print(p)
 		print(X_train[example])
-
-	(X_mnist_train, Y_mnist_train), (X_mnist_test, Y_mnist_test) = mnist.load_data()
-
-	X_mnist_train = np.where(X_mnist_train.reshape((X_mnist_train.shape[0], 28*28)) > 75, 1, 0)
-	X_mnist_test = np.where(X_mnist_test.reshape((X_mnist_test.shape[0], 28*28)) > 75, 1, 0)
-
-	x_mnist_train_count = [X_mnist_train[Y_mnist_train == 0].shape[0], X_mnist_train[Y_mnist_train == 1].shape[0]]
-
+		example += 1
 	
 	for i in range(args.number_of_examples):
 		x = np.random.randint(2, size=(2))
