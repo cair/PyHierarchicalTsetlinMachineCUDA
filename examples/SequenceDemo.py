@@ -18,7 +18,6 @@ def default_args(**kwargs):
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--sequence-length", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=20, type=int)
-	parser.add_argument("--number-of-and-alternatives", default=4, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
@@ -57,6 +56,7 @@ if args.generate_data:
 		example += 1
 
 	print(X_unique)
+	print(Y_unique)
 
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	
@@ -67,7 +67,6 @@ if args.generate_data:
 
 	print(X_train)
 	print(Y_train)
-	
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	X_test = X_unique[test_indices].copy()
 	Y_test = Y_unique[test_indices].copy()
@@ -118,9 +117,9 @@ for r in range(args.runs):
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
 			hierarchy_structure=(
-				(tm.AND_GROUP, 28*28*2),
+				(tm.AND_GROUP, args.sequence_length),
 				(tm.OR_ALTERNATIVES, or_alternatives),
-				(tm.AND_ALTERNATIVES, args.number_of_and_alternatives)
+				(tm.AND_GROUP, args.sequence_length)
 			)
 		)
 	else:
@@ -135,6 +134,7 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
+			append_negated=False,
 			hierarchy_structure=(
 				(tm.AND_GROUP, 28*28),
 				(tm.OR_ALTERNATIVES, or_alternatives),
