@@ -248,6 +248,26 @@ code_update = """
 			}
 		}
 
+		__global__ void evaluate_or_groups(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes of each OR node child
+			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
+				// Add OR addends
+
+				int or_alternatives_vote_sum = 0;
+				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
+					// Aggregate votes from each child node through addition
+
+					or_alternatives_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
+				}
+
+				or_group_node_output[or_group_node] = or_alternatives_vote_sum;
+			}
+		}
+
 		__global__ void evaluate_or_groups_convolution(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
