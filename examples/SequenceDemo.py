@@ -140,7 +140,7 @@ for r in range(args.runs):
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.number_of_and_alternatives)
+				(tm.AND_ALTERNATIVES, args.number_of_and_alternatives)
 			)
 		)
 
