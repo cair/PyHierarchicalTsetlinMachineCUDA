@@ -28,6 +28,7 @@ def default_args(**kwargs):
 	parser.add_argument('--weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
 	parser.add_argument('--literal-budget', default=2, type=int)
+	parser.add_argument('--append-negated', action='store_true')
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -96,7 +97,7 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
-			append_negated=False,
+			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length*args.sequence_length),
 				(tm.AND_GROUP, 1)
@@ -115,7 +116,7 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
-			append_negated=False,
+			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
 				(tm.OR_ALTERNATIVES, or_alternatives),
@@ -135,7 +136,7 @@ for r in range(args.runs):
 			seed=seed,
 			number_of_state_bits=args.number_of_state_bits,
 			no_clipping=args.no_clipping,
-			append_negated=False,
+			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
 				(tm.OR_GROUP, args.sequence_length),
