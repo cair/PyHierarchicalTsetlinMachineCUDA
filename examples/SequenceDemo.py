@@ -101,9 +101,9 @@ for r in range(args.runs):
 		)
 	elif args.and_alternatives:
 		tsetlin_machine = TsetlinMachine(
-			clauses,
-			T,
-			s,
+			args.number_of_clauses,
+			args.T,
+			args.s,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
@@ -120,9 +120,9 @@ for r in range(args.runs):
 		)
 	else:
 		tsetlin_machine = TsetlinMachine(
-			clauses,
-			T,
-			s,
+			args.number_of_clauses,
+			args.T,
+			args.s,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
 			constant_update_p=args.constant_update_p,
