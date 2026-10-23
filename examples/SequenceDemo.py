@@ -149,6 +149,8 @@ for r in range(args.runs):
 		result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
 		stop_testing = time()
 
+		tsetlin_machine.print_hierarchy(print_ta_state=True)
+
 		print("#%d/%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f\n" % (r, e, result))

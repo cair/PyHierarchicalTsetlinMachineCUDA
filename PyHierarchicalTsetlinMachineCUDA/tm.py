@@ -588,9 +588,9 @@ class CommonTsetlinMachine():
 						left.insert(0, "(")
 					elif previous_index[d-1] != depth_d_node_index:
 						if self.hierarchy_structure[d][0] in [AND_GROUP, AND_ALTERNATIVES]:
-							inside.append(" ∧ ")
+							inside.append(" AND ")
 						elif self.hierarchy_structure[d][0] in [OR_GROUP, OR_GROUP_CONVOLUTION, OR_ALTERNATIVES]:
-							inside.append(" ∨ ")
+							inside.append(" OR ")
 					
 					previous_index[d-1] = depth_d_node_index
 
@@ -618,7 +618,7 @@ class CommonTsetlinMachine():
 								l.append("¬x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
 				
 				if len(l) > 1:
-					print("(" + " ∧ ".join(l) + ")", end = '')
+					print("(" + " AND ".join(l) + ")", end = '')
 				elif len(l) == 1:
 					print(l[0], end = '')
 
