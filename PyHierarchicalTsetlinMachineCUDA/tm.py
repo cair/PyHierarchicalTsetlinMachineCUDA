@@ -108,7 +108,7 @@ class CommonTsetlinMachine():
 		# Calculates number of literal chunks overall for the feature vector (ignores OR- and AND alternatives)
 		self.number_of_literal_chunks = self.number_of_literal_chunks_per_leaf
 		for d in range(self.depth - 1, 0, -1):
-			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == OR_GROUP_CONVOLUTION or self.hierarchy_structure[d][0] == AND_GROUP): # OR_GROUP and AND_GROUP join the features of their children
+			if (self.hierarchy_structure[d][0] == OR_GROUP or self.hierarchy_structure[d][0] == OR_GROUP_CONVOLUTION or self.hierarchy_structure[d][0] == AND_GROUP): # OR_GROUP, OR_GROUP_CONVOLUTION, and AND_GROUP join the features of their children
 				self.number_of_literal_chunks *= self.hierarchy_structure[d][1]
 
 		self.np_rng = np.random.default_rng(seed)
