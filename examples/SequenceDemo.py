@@ -150,12 +150,14 @@ for r in range(args.runs):
 		stop_training = time()
 
 		start_testing = time()
-		result = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+		result_test = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
 		stop_testing = time()
+
+		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
 		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		print("#%d/%d Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Test Accuracy: %.2f%% Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test, result_train, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f\n" % (r, e, result))
 		f.flush()
