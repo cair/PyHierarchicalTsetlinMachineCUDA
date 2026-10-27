@@ -57,13 +57,10 @@ if args.generate_data:
 
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	
-	print(train_indices)
 	X_train = X_unique[train_indices].copy()
 	Y_train = Y_unique[train_indices].copy()
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
-	print(X_train)
-	print(Y_train)
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	X_test = X_unique[test_indices].copy()
 	Y_test = Y_unique[test_indices].copy()
