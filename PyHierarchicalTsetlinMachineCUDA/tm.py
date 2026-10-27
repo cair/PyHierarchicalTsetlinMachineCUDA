@@ -257,6 +257,11 @@ class CommonTsetlinMachine():
 		
 		return state
 
+	def get_clause_weight(self, clause):
+		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
+		cuda.memcpy_dtoh(self.clause_weights, self.clause_weights_gpu)
+		return(clause_weights[clause])
+
 	def get_state(self):
 		# To be updated
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -560,8 +565,9 @@ class CommonTsetlinMachine():
 		return hierarchy_votes, class_sum
 
 	def print_hierarchy(self, print_ta_state=False):
+
 		for i in range(self.number_of_clauses):
-			print("\nCLAUSE #%d: " % (i), end='')
+			print("\nCLAUSE #%d (%d): " % (i, self.get_clause_weight[i]), end='')
 
 			previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
 			for j in range(self.hierarchy_size[1]):
