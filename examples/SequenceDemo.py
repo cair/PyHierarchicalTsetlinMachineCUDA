@@ -40,15 +40,13 @@ args = default_args()
 
 if args.generate_data:
 	X_unique = np.ones((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
-	Y_unique = np.empty(math.factorial(args.sequence_length), dtype=np.uint32)
+	Y_unique = np.concatenate((np.zeros(math.factorial(args.sequence_length)/2, dtype=np.uint32), np.ones(math.factorial(args.sequence_length)/2, dtype=np.uint32)))
 
 	permutations = itertools.permutations(range(args.sequence_length))
 	example = 0
 	for p in permutations:
 		for i in range(args.sequence_length):
 			X_unique[example, i*args.sequence_length + p[i]] = 0
-
-		Y_unique[example] = np.random.randint(2)
 
 		print(p, Y_unique[example])
 
