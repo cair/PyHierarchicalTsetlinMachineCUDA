@@ -41,7 +41,8 @@ args = default_args()
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
-	X_unique = np.ones((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
+	#X_unique = np.ones((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
+	X_unique = np.zeros((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
 	Y_unique = np.concatenate((np.zeros(math.factorial(args.sequence_length)//2, dtype=np.uint32), np.ones(math.factorial(args.sequence_length)//2, dtype=np.uint32)))
 	rng.shuffle(Y_unique)
 
@@ -49,7 +50,7 @@ if args.generate_data:
 	example = 0
 	for p in permutations:
 		for i in range(args.sequence_length):
-			X_unique[example, i*args.sequence_length + p[i]] = 0
+			X_unique[example, i*args.sequence_length + p[i]] = 1#0
 
 		print(p, Y_unique[example])
 
