@@ -619,9 +619,9 @@ class CommonTsetlinMachine():
 								l.append("x%d" % (feature_base + k,))
 						else:
 							if print_ta_state:
-								l.append("¬x%d[%d]" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
+								l.append("NOT x%d[%d]" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
 							else:
-								l.append("¬x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
+								l.append("NOT x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
 				
 				if len(l) > 1:
 					print("(" + " AND ".join(l) + ")", end = '')
