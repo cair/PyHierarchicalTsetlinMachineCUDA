@@ -231,7 +231,7 @@ code_update = """
 
 				//float component_output = 1;
 
-				float component_output = 2;
+				float component_output = 1;
 
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
