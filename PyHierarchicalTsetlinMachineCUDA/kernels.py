@@ -229,20 +229,34 @@ code_update = """
 
 				// Evaluate clause component
 
-				float component_output = 1;
+				//float component_output = 1;
+
+				float component_output = 2;
 
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
-					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+					
+					component_output -= __popc(ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) - __popc((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]));
+					if (component_output <= 0) {
 						component_output = 0;
-							
 						break;
 					}
-				}
 
-				if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+					//if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
+					//	component_output = 0;
+					//		
+					//	break;
+					//}
+				}
+	
+				component_output -= __popc(ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHY) - __popc((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF - 1] & FILTER_HIERARCHICAL));
+				if (component_output <= 0) {
 					component_output = 0;
 				}
+				 
+				//if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
+				//	component_output = 0;
+				//}
 
 				global_component_output[clause_component] = component_output;
 			}
