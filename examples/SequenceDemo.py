@@ -29,6 +29,7 @@ def default_args(**kwargs):
 	parser.add_argument('--generate-data', action='store_true')
 	parser.add_argument('--literal-budget', default=2, type=int)
 	parser.add_argument('--append-negated', action='store_true')
+	parser.add_argument('--negate_input', action='store_true')
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -41,7 +42,6 @@ args = default_args()
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
-	#X_unique = np.ones((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
 	X_unique = np.zeros((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
 	Y_unique = np.concatenate((np.zeros(math.factorial(args.sequence_length)//2, dtype=np.uint32), np.ones(math.factorial(args.sequence_length)//2, dtype=np.uint32)))
 	rng.shuffle(Y_unique)
@@ -50,11 +50,14 @@ if args.generate_data:
 	example = 0
 	for p in permutations:
 		for i in range(args.sequence_length):
-			X_unique[example, i*args.sequence_length + p[i]] = 1#0
+			X_unique[example, i*args.sequence_length + p[i]] = 1
 
 		print(p, Y_unique[example])
 
 		example += 1
+
+	if args.negate_input:
+		X_unique = 1 - X_uniqe
 
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	
