@@ -259,7 +259,7 @@ class CommonTsetlinMachine():
 
 	def get_clause_weight(self, clause):
 		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
-		cuda.memcpy_dtoh(self.clause_weights, self.clause_weights_gpu)
+		cuda.memcpy_dtoh(clause_weights, self.clause_weights_gpu)
 		return(clause_weights[clause])
 
 	def get_state(self):
