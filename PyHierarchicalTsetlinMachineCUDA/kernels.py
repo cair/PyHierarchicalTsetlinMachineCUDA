@@ -249,11 +249,11 @@ code_update = """
 					//}
 				}
 	
-				component_output -= __popc(ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHY) - __popc((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF - 1] & FILTER_HIERARCHICAL));
+				component_output -= __popc(ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL) - __popc((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF - 1] & FILTER_HIERARCHICAL));
 				if (component_output <= 0) {
 					component_output = 0;
 				}
-				 
+
 				//if ((ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + TA_CHUNKS_PER_LEAF-1] & FILTER_HIERARCHICAL) != (ta_state[(TA_CHUNKS_PER_LEAF-1)*STATE_BITS + STATE_BITS - 1] & FILTER_HIERARCHICAL)) {
 				//	component_output = 0;
 				//}
