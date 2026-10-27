@@ -48,12 +48,11 @@ if args.generate_data:
 		for i in range(args.sequence_length):
 			X_unique[example, i*args.sequence_length + p[i]] = 0
 
-		print(p)
 		Y_unique[example] = np.random.randint(2)
 		example += 1
 
-	print(X_unique)
-	print(Y_unique)
+	for i in range(math.factorial(args.sequence_length)):
+		print(permutations[i], Y_unique[i])
 
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	
