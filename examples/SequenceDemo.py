@@ -160,8 +160,7 @@ for r in range(args.runs):
 
 		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		for i in range(args.number_of_clauses):
-			print(tsetlin_machine.clause_precision(i, X_test, Y_test))
+		print(tsetlin_machine.clause_precision(X_test, Y_test))
 
 		transformed_X = tsetlin_machine.transform(X_test)
 		print(transformed_X[0,:])
