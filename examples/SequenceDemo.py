@@ -172,7 +172,7 @@ for r in range(args.runs):
 					high_precision_matches += 1
 					break
 
-		print("HPM", high_precision_matches/transformed_X.shape[0], high_precision_matches, transformed_X.shape[0])
+		print("HPM", high_precision_matches/transformed_X.shape[0])
 
 		print(transformed_X[0,:])
 		print(transformed_X[0,:].sum())
