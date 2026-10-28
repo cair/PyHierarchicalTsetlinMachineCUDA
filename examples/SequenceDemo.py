@@ -165,6 +165,15 @@ for r in range(args.runs):
 			print(i, clause_precision[i], tsetlin_machine.get_clause_weight(i))
 
 		transformed_X = tsetlin_machine.transform(X_test)
+		high_precision_matches = 1
+		for i in range(transformed_X.shape[0]):
+			for j in range(tsetlin_machine.number_of_clauses):
+				if transformed_X[i, j] > 0 and clause_precision[j] == 1.0:
+						high_precision_matches += 1
+						break
+
+		print("HPM", high_precision_matches/transformed_X.shape[0])
+
 		print(transformed_X[0,:])
 		print(transformed_X[0,:].sum())
 		print(transformed_X.shape)
