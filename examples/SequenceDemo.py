@@ -16,6 +16,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-examples", default=10000, type=int)
 	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
+	parser.add_argument("--q", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=3, type=int)
 	parser.add_argument("--number-of-and-alternatives", default=20, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
@@ -89,7 +90,8 @@ for r in range(args.runs):
 		tsetlin_machine = TsetlinMachine(
 			args.number_of_clauses * args.number_of_and_alternatives,
 			args.T,
-			args.s,
+			args.s
+			q=args.q,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
