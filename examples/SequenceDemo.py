@@ -172,15 +172,12 @@ for r in range(args.runs):
 					high_precision_matches += 1
 					break
 
-		print("HPM", high_precision_matches/transformed_X.shape[0])
+		print("HPM",)
 
-		print(transformed_X[0,:])
-		print(transformed_X[0,:].sum())
-		print(transformed_X.shape)
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
-		print("#%d/%d Test Accuracy: %.2f%% Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test, result_train, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Test Accuracy: %.2f%% (%.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test,  100*high_precision_matches/transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f %.2f\n" % (r, e, result_test, result_train))
 		f.flush()
