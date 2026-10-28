@@ -67,8 +67,10 @@ class CommonTsetlinMachine():
 		# Calculates the number of nodes at each level of the hierarchy
 		self.hierarchy_size = [0] * (self.depth + 1)
 		self.hierarchy_size[self.depth] = 1
+		self.number_of_non_leaf_hierarchy_nodes = self.hierarchy_size[self.depth]
 		for d in range(self.depth - 1):
 			self.hierarchy_size[self.depth - d - 1] = self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
+			self.number_of_non_leaf_hierarchy_nodes += self.hierarchy_structure[self.depth - d - 1][1] * self.hierarchy_size[self.depth - d]
 
 		# Represents hierarchy structure for transfer to GPU
 		self.hierarchy_structure_factors = [0] * (self.depth - 1)
@@ -235,8 +237,6 @@ class CommonTsetlinMachine():
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
-		self.clause_output_max_gpu = cuda.mem_alloc(4)
-		self.clause_output_max = np.ascontiguousarray(np.empty(1)).astype(np.float32)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -288,7 +288,20 @@ class CommonTsetlinMachine():
 
 	# Transform input data for processing at next layer
 	def transform(self, X):
-		None # To be updated
+		number_of_examples = X.shape[0]
+		
+		encoded_X_hierarchy_test_gpu = cuda.mem_alloc(int(number_of_examples * self.number_of_literal_chunks * 4))
+		self.encode_X(X, encoded_X_hierarchy_test_gpu)
+
+		X_transformed = np.ascontiguousarray(np.empty((number_of_examples, self.number_of_clauses))).astype(np.float32)
+
+		print(len(self.hierarchy_votes), self.depth)
+		for e in range(number_of_examples):
+			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
+			cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
+			X_transformed[e,:] = self.clause_output
+
+		return X_transformed
 
 	def initialize_weights_and_ta_states(self):
 		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_gpu, grid=self.grid, block=self.block)
@@ -354,9 +367,6 @@ class CommonTsetlinMachine():
 				)
 			else:
 				raise ValueError("Unknown Node Type!")
-
-		self.clause_output_max[:] = np.finfo(np.float32).min
-		cuda.memcpy_htod(self.clause_output_max_gpu, self.clause_output_max)
 
 		# Adds up the votes from each clause (hierarchy root)
 		self.evaluate_final.prepared_call(
