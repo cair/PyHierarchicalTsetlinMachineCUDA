@@ -90,7 +90,7 @@ for r in range(args.runs):
 		tsetlin_machine = TsetlinMachine(
 			args.number_of_clauses * args.number_of_and_alternatives,
 			args.T,
-			args.s
+			args.s,
 			q=args.q,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
