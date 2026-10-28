@@ -876,7 +876,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 
 		return
 
-	def clause_precision(self, X, Y, clause):
+	def clause_precision(self,clause, X, Y):
 		X_transformed = self.transform(X)
 
 		if self.get_clause_weight(clause) >= 0:
