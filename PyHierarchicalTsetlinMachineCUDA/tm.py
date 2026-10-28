@@ -881,7 +881,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 
 		clause_precision = np.empty(self.number_of_clauses)
 		for i in range(self.number_of_clauses):
-			if self.get_clause_weight(clause) >= 0:
+			if self.get_clause_weight(i) >= 0:
 				clause_precision[i] = Y[X_transformed[:,i] > 0].sum() / (X_transformed[:,i] > 0).sum()
 			else:
 				clause_precision[i] = (1 - Y[X_transformed[:,i] > 0]).sum() / (X_transformed[:,i] > 0).sum()
