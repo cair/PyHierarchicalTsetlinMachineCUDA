@@ -160,8 +160,10 @@ for r in range(args.runs):
 
 		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		print(tsetlin_machine.transform(X_test)[0,:])
-
+		transformed_X = tsetlin_machine.transform(X_test)
+		print(transformed_X[0,:])
+		print(transformed_X.sum() / args.number_of_examples)
+		
 		print("#%d/%d Test Accuracy: %.2f%% Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test, result_train, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f %.2f\n" % (r, e, result_test, result_train))
