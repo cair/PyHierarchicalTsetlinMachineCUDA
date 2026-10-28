@@ -876,13 +876,17 @@ class TsetlinMachine(CommonTsetlinMachine):
 
 		return
 
-	def clause_precision(self,clause, X, Y):
+	def clause_precision(self, X, Y):
 		X_transformed = self.transform(X)
 
-		if self.get_clause_weight(clause) >= 0:
-			return Y[X_transformed[:,clause] > 0].sum() / (X_transformed[:,clause] > 0).sum()
-		else:
-			return (1 - Y[X_transformed[:,clause] > 0]).sum() / (X_transformed[:,clause] > 0).sum()
+		clause_precision = np.empty(self.number_of_clauses)
+		for i in range(self.number_of_clauses):
+			if self.get_clause_weight(clause) >= 0:
+				clause_precision[i] = Y[X_transformed[:,i] > 0].sum() / (X_transformed[:,i] > 0).sum()
+			else:
+				clause_precision[i] = (1 - Y[X_transformed[:,i] > 0]).sum() / (X_transformed[:,i] > 0).sum()
+
+		return clause_precision
 
 	def score(self, X):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
