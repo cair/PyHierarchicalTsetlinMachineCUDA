@@ -57,7 +57,7 @@ if args.generate_data:
 		example += 1
 
 	if args.negate_input:
-		X_unique = 1 - X_uniqe
+		X_unique = 1 - X_unique
 
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	
