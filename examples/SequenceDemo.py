@@ -160,7 +160,7 @@ for r in range(args.runs):
 
 		#tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		#clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
+		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
 		#for i in range(tsetlin_machine.number_of_clauses):
 		#	print(i, clause_precision[i], tsetlin_machine.get_clause_weight(i))
 
