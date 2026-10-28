@@ -29,7 +29,7 @@ def default_args(**kwargs):
 	parser.add_argument('--generate-data', action='store_true')
 	parser.add_argument('--literal-budget', default=2, type=int)
 	parser.add_argument('--append-negated', action='store_true')
-	parser.add_argument('--negate_input', action='store_true')
+	parser.add_argument('--negate-input', action='store_true')
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
