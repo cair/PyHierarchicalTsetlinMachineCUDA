@@ -112,6 +112,9 @@ code_update = """
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
 				update_probability = 1.0;
+				if (class_sum == -THRESHOLD && y == -THRESHOLD) {
+					target *= -1;
+				} 
 			#else
 				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
