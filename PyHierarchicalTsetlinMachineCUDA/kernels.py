@@ -112,6 +112,9 @@ code_update = """
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
 				update_probability = 1.0;
+				if (class_sum == -THRESHOLD && y == -THRESHOLD) {
+					target *= -1;
+				} 
 			#else
 				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
@@ -149,7 +152,7 @@ code_update = """
 			#if CONSTANT_UPDATE_P == 1
 				update_probability = 1.0;
 			#else
-				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
+				update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
 
 			if (curand_uniform(localState) <= update_probability) {
@@ -218,7 +221,7 @@ code_update = """
 					}
 
 					// Support reuse of the same Tsetlin Automata when doing OR to group different feature chunks
-					if (hierarchy_structure_type[d] != OR_GROUP) {
+					if (hierarchy_structure_type[d] != OR_GROUP_CONVOLUTION) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
@@ -230,11 +233,11 @@ code_update = """
 				// Evaluate clause component
 
 				float component_output = 1;
-
 				for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF-1; ++ta_chunk) {
 					// Compare the TA state of the component (leaf) against the corresponding part of the feature vector
+					
 					if ((ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1] & Xi[feature_chunk_base + ta_chunk]) != ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]) {
-						component_output = 0;
+					component_output = 0;
 							
 						break;
 					}
@@ -249,6 +252,26 @@ code_update = """
 		}
 
 		__global__ void evaluate_or_groups(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			// Add up the votes of each OR node child
+			for (int or_group_node = index; or_group_node < CLAUSES*number_of_or_group_nodes; or_group_node += stride) {
+				// Add OR addends
+
+				int or_alternatives_vote_sum = 0;
+				for (int or_addend = 0; or_addend < number_of_or_group_addends; ++or_addend) {
+					// Aggregate votes from each child node through addition
+
+					or_alternatives_vote_sum += child_input[or_group_node*number_of_or_group_addends + or_addend];
+				}
+
+				or_group_node_output[or_group_node] = or_alternatives_vote_sum;
+			}
+		}
+
+		__global__ void evaluate_or_groups_convolution(float *child_input, float *or_group_node_output, int number_of_or_group_nodes, int number_of_or_group_addends)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -319,7 +342,7 @@ code_update = """
 			}
 		}
 
-		__global__ void propagate_or_group_false_truth_values(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
+		__global__ void propagate_or_group_false_truth_values_convolution(curandState *state, float *child_input, float *group_node_output, int number_of_group_nodes, int number_of_group_node_children)
 		{
 			int index = blockIdx.x * blockDim.x + threadIdx.x;
 			int stride = blockDim.x * gridDim.x;
@@ -489,7 +512,7 @@ code_update = """
 						size_feature_chunk_base *= hierarchy_structure_factors[d];
 					}
 
-					if (hierarchy_structure_type[d] != OR_GROUP) {
+					if (hierarchy_structure_type[d] != OR_GROUP_CONVOLUTION) {
 						ta_chunk_base += size_ta_chunk_base * depth_d_node_index * TA_CHUNKS_PER_LEAF;
 						size_ta_chunk_base *= hierarchy_structure_factors[d];
 					}
