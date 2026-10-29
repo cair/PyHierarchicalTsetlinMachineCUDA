@@ -17,6 +17,7 @@ def default_args(**kwargs):
 	parser.add_argument("--T", default=1000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--q", default=1.0, type=float)
+	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=3, type=int)
 	parser.add_argument("--number-of-and-alternatives", default=20, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
@@ -92,6 +93,7 @@ for r in range(args.runs):
 			args.T,
 			args.s,
 			q=args.q,
+			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
@@ -111,6 +113,8 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
+			q=args.q,
+			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
@@ -131,6 +135,8 @@ for r in range(args.runs):
 			args.number_of_clauses,
 			args.T,
 			args.s,
+			q=args.q,
+			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
 			binary_inference=args.binary_inference,
