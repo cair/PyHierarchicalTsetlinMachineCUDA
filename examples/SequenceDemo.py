@@ -33,6 +33,8 @@ def default_args(**kwargs):
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 
+	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
+
 	args = parser.parse_args()
 	for key, value in kwargs.items():
 		if key in args.__dict__:
