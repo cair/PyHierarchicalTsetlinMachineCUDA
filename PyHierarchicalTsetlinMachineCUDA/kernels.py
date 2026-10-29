@@ -116,6 +116,7 @@ code_update = """
 				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
 
+			update_probability = 1.0;
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
 					if (clause_output && abs(*clause_weight) < INT_MAX) {
