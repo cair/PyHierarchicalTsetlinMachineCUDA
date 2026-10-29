@@ -19,7 +19,7 @@ def default_args(**kwargs):
 	parser.add_argument("--q", default=0.01, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=0.001, type=float)
 	parser.add_argument("--sequence-length", default=6, type=int)
-	parser.add_argument("--number-of-and-alternatives", default=20, type=int)
+	parser.add_argument("--number-of-and-alternatives", default=1200, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
