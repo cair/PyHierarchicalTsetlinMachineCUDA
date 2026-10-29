@@ -29,7 +29,7 @@ def default_args(**kwargs):
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
 	parser.add_argument('--generate-data', action='store_true')
-	parser.add_argument('--literal-budget', default=2, type=int)
+	parser.add_argument('--literal-budget', default=10, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 
