@@ -178,9 +178,11 @@ for r in range(args.runs):
 		high_precision_matches = 0
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
+			high_precision_match = False
 			for j in range(tsetlin_machine.number_of_clauses):
-				if transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
+				if not high_precision_match and transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
 					high_precision_matches += 1
+					high_precision_match = True
 
 				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
 					max_precision[i] = clause_precision[j]
