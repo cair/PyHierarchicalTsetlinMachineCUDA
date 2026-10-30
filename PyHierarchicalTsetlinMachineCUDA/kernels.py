@@ -138,6 +138,45 @@ code_update = """
 			}
 		}
 
+		__device__ inline void update_clause_weight_inference(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, float class_sum)
+		{
+			int target = 1 - 2*(class_sum > y);
+			
+			if (target == -1 && curand_uniform(localState) > 1.0/max(1, number_of_outputs-1)) {
+				return;
+			}
+
+			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
+		
+			float update_probability;
+			#if CONSTANT_UPDATE_P == 1
+				update_probability = 1.0;
+				if (class_sum == -THRESHOLD && y == -THRESHOLD) {
+					target *= -1;
+				} 
+			#else
+				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
+			#endif
+
+			if (curand_uniform(localState) <= update_probability) {
+				if (target*sign > 0) {
+					if (clause_output && abs(*clause_weight) < INT_MAX) {
+						(*clause_weight) += sign;
+					}
+				} else if (target*sign < 0 && clause_output) {
+					// Type II Feedback
+
+					(*clause_weight) -= sign;
+					
+					#if FLIP_POLARITY == 0
+						if (*clause_weight == 0) {
+							*clause_weight += sign;
+						}
+					#endif
+				}
+			}
+		}
+
 		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
 		{
 			int target = 1 - 2*(class_sum > y);
@@ -555,6 +594,31 @@ code_update = """
 					}
 
 					update_clause_weight(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
+				}
+			}
+		
+			state[index] = localState;
+		}
+
+		// Update state of Tsetlin Automata team
+		__global__ void update_weights_inference(curandState *state, int tm_type, int number_of_outputs, int *clause_weights, float *clause_output, float *class_sum, int *y, int example)
+		{
+			int index = blockIdx.x * blockDim.x + threadIdx.x;
+			int stride = blockDim.x * gridDim.x;
+
+			/* Copy state to local memory for efficiency */  
+			curandState localState = state[index];
+
+			for (unsigned long long clause = index; clause < CLAUSES; clause += stride) {
+				for (unsigned long long class_id = 0; class_id < number_of_outputs; ++class_id) {
+					float local_class_sum = class_sum[class_id];
+					if (local_class_sum > THRESHOLD) {
+						local_class_sum = THRESHOLD;
+					} else if (local_class_sum < -THRESHOLD) {
+						local_class_sum = -THRESHOLD;
+					}
+
+					update_clause_weight_inference(&localState, tm_type, number_of_outputs, &clause_weights[class_id*CLAUSES + clause], clause_output[clause] > 0, y[example*number_of_outputs + class_id], local_class_sum);
 				}
 			}
 		

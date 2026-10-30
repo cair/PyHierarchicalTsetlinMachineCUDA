@@ -165,6 +165,9 @@ class CommonTsetlinMachine():
 		self.update_weights = mod_update.get_function("update_weights")
 		self.update_weights.prepare("PiiPPPPi")
 
+		self.update_weights_inference = mod_update.get_function("update_weights_inference")
+		self.update_weights_inference.prepare("PiiPPPPi")
+
 		self.evaluate_leaves = mod_update.get_function("evaluate_leaves")
 		self.evaluate_leaves.prepare("PPPiPPPi")
 
@@ -236,9 +239,13 @@ class CommonTsetlinMachine():
 		# GPU memory for storing Tsetlin Automata states
 		self.ta_state_hierarchy_gpu = cuda.mem_alloc(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits*4)
 		self.clause_weights_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
+		self.clause_weights_inference_gpu = cuda.mem_alloc(self.number_of_outputs*self.number_of_clauses*4)
 		self.component_weights_gpu = cuda.mem_alloc(self.number_of_clauses*self.hierarchy_size[1]*4) # Only positive weights...
 		self.class_sum_gpu = cuda.mem_alloc(self.number_of_outputs*4)
 		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
+
+		self.class_sum_inference_gpu = cuda.mem_alloc(self.number_of_outputs*4)
+		self.class_sum_inference = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
 
 	def ta_action(self, clause, leaf, ta):
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
@@ -307,6 +314,7 @@ class CommonTsetlinMachine():
 
 	def initialize_weights_and_ta_states(self):
 		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_gpu, grid=self.grid, block=self.block)
+		self.prepare_weights(self.cuda_rng.state, np.int32(self.tm_type), np.int32(self.number_of_outputs), self.clause_weights_inference_gpu, grid=self.grid, block=self.block)
 
 		self.prepare_hierarchy(np.int32(self.number_of_outputs), self.ta_state_hierarchy_gpu, grid=self.grid, block=self.block)
 
@@ -314,6 +322,9 @@ class CommonTsetlinMachine():
 		# Initializes class sums to zero
 		class_sum = np.zeros(self.number_of_outputs, dtype=np.float32)
 		cuda.memcpy_htod(self.class_sum_gpu, class_sum)
+
+		class_sum_inference = np.zeros(self.number_of_outputs, dtype=np.float32)
+		cuda.memcpy_htod(self.class_sum_inference_gpu, class_sum_inference)
 
 		# Evaluates all the hierarchy leaves in parallel
 		self.evaluate_leaves.prepared_call(
@@ -378,6 +389,16 @@ class CommonTsetlinMachine():
 			self.hierarchy_votes[self.depth-1],
 			self.clause_weights_gpu,
 			self.class_sum_gpu
+		)
+
+		# Adds up the votes from each clause (hierarchy root)
+		self.evaluate_final.prepared_call(
+			self.grid,
+			self.block,
+			np.int32(self.number_of_outputs),
+			self.hierarchy_votes[self.depth-1],
+			self.clause_weights_inference_gpu,
+			self.class_sum_inference_gpu
 		)
 
 	def _fit(self, X, encoded_Y):
@@ -460,6 +481,19 @@ class CommonTsetlinMachine():
 					Y_gpu,
 					np.int32(e)
 				)
+
+				self.update_weights_inference.prepared_call(
+					self.grid,
+					self.block,
+					self.cuda_rng.state,
+					np.int32(self.tm_type),
+					np.int32(self.number_of_outputs),
+					self.clause_weights_inference_gpu,
+					self.hierarchy_votes[self.depth-1],
+					self.class_sum_inference_gpu,
+					Y_gpu,
+					np.int32(e)
+				)
 		return
        
 	def _score(self, X):
@@ -473,8 +507,8 @@ class CommonTsetlinMachine():
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 
-			cuda.memcpy_dtoh(self.class_sum, self.class_sum_gpu)
-			class_sum[:, e] = self.class_sum
+			cuda.memcpy_dtoh(self.class_sum_inference, self.class_sum_inference_gpu)
+			class_sum[:, e] = self.class_sum_inference
 	
 		if self.no_clipping:
 			class_sum = class_sum.reshape((self.number_of_outputs, number_of_examples))
