@@ -176,18 +176,17 @@ for r in range(args.runs):
 
 		transformed_X = tsetlin_machine.transform(X_test)
 		high_precision_matches = 0
+		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
 			for j in range(tsetlin_machine.number_of_clauses):
-				if transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
-					high_precision_matches += 1
+				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
+					max_precision[i] = clause_precision[j]
 					break
-
-		print("HPM",)
 
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
-		print("#%d/%d Test Accuracy: %.2f%% (%.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test,  100*high_precision_matches/transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Test Accuracy: %.2f%% (%.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" % (r+1, e+1, result_test,  100.0 * max_precision.mean(), result_train, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f %.2f\n" % (r, e, result_test, result_train))
 		f.flush()
