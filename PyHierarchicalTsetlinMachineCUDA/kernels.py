@@ -146,6 +146,10 @@ code_update = """
 				return;
 			}
 
+			if (target == 1 && curand_uniform(localState) < 0.1) {
+				return;
+			}
+
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
 			float update_probability;
