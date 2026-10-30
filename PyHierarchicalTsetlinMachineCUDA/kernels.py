@@ -103,7 +103,7 @@ code_update = """
 		{
 			int target = 1 - 2*(class_sum > y);
 			
-			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
+			if (target == -1 && curand_uniform(localState) > 1.0/max(1, number_of_outputs-1)) {
 				return;
 			}
 
