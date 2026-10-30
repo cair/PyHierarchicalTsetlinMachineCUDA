@@ -181,7 +181,6 @@ for r in range(args.runs):
 			for j in range(tsetlin_machine.number_of_clauses):
 				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
 					max_precision[i] = clause_precision[j]
-					break
 
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
