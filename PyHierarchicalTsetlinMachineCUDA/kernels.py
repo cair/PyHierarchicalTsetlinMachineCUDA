@@ -215,9 +215,9 @@ code_update = """
 
 						if (component_output && included_literals <= LITERAL_BUDGET) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
-								inc(ta_state, ta_chunk, X[ta_chunk]);
+								inc(ta_state, ta_chunk, X[ta_chunk] & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 							#else
-								inc(ta_state, ta_chunk, X[ta_chunk] & (~la_feedback));
+								inc(ta_state, ta_chunk, X[ta_chunk] & (~la_feedback) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 							#endif
 
 							dec(ta_state, ta_chunk, (~X[ta_chunk]) & la_feedback);
