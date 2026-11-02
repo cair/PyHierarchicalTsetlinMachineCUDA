@@ -5,7 +5,7 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 
 clauses = 2000
-T = 50#*100
+T = 50*100
 s = 10.0
 
 (X_train, Y_train), (X_test, Y_test) = mnist.load_data()
@@ -17,7 +17,7 @@ tm = MultiClassTsetlinMachine(clauses,
 	T,
 	s,
 	weighted_clauses=True,
-	clause_weight_update_ratio=0.01,
+	clause_weight_update_ratio=0.001,
 	hierarchy_structure=((tm.AND_GROUP, 28*28), (tm.AND_GROUP, 1))
 )
 
