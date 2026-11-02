@@ -18,6 +18,7 @@ tm = MultiClassTsetlinMachine(clauses,
 	s,
 	weighted_clauses=True,
 	clause_weight_update_ratio=0.1,
+	literal_budget=0,
 	q=1.0,
 	hierarchy_structure=((tm.AND_GROUP, 28*28), (tm.AND_GROUP, 1))
 )
