@@ -5,14 +5,9 @@ import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
 import argparse
 
-clauses = 2000
-T = 50*100
-s = 10.0
-
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--epochs", default=250, type=int)
-	parser.add_argument("--runs", default=100, type=int)
+	parser.add_argument("--epochs", default=500, type=int)
 	parser.add_argument("--number-of-clauses", default=2000, type=int)
 	parser.add_argument("--number-of-state-bits", default=8, type=int)
 	parser.add_argument("--T", default=5000, type=int)
@@ -48,7 +43,7 @@ tm = MultiClassTsetlinMachine(clauses,
 )
 
 print("\nAccuracy over 500 epochs:\n")
-for e in range(500):
+for e in range(args.epochs):
 	start_training = time()
 	tm.fit(X_train, Y_train)
 	stop_training = time()
