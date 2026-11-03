@@ -17,7 +17,7 @@ def default_args(**kwargs):
 	parser.add_argument("--T", default=5000, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--q", default=1.0, type=float)
-	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
+	parser.add_argument("--clause-weight-update-ratio", default=0.01, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
