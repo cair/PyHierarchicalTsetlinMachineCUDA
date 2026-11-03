@@ -3,6 +3,7 @@ import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
 from keras.datasets import mnist
+import argparse
 
 clauses = 2000
 T = 50*100
