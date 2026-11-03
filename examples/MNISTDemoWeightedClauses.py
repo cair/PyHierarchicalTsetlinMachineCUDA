@@ -57,7 +57,7 @@ for e in range(500):
 	result = 100*(tm.predict(X_test) == Y_test).mean()
 	stop_testing = time()
 
-	clause_precision = tm.tms[0].clause_precision(X_test, Y_test)
+	clause_precision = tm.tms[0].clause_precision(X_test, Y_test==0)
 	transformed_X = tm.tms[0].transform(X_test)
 	high_precision_matches = 0
 	max_precision = np.zeros(transformed_X.shape[0])
