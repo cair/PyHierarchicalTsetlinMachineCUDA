@@ -48,7 +48,7 @@ tm = MultiClassTsetlinMachine(clauses,
 )
 
 print("\nAccuracy over 500 epochs:\n")
-for i in range(500):
+for e in range(500):
 	start_training = time()
 	tm.fit(X_train, Y_train)
 	stop_training = time()
@@ -71,5 +71,5 @@ for i in range(500):
 			if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
 				max_precision[i] = clause_precision[j]
 
-	print("#%d/%d Test Accuracy: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
-			(r+1, e+1, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
+	print("#%d Test Accuracy: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
+			(e+1, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
