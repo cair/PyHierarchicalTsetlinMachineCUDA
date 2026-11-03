@@ -64,7 +64,7 @@ for e in range(500):
 	for i in range(transformed_X.shape[0]):
 		high_precision_match = False
 		for j in range(tm.tms[0].number_of_clauses):
-			if not high_precision_match and transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
+			if not high_precision_match and transformed_X[i, j] > 0 and clause_precision[j] >= 0.99:
 				high_precision_matches += 1
 				high_precision_match = True
 
