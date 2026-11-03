@@ -21,7 +21,7 @@ def default_args(**kwargs):
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
-	parser.add_argument('--literal-budget', default=36, type=int)
+	parser.add_argument('--literal-budget', default=0, type=int)
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
