@@ -32,7 +32,7 @@ args = default_args()
 X_train = np.where(X_train.reshape((X_train.shape[0], 28*28)) > 75, 1, 0)
 X_test = np.where(X_test.reshape((X_test.shape[0], 28*28)) > 75, 1, 0)
 
-tm = MultiClassTsetlinMachine(args.clauses,
+tm = MultiClassTsetlinMachine(args.number_of_clauses,
 	args.T,
 	args.s,
 	weighted_clauses=True,
