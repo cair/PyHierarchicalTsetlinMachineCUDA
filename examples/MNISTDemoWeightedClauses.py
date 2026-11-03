@@ -57,13 +57,13 @@ for i in range(500):
 	result = 100*(tm.predict(X_test) == Y_test).mean()
 	stop_testing = time()
 
-	clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
-	transformed_X = tsetlin_machine.transform(X_test)
+	clause_precision = tm.tms[0].clause_precision(X_test, Y_test)
+	transformed_X = tm.tms[0].transform(X_test)
 	high_precision_matches = 0
 	max_precision = np.zeros(transformed_X.shape[0])
 	for i in range(transformed_X.shape[0]):
 		high_precision_match = False
-		for j in range(tsetlin_machine.number_of_clauses):
+		for j in range(tm.tms[0].number_of_clauses):
 			if not high_precision_match and transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
 				high_precision_matches += 1
 				high_precision_match = True
