@@ -160,8 +160,8 @@ for r in range(args.runs):
 			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.number_of_synonyms),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives * args.sequence_length),
-				(tm.AND_GROUP, args.sequence_length )
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.AND_GROUP, args.sequence_length * args.sequence_length)
 			)
 		)
 	else:
