@@ -45,6 +45,7 @@ def default_args(**kwargs):
 	parser.add_argument("--q", default=1.0, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=6, type=int)
+	parser.add_argument("--number-of-synonyms", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
 	parser.add_argument("--number-of-and-alternatives", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
@@ -73,18 +74,13 @@ args = default_args()
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
-	X_unique = np.zeros((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
-	#Y_unique = np.concatenate((np.zeros(math.factorial(args.sequence_length)//2, dtype=np.uint32), np.ones(math.factorial(args.sequence_length)//2, dtype=np.uint32)))
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 
-	permutations = itertools.permutations(range(args.sequence_length))
+	permutations = list(itertools.permutations(range(args.sequence_length)))
 	example = 0
 	for p in permutations:
 		if example == 0:
 			first_permutation = p
-
-		for i in range(args.sequence_length):
-			X_unique[example, i*args.sequence_length + p[i]] = 1
 
 		Y_unique[example] = min_swaps_to_reach(p, first_permutation) % 2
 
@@ -92,18 +88,28 @@ if args.generate_data:
 
 		example += 1
 
-	if args.negate_input:
-		X_unique = 1 - X_unique
 
+
+	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
+	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	
-	X_train = X_unique[train_indices].copy()
-	Y_train = Y_unique[train_indices].copy()
+	for i in args.number_of_examples:
+		for j in range(args.sequence_length):
+			X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)] = 1
+		Y_train[i] = Y_unique[train_indices[i]]
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
+	X_test = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
+	Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	X_test = X_unique[test_indices].copy()
-	Y_test = Y_unique[test_indices].copy()
+	for i in args.number_of_examples:
+		for j in range(args.sequence_length):
+			X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)] = 1
+		Y_test[i] = Y_unique[test_indices[i]]
+
+	if args.negate_input:
+		X_train = 1 - X_train
+		X_test = 1 - X_test
 
 	np.savetxt("examples/SequenceTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 	np.savetxt("examples/SequenceTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
