@@ -204,7 +204,7 @@ for r in range(args.runs):
 
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
 		precision_test = 100*precision_score(Y_test, Y_test_pred)
-		recall_test = 100*precision_score(Y_test, Y_test_pred)
+		recall_test = 100*recall_score(Y_test, Y_test_pred)
 
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
