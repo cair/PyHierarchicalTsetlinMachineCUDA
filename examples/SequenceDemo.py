@@ -129,7 +129,7 @@ for r in range(args.runs):
 			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, args.sequence_length),
-				(tm.OR_ALTERNATIVES, or_alternatives),
+				(tm.OR_ALTERNATIVES, args.or_alternatives),
 				(tm.AND_GROUP, args.sequence_length)
 			)
 		)
