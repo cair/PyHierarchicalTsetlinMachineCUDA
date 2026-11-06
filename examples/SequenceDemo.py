@@ -6,6 +6,7 @@ from keras.datasets import mnist
 import argparse
 import itertools
 import math
+from sklearn.metrics import precision_score, recall_score, accuracy_score
 
 def min_swaps_to_reach(p1, p2):
     """
@@ -198,8 +199,12 @@ for r in range(args.runs):
 		stop_training = time()
 
 		start_testing = time()
-		result_test = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+		Y_test_pred = tsetlin_machine.predict(X_test)
 		stop_testing = time()
+
+		result_test = 100*accuracy_score(Y_test, Y_test_pred)
+		precision_test = 100*precision_score(Y_test, Y_test_pred)
+		recall_test = 100*precision_score(Y_test, Y_test_pred)
 
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
@@ -225,8 +230,8 @@ for r in range(args.runs):
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
-		print("#%d/%d Test Accuracy: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
-			(r+1, e+1, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
+			(r+1, e+1, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
