@@ -225,7 +225,7 @@ code_update = """
 
 						unsigned int la_feedback_2 = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 0.1) {
+							if (curand_uniform(localState) <= 0.5) {
 								la_feedback_2 |= (1 << b);
 							}
 						}
@@ -248,7 +248,7 @@ code_update = """
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
 						unsigned int la_feedback_2 = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 0.1) {
+							if (curand_uniform(localState) <= 0.5) {
 								la_feedback_2 |= (1 << b);
 							}
 						}
