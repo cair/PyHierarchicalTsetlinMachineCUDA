@@ -225,7 +225,7 @@ code_update = """
 
 						unsigned int la_feedback_2 = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 0.5) {
+							if (curand_uniform(localState) <= 1.0) {
 								la_feedback_2 |= (1 << b);
 							}
 						}
