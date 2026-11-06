@@ -113,7 +113,7 @@ for r in range(args.runs):
 		)
 	elif args.and_alternatives:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses,
+			args.number_of_clauses* args.number_of_and_alternatives,
 			args.T,
 			args.s,
 			q=args.q,
