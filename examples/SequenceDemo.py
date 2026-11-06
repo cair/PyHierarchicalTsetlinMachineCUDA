@@ -84,12 +84,15 @@ if args.generate_data:
 
 		print(permutations[i], Y_unique[i])
 
+	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
+	np.random.shuffle(synonym_permutation)
+
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)] = 1
+			X_train[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[train_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
 		Y_train[i] = Y_unique[train_indices[i]]
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
@@ -98,7 +101,7 @@ if args.generate_data:
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)] = 1
+			X_test[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[test_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
 		Y_test[i] = Y_unique[test_indices[i]]
 
 	if args.negate_input:
