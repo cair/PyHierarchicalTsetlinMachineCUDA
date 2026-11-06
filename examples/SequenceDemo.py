@@ -159,9 +159,9 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length * args.number_of_synonyms // 2),
+				(tm.AND_GROUP, args.sequence_length * args.number_of_synonyms // 4),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length * 2)
+				(tm.AND_GROUP, args.sequence_length * 4)
 			)
 		)
 	else:
