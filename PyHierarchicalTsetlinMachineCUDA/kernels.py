@@ -223,9 +223,16 @@ code_update = """
 							}
 						}
 
+						unsigned int la_feedback_2 = 0;
+						for (int b = 0; b < INT_SIZE; ++b) {
+							if (curand_uniform(localState) <= 0.1) {
+								la_feedback_2 |= (1 << b);
+							}
+						}
+
 						if (component_output && included_literals <= LITERAL_BUDGET) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
-								inc(ta_state, ta_chunk, X[ta_chunk]); // & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
+								inc(ta_state, ta_chunk, X[ta_chunk] & la_feedback_2); // & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 							#else
 								inc(ta_state, ta_chunk, X[ta_chunk] & (~la_feedback)); // & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 							#endif
@@ -239,7 +246,14 @@ code_update = """
 					// Type II Feedback
 
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
-						inc(ta_state, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
+						unsigned int la_feedback_2 = 0;
+						for (int b = 0; b < INT_SIZE; ++b) {
+							if (curand_uniform(localState) <= 0.1) {
+								la_feedback_2 |= (1 << b);
+							}
+						}
+
+						inc(ta_state, ta_chunk, (~X[ta_chunk]) & la_feedback_2 & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
 			}
