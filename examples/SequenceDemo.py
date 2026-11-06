@@ -7,6 +7,32 @@ import argparse
 import itertools
 import math
 
+def min_swaps_to_reach(p1, p2):
+    """
+    Finner minste antall enkeltombyttinger (swaps) for å gå
+    fra permutasjon p1 til permutasjon p2.
+    """
+    n = len(p1)
+    # Finn posisjonen til hvert element i p2
+    pos_in_p2 = {val: i for i, val in enumerate(p2)}
+    
+    # Lag 'target'-indekser for hva p1 skal kartlegges til i p2
+    # Vi oversetter p1 til en permutasjon av indekser 0..n-1
+    target = [pos_in_p2[val] for val in p1]
+    
+    visited = [False] * n
+    cycles = 0
+    
+    for i in range(n):
+        if not visited[i] and target[i] != i:
+            cycles += 1
+            curr = i
+            while not visited[curr]:
+                visited[curr] = True
+                curr = target[curr]
+                
+    return n - cycles
+
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--epochs", default=250, type=int)
@@ -54,19 +80,14 @@ if args.generate_data:
 	permutations = itertools.permutations(range(args.sequence_length))
 	example = 0
 	for p in permutations:
+		if example == 0:
+			first_permutation = p
+
 		for i in range(args.sequence_length):
 			X_unique[example, i*args.sequence_length + p[i]] = 1
 
-			if p[i] == 0:
-				pos_0 = i				
-			elif p[i] == 1:
-				pos_1 = i
+		Y_unique[example] = min_swaps_to_reach(p, first_permutation) % 2
 
-		if (pos_0 % 2) != (pos_1 % 2):
-			Y_unique[example] = 1
-		else:
-			Y_unique[example] = 0
-			
 		print(p, Y_unique[example])
 
 		example += 1
