@@ -75,18 +75,14 @@ if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
-
 	permutations = list(itertools.permutations(range(args.sequence_length)))
-	example = 0
-	for p in permutations:
-		if example == 0:
-			first_permutation = p
+	for i in range(math.factorial(args.sequence_length)):
+		if i == 0:
+			first_permutation = permutations[i]
 
-		Y_unique[example] = min_swaps_to_reach(p, first_permutation) % 2
+		Y_unique[i] = min_swaps_to_reach(permutations[i], first_permutation) % 2
 
-		print(p, Y_unique[example])
-
-		example += 1
+		print(permutations[i], Y_unique[i])
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
