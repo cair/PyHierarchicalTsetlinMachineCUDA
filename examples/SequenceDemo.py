@@ -86,7 +86,7 @@ if args.generate_data:
 		print(permutations[i], Y_unique[i])
 
 	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
-	np.random.shuffle(synonym_permutation)
+#	np.random.shuffle(synonym_permutation)
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
@@ -163,9 +163,9 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.number_of_synonyms * args.sequence_length),
+				(tm.AND_GROUP, args.number_of_synonyms),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length)
+				(tm.AND_GROUP, args.sequence_length * args.sequence_length)
 			)
 		)
 	else:
