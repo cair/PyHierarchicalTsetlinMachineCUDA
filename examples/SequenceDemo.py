@@ -6,6 +6,33 @@ from keras.datasets import mnist
 import argparse
 import itertools
 import math
+from sklearn.metrics import precision_score, recall_score, accuracy_score
+
+def min_swaps_to_reach(p1, p2):
+    """
+    Finner minste antall enkeltombyttinger (swaps) for å gå
+    fra permutasjon p1 til permutasjon p2.
+    """
+    n = len(p1)
+    # Finn posisjonen til hvert element i p2
+    pos_in_p2 = {val: i for i, val in enumerate(p2)}
+    
+    # Lag 'target'-indekser for hva p1 skal kartlegges til i p2
+    # Vi oversetter p1 til en permutasjon av indekser 0..n-1
+    target = [pos_in_p2[val] for val in p1]
+    
+    visited = [False] * n
+    cycles = 0
+    
+    for i in range(n):
+        if not visited[i] and target[i] != i:
+            cycles += 1
+            curr = i
+            while not visited[curr]:
+                visited[curr] = True
+                curr = target[curr]
+                
+    return n - cycles
 
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
@@ -19,7 +46,9 @@ def default_args(**kwargs):
 	parser.add_argument("--q", default=1.0, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=6, type=int)
-	parser.add_argument("--number-of-and-alternatives", default=1200, type=int)
+	parser.add_argument("--number-of-synonyms", default=3, type=int)
+	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
+	parser.add_argument("--number-of-and-alternatives", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
@@ -46,32 +75,39 @@ args = default_args()
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
-	X_unique = np.zeros((math.factorial(args.sequence_length), args.sequence_length * args.sequence_length), dtype=np.uint32)
-	Y_unique = np.concatenate((np.zeros(math.factorial(args.sequence_length)//2, dtype=np.uint32), np.ones(math.factorial(args.sequence_length)//2, dtype=np.uint32)))
-	rng.shuffle(Y_unique)
+	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
+	permutations = list(itertools.permutations(range(args.sequence_length)))
+	for i in range(math.factorial(args.sequence_length)):
+		if i == 0:
+			first_permutation = permutations[i]
 
-	permutations = itertools.permutations(range(args.sequence_length))
-	example = 0
-	for p in permutations:
-		for i in range(args.sequence_length):
-			X_unique[example, i*args.sequence_length + p[i]] = 1
+		Y_unique[i] = min_swaps_to_reach(permutations[i], first_permutation) % 2
 
-		print(p, Y_unique[example])
+		print(permutations[i], Y_unique[i])
 
-		example += 1
+	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
+	np.random.shuffle(synonym_permutation)
 
-	if args.negate_input:
-		X_unique = 1 - X_unique
-
+	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
+	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	
-	X_train = X_unique[train_indices].copy()
-	Y_train = Y_unique[train_indices].copy()
+	for i in range(args.number_of_examples):
+		for j in range(args.sequence_length):
+			X_train[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[train_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
+		Y_train[i] = Y_unique[train_indices[i]]
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
+	X_test = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
+	Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	X_test = X_unique[test_indices].copy()
-	Y_test = Y_unique[test_indices].copy()
+	for i in range(args.number_of_examples):
+		for j in range(args.sequence_length):
+			X_test[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[test_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
+		Y_test[i] = Y_unique[test_indices[i]]
+
+	if args.negate_input:
+		X_train = 1 - X_train
+		X_test = 1 - X_test
 
 	np.savetxt("examples/SequenceTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
 	np.savetxt("examples/SequenceTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
@@ -84,14 +120,14 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
-f = open("sequence_statistics_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d.txt" % (args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_and_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs), "w")
+f = open("sequence_statistics_%d_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d.txt" % (args.literal_budget, args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_and_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs, args.q, args.clause_weight_update_ratio, args.sequence_length, args.append_negated, args.number_of_and_alternatives), "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses * args.number_of_and_alternatives,
+			args.number_of_clauses * args.number_of_and_alternatives * args.number_of_or_alternatives,
 			args.T,
 			args.s,
 			q=args.q,
@@ -106,13 +142,13 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length*args.sequence_length),
+				(tm.AND_GROUP, args.sequence_length*args.sequence_length*args.number_of_synonyms),
 				(tm.AND_GROUP, 1)
 			)
 		)
 	elif args.and_alternatives:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses,
+			args.number_of_clauses* args.number_of_and_alternatives,
 			args.T,
 			args.s,
 			q=args.q,
@@ -127,8 +163,8 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length),
-				(tm.OR_ALTERNATIVES, or_alternatives),
+				(tm.AND_GROUP, args.number_of_synonyms * args.sequence_length),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length)
 			)
 		)
@@ -163,8 +199,12 @@ for r in range(args.runs):
 		stop_training = time()
 
 		start_testing = time()
-		result_test = 100*(tsetlin_machine.predict(X_test) == Y_test).mean()
+		Y_test_pred = tsetlin_machine.predict(X_test)
 		stop_testing = time()
+
+		result_test = 100*accuracy_score(Y_test, Y_test_pred)
+		precision_test = 100*precision_score(Y_test, Y_test_pred)
+		recall_test = 100*recall_score(Y_test, Y_test_pred)
 
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
@@ -190,9 +230,9 @@ for r in range(args.runs):
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
-		print("#%d/%d Test Accuracy: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
-			(r+1, e+1, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
+			(r+1, e+1, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
-		f.write("%d %d %.2f %.2f\n" % (r, e, result_test, result_train))
+		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
 f.close()
