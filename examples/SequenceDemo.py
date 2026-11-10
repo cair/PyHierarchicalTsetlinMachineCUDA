@@ -61,12 +61,9 @@ if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
-	permutations = list(itertools.permutations(range(args.sequence_length)))
-	for i in range(math.factorial(args.sequence_length)):
-		if i == 0:
-			first_permutation = permutations[i]
-
-		Y_unique[i] = count_inversions(permutations[i]) % 2 # np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
+	permutations = itertools.permutations(range(args.sequence_length))
+	for p in permutations:
+		Y_unique[i] = count_inversions(p) % 2
 
 		print(permutations[i], Y_unique[i])
 
