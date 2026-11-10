@@ -61,13 +61,11 @@ if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
-	permutations = itertools.permutations(range(args.sequence_length))
-	example = 0
-	for p in permutations:
-		Y_unique[example] = count_inversions(p) % 2
+	permutations = list(itertools.permutations(range(args.sequence_length)))
+	for i in range(math.factorial(args.sequence_length)):
+		Y_unique[i] = count_inversions(permutations[i]) % 2 # np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
 
-		print(p, Y_unique[example])
-		example += 1
+		print(permutations[i], Y_unique[i])
 
 	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
 	np.random.shuffle(synonym_permutation)
