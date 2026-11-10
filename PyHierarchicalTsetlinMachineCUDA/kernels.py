@@ -115,9 +115,9 @@ code_update = """
 
 			int sign = (*clause_weight >= 0) - (*clause_weight < 0);
 		
-			//if (target*sign == 1 && curand_uniform(localState) <= 0.9) {
-			//	return;
-			//}
+			if (target*sign == 1 && curand_uniform(localState) <= 0.9) {
+				return;
+			}
 
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
