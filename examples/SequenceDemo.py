@@ -82,7 +82,7 @@ if args.generate_data:
 		if i == 0:
 			first_permutation = permutations[i]
 
-		Y_unique[i] = np.randomom.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
+		Y_unique[i] = np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
 
 		print(permutations[i], Y_unique[i])
 
