@@ -8,6 +8,7 @@ import itertools
 import math
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 
+# Code from Gemini, must be verified...
 def min_swaps_to_reach(p1, p2):
     """
     Finner minste antall enkeltombyttinger (swaps) for å gå
