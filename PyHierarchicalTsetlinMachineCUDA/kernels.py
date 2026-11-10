@@ -119,6 +119,14 @@ code_update = """
 				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
 
+			#if CONSTANT_UPDATE_P == 1
+				update_probability = 1.0;
+			#elif CLAUSE_WEIGHT_UPDATE_RATIO <= 1.0
+				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
+			#else
+				update_probability = (1.0/CLAUSE_WEIGHT_UPDATE_RATIO)*fabsf(y - class_sum)/(2*THRESHOLD);
+			#endif
+
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
 					if (clause_output && abs(*clause_weight) < INT_MAX) {
@@ -151,8 +159,10 @@ code_update = """
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
 				update_probability = 1.0;
-			#else
+			#elif CLAUSE_WEIGHT_UPDATE_RATIO <= 1.0
 				update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*fabsf(y - class_sum)/(2*THRESHOLD);
+			#else
+				update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 			#endif
 
 			if (curand_uniform(localState) <= update_probability) {
