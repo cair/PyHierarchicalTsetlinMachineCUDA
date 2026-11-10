@@ -210,7 +210,7 @@ code_update = """
 						// Generate random bit values
 						unsigned int la_feedback = 0;
 						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= 0.5) {
+							if (curand_uniform(localState) <= 0.25) {
 								la_feedback |= (1 << b);
 							}
 						}
