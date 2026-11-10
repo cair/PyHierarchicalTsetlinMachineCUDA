@@ -46,7 +46,7 @@ COALESCED_TM = 2
 class CommonTsetlinMachine():
 
 	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False,
-		clip_weights=True, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+		clip_weights=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
 		self.T = float(T)
