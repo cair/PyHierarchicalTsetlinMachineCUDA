@@ -892,6 +892,18 @@ class TsetlinMachine(CommonTsetlinMachine):
 
 		return clause_precision
 
+	def clause_recall(self, X, Y):
+		X_transformed = self.transform(X)
+
+		clause_recall = np.empty(self.number_of_clauses)
+		for i in range(self.number_of_clauses):
+			if self.get_clause_weight(i) >= 0:
+				clause_recall[i] = Y[X_transformed[:,i] > 0].sum() / Y.sum()
+			else:
+				clause_recall[i] = (1 - Y[X_transformed[:,i] > 0]).sum() / (1 - Y).sum()
+
+		return clause_recall
+
 	def score(self, X):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
 		return self._score(X)[0,:]
