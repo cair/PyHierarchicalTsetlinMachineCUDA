@@ -45,7 +45,8 @@ COALESCED_TM = 2
 
 class CommonTsetlinMachine():
 
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False,
+		clip_weights=True, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
 		self.T = float(T)
@@ -57,6 +58,7 @@ class CommonTsetlinMachine():
 		self.constant_update_p = constant_update_p
 		self.binary_inference = binary_inference
 		self.and_group_normalization = and_group_normalization
+		self.clip_weights = clip_weights
 		self.hierarchy_structure = hierarchy_structure
 		self.depth = len(hierarchy_structure)
 
@@ -143,6 +145,7 @@ class CommonTsetlinMachine():
 	#define BINARY_INFERENCE %d
 	#define CONSTANT_UPDATE_P %d
 	#define AND_GROUP_NORMALIZATION %d
+	#define CLIP_WEIGHTS %d
 
 	#define AND_GROUP %d
 	#define AND_ALTERNATIVES %d
@@ -152,7 +155,32 @@ class CommonTsetlinMachine():
 
 	#define NEGATIVE_CLAUSES %d
 	#define FLIP_POLARITY %d
-		""" % (self.number_of_clauses, self.depth, self.hierarchy_size[1], self.number_of_ta_teams, self.number_of_literals_per_leaf, self.number_of_literal_chunks_per_leaf, self.number_of_literal_chunks, self.number_of_state_bits, self.boost_true_positive_feedback, self.s, self.T, self.q, self.clause_weight_update_ratio, self.literal_budget, self.binary_inference, self.constant_update_p, self.and_group_normalization, AND_GROUP, AND_ALTERNATIVES, OR_GROUP, OR_GROUP_CONVOLUTION, OR_ALTERNATIVES, self.negative_clauses, self.flip_polarity)
+		""" % (self.number_of_clauses,
+			self.depth,
+			self.hierarchy_size[1],
+			self.number_of_ta_teams,
+			self.number_of_literals_per_leaf,
+			self.number_of_literal_chunks_per_leaf,
+			self.number_of_literal_chunks,
+			self.number_of_state_bits,
+			self.boost_true_positive_feedback,
+			self.s,
+			self.T,
+			self.q,
+			self.clause_weight_update_ratio,
+			self.literal_budget,
+			self.binary_inference,
+			self.constant_update_p,
+			self.and_group_normalization,
+			self.clip_weights,
+			AND_GROUP,
+			AND_ALTERNATIVES,
+			OR_GROUP,
+			OR_GROUP_CONVOLUTION,
+			OR_ALTERNATIVES,
+			self.negative_clauses,
+			self.flip_polarity
+		)
 
 		mod_prepare = SourceModule(parameters + kernels.code_header + kernels.code_prepare, no_extern_c=True)
 		self.prepare_weights = mod_prepare.get_function("prepare_weights")

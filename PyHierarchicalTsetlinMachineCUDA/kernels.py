@@ -131,9 +131,15 @@ code_update = """
 
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
-					if (clause_output && abs(*clause_weight) < INT_MAX) {
-						(*clause_weight) += sign;
-					}
+					#if CLIP_WEIGHTS == 1
+						if (clause_output && abs(*clause_weight) < THRESHOLD) {
+							(*clause_weight) += sign;
+						}
+					#else
+						if (clause_output && abs(*clause_weight) < INT_MAX) {
+							(*clause_weight) += sign;
+						}
+					#endif
 				} else if (target*sign < 0 && clause_output) {
 					// Type II Feedback
 
