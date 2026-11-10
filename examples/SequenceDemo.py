@@ -192,8 +192,8 @@ for r in range(args.runs):
 
 		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
-		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
+		clause_precision = tsetlin_machine.clause_precision(X_train, Y_train)
+		clause_recall = tsetlin_machine.clause_recall(X_train, Y_train)
 		for i in range(tsetlin_machine.number_of_clauses):
 			print(i, clause_precision[i], clause_recall[i], tsetlin_machine.get_clause_weight(i))
 
