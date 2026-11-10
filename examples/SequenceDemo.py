@@ -8,32 +8,16 @@ import itertools
 import math
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 
-# Code from Gemini, must be verified...
-def min_swaps_to_reach(p1, p2):
-    """
-    Finner minste antall enkeltombyttinger (swaps) for å gå
-    fra permutasjon p1 til permutasjon p2.
-    """
-    n = len(p1)
-    # Finn posisjonen til hvert element i p2
-    pos_in_p2 = {val: i for i, val in enumerate(p2)}
-    
-    # Lag 'target'-indekser for hva p1 skal kartlegges til i p2
-    # Vi oversetter p1 til en permutasjon av indekser 0..n-1
-    target = [pos_in_p2[val] for val in p1]
-    
-    visited = [False] * n
-    cycles = 0
-    
+# Gemini code, must be verified
+def count_inversions(permutation):
+    """Counts the number of inversions to determine parity."""
+    inv = 0
+    n = len(permutation)
     for i in range(n):
-        if not visited[i] and target[i] != i:
-            cycles += 1
-            curr = i
-            while not visited[curr]:
-                visited[curr] = True
-                curr = target[curr]
-                
-    return n - cycles
+        for j in range(i + 1, n):
+            if permutation[i] > permutation[j]:
+                inv += 1
+    return inv
 
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
@@ -82,7 +66,7 @@ if args.generate_data:
 		if i == 0:
 			first_permutation = permutations[i]
 
-		Y_unique[i] = np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
+		Y_unique[i] = count_inversions(permutations[i]) % 2 # np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
 
 		print(permutations[i], Y_unique[i])
 
