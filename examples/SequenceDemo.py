@@ -68,7 +68,7 @@ if args.generate_data:
 		print(permutations[i], Y_unique[i])
 
 	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
-	np.random.shuffle(synonym_permutation)
+	#np.random.shuffle(synonym_permutation)
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
