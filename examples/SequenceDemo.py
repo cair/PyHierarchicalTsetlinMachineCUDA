@@ -197,7 +197,7 @@ for r in range(args.runs):
 		for i in range(tsetlin_machine.number_of_clauses):
 			print(i, clause_precision[i], clause_recall[i], tsetlin_machine.get_clause_weight(i))
 
-		transformed_X = tsetlin_machine.transform(X_test)
+		transformed_X = tsetlin_machine.transform(X_train)
 		high_precision_matches = 0
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
