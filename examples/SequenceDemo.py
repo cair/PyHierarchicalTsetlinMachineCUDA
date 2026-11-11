@@ -184,11 +184,7 @@ for r in range(args.runs):
 		stop_testing = time()
 
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
-		precision_test = 100*precision_score(Y_test, Y_test_pred)
-		recall_test = 100*recall_score(Y_test, Y_test_pred)
-
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
-
 
 		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
@@ -197,15 +193,8 @@ for r in range(args.runs):
 			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision, clause_recall))
 
 		transformed_X = tsetlin_machine.transform(X_test)
-		high_precision_matches = 0
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
-			high_precision_match = False
-			for j in range(tsetlin_machine.number_of_clauses):
-				if not high_precision_match and transformed_X[i, j] > 0 and clause_precision[j] >= 1.0:
-					high_precision_matches += 1
-					high_precision_match = True
-
 				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
 					max_precision[i] = clause_precision[j]
 
