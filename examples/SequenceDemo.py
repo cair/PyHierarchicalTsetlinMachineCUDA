@@ -7,6 +7,7 @@ import argparse
 import itertools
 import math
 from sklearn.metrics import precision_score, recall_score, accuracy_score
+from scipy.stats import zipfian
 
 # Gemini code, must be verified
 def count_inversions(permutation):
@@ -46,6 +47,7 @@ def default_args(**kwargs):
 	parser.add_argument('--literal-budget', default=36, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
+	parser.add_argument("--synonym-skewedness", default=1.2, type=float)
 
 	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
 
@@ -63,19 +65,16 @@ if args.generate_data:
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 	permutations = list(itertools.permutations(range(args.sequence_length)))
 	for i in range(math.factorial(args.sequence_length)):
-		Y_unique[i] = count_inversions(permutations[i]) % 2 # np.random.random() <= 0.5 #min_swaps_to_reach(permutations[i], first_permutation) % 2
+		Y_unique[i] = count_inversions(permutations[i]) % 2
 
 		print(permutations[i], Y_unique[i])
-
-	synonym_permutation = np.arange(args.sequence_length*args.number_of_synonyms)
-	#np.random.shuffle(synonym_permutation)
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_train[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[train_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
+			X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, size=1)[0] - 1] = 1
 		Y_train[i] = Y_unique[train_indices[i]]
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
@@ -84,7 +83,7 @@ if args.generate_data:
 	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_test[i, j*args.sequence_length*args.number_of_synonyms + synonym_permutation[permutations[test_indices[i]][j]*args.number_of_synonyms + np.random.randint(args.number_of_synonyms)]] = 1
+			X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, size=1)[0] - 1] = 1
 		Y_test[i] = Y_unique[test_indices[i]]
 
 	if args.negate_input:
