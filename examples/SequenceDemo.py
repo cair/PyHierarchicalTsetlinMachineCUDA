@@ -239,6 +239,7 @@ for r in range(args.runs):
 
 		max_example_precision = np.zeros(transformed_X_test.shape[0])
 		for i in range(transformed_X_test.shape[0]):
+			for j in range(args.number_of_clauses):
 				if transformed_X_test[i, j] > 0 and clause_precision_test[j] >= max_example_precision[i]:
 					max_example_precision[i] = clause_precision_test[j]
 
