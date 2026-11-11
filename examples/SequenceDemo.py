@@ -49,6 +49,7 @@ def default_args(**kwargs):
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 	parser.add_argument("--synonym-skewedness", default=1.2, type=float)
+	parser.add_argument("--print-hierarchy", action='store_true')
 
 	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
 
@@ -188,13 +189,12 @@ for r in range(args.runs):
 
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
-		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
 		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
 
-		for i in range(tsetlin_machine.number_of_clauses):
-			print(i, clause_precision[i], clause_recall[i], tsetlin_machine.get_clause_weight(i))
+		if args.print_hierarchy:
+			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision, clause_recall))
 
 		transformed_X = tsetlin_machine.transform(X_test)
 		high_precision_matches = 0
@@ -209,16 +209,16 @@ for r in range(args.runs):
 				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
 					max_precision[i] = clause_precision[j]
 
-		known = 1.0*transformed_X.max(axis=1).sum()/transformed_X.shape[0]
-
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
-		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
 		print("Number of unique patterns: %d" % (math.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length,))
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
+
+		coverage = transformed_X.sum(axis=1)
+		activations = np.unique(coverage, return_counts=True)
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
@@ -227,15 +227,15 @@ for r in range(args.runs):
 		overlap_count = np.sum(counts > 1)
 		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
 
-		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
-			(r+1, e+1, 100.0 * known, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
+		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
+			(r+1, e+1, 100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0])), result_test, result_train, stop_training-start_training, stop_testing-start_testing))
 
 		print("Clause precision: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
 		print("Clause recall: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
 
-		coverage = transformed_X.sum(axis=1)
+		print("Average absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
+
 		print("Absolute votes per sample (votes, percentage):", end=' ')
-		activations = np.unique(coverage, return_counts=True)
 		for i in range(len(activations[0])):
 			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
 		print()
