@@ -235,10 +235,10 @@ for r in range(args.runs):
 		print("Clause recall: %.2f (p1) %.2f (p10) %.2f (p50) %.2f (p90) %.2f (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
 
 		coverage = transformed_X.sum(axis=1)
-		print("Votes per sample (positive and negative):", end=' ')
+		print("Absolute votes per sample (votes, percentage):", end=' ')
 		activations = np.unique(coverage, return_counts=True)
 		for i in range(len(activations[0])):
-			print("%d:%.2f%%" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
+			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
 		print()
 
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
