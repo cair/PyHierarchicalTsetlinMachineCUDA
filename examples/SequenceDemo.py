@@ -217,7 +217,7 @@ for r in range(args.runs):
 
 		print()
 
-		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0]),))
+		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0]),)))
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
 		print("Training accuracy:" % (result_train,))
@@ -238,7 +238,7 @@ for r in range(args.runs):
 		print("Mean clause recall: %.1f%%" % (100.0*clause_recall.mean()))
 
 		print()
-		
+
 		print("Absolute votes per sample (votes, percentage):", end=' ')
 		for i in range(len(activations[0])):
 			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
