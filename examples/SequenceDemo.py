@@ -63,7 +63,7 @@ args = default_args()
 
 config_dict = vars(args)
 
-ext_parts = [f"{v}" for v in sorted(config_dict.valuess())]
+ext_parts = [f"{v}" for v in sorted(config_dict.values())]
 raw_extension = "_".join(ext_parts)
 
 if args.generate_data:
