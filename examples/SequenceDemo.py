@@ -61,6 +61,11 @@ def default_args(**kwargs):
 
 args = default_args()
 
+config_dict = vars(args)
+
+ext_parts = [f"{k}_{v}" for k, v in sorted(config_dict.items())]
+raw_extension = "_".join(ext_parts)
+
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
@@ -101,7 +106,7 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
-f = open("sequence_statistics_%d_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d_%.2f_%d_%d_%d_%d_%d_%d_%d.txt" % (args.literal_budget, args.number_of_clauses, args.T, args.s, args.number_of_state_bits, args.vanilla, args.and_group_normalization, args.constant_update_p, args.binary_inference, args.number_of_and_alternatives, args.weighted_clauses, args.noise, args.no_clipping, args.epochs, args.q, args.clause_weight_update_ratio, args.sequence_length, args.append_negated, args.number_of_and_alternatives), "w")
+f = open("sequence_statistics_" + raw_extension, "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
