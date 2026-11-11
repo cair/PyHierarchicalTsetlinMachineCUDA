@@ -48,7 +48,8 @@ def default_args(**kwargs):
 	parser.add_argument('--literal-budget', default=36, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
-	parser.add_argument("--synonym-skewedness", default=1.2, type=float)
+	parser.add_argument("--synonym-skewedness", default=0.0, type=float)
+	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--print-hierarchy", action='store_true')
 
 	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
