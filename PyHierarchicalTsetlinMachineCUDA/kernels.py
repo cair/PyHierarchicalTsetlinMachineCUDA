@@ -203,7 +203,14 @@ code_update = """
 					// Type II Feedback
 
 					for (int ta_chunk = 0; ta_chunk < TA_CHUNKS_PER_LEAF; ++ta_chunk) {
-						inc(ta_state, ta_chunk, (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
+						unsigned int la_feedback = 0;
+						for (int b = 0; b < INT_SIZE; ++b) {
+							if (curand_uniform(localState) <= 0.5) {
+								la_feedback |= (1 << b);
+							}
+						}
+
+						inc(ta_state, ta_chunk, la_feedback & (~X[ta_chunk]) & (~ta_state[ta_chunk*STATE_BITS + STATE_BITS - 1]));
 					}
 				}
 			}
