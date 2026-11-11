@@ -66,7 +66,7 @@ config_dict = vars(args)
 ext_parts = [f"{v}" for v in sorted(config_dict.values())]
 raw_extension = "_".join(ext_parts)
 
-f = open("sequence_statistics_" + raw_extension, "w")
+f = open("sequence_statistics_" + raw_extension ".txt", "w")
 
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
