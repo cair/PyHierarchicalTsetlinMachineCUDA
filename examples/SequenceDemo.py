@@ -196,7 +196,7 @@ for r in range(args.runs):
 		if args.print_hierarchy:
 			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			print()
-			
+
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
 		print("Number of unique patterns: %d" % (math.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length,))
@@ -250,8 +250,8 @@ for r in range(args.runs):
 		for i in range(len(activations[0])):
 			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
 		print()
-
-		print("Mean absolute votes per sample: %.2f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
+		print()
+		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
 		#f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X_test.shape[0], result_train))
 		#f.flush()
