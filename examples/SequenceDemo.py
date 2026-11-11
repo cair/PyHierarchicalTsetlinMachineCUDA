@@ -218,6 +218,8 @@ for r in range(args.runs):
 		overlap_count = np.sum(counts > 1)
 		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
 
+		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)) - overlap_count,))
+
 		print()
 
 		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),))
