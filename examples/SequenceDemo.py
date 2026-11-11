@@ -79,7 +79,12 @@ if args.generate_data:
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
-	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	
+	if args.sequence_skewedness == 0.0:
+		train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	else:
+		train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
+
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
 			X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
@@ -88,7 +93,12 @@ if args.generate_data:
 
 	X_test = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
-	test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+
+	if args.sequence_skewedness == 0.0:
+		test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	else:
+		test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
+
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
 			X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, size=1)[0] - 1] = 1
