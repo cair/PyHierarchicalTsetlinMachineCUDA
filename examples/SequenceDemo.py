@@ -9,7 +9,6 @@ import math
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 from scipy.stats import zipfian
 
-# Gemini code, must be verified
 def count_inversions(permutation):
     """Counts the number of inversions to determine parity."""
     inv = 0
@@ -191,12 +190,12 @@ for r in range(args.runs):
 
 		tsetlin_machine.print_hierarchy(print_ta_state=True)
 
-		clause_precision = tsetlin_machine.clause_precision(X_train, Y_train)
-		clause_recall = tsetlin_machine.clause_recall(X_train, Y_train)
+		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
+		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
 		for i in range(tsetlin_machine.number_of_clauses):
 			print(i, clause_precision[i], clause_recall[i], tsetlin_machine.get_clause_weight(i))
 
-		transformed_X = tsetlin_machine.transform(X_train)
+		transformed_X = tsetlin_machine.transform(X_test)
 		high_precision_matches = 0
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
@@ -210,6 +209,12 @@ for r in range(args.runs):
 					max_precision[i] = clause_precision[j]
 
 		known = 1.0*transformed_X.max(axis=1).sum()/transformed_X.shape[0]
+
+		coverage = 1.0*transformed_X.sum(axis=1)
+
+		print("STATISTICS #%d/%d\n" % (r+1, e+1))
+
+		print("Clause activations per test sample:", 100.0 * np.bincount(coverage) / transformed_X.shape[0])
 
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
