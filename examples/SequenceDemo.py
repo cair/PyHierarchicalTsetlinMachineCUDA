@@ -189,12 +189,14 @@ for r in range(args.runs):
 		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall_test = tsetlin_machine.clause_recall(X_test, Y_test)
 
+		transformed_X_test = tsetlin_machine.transform(X_test)
+
+		print("CLAUSES RUN #%d EPOCH #%d\n" % (r+1, e+1))
+
 		if args.print_hierarchy:
 			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			print()
-
-		transformed_X_test = tsetlin_machine.transform(X_test)
-
+			
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
 		print("Number of unique patterns: %d" % (math.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length,))
