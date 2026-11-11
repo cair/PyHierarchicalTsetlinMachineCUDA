@@ -211,8 +211,6 @@ for r in range(args.runs):
 
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
-		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
-
 		print("Number of unique patterns: %d" % (math.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length,))
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))

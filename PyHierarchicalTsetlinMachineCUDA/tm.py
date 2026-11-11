@@ -325,7 +325,6 @@ class CommonTsetlinMachine():
 
 		X_transformed = np.ascontiguousarray(np.empty((number_of_examples, self.number_of_clauses))).astype(np.float32)
 
-		print(len(self.hierarchy_votes), self.depth)
 		for e in range(number_of_examples):
 			self.evaluate_hierarchy(encoded_X_hierarchy_test_gpu, e)
 			cuda.memcpy_dtoh(self.clause_output, self.hierarchy_votes[self.depth-1])
