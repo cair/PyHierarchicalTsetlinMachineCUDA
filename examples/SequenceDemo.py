@@ -215,21 +215,36 @@ for r in range(args.runs):
 		overlap_count = np.sum(counts > 1)
 		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
 
-		print("#%d/%d Coverage: %.2f%% Test accuracy: %.2f%% Training accuracy: %.2f%% Training time: %.2fs Testing time: %.2fs" %
-			(r+1, e+1, 100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0])), result_test, result_train, stop_training-start_training, stop_testing-start_testing))
+		print()
+
+		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0]),))
+		print()
+		print("Testing accuracy: %.2f%%" % (result_test,))
+		print("Training accuracy:" % (result_train,))
+		
+		print()
+
+		print("Testing time: %.2fs" % (stop_testing-start_testing,))
+		print("Training time: %.2fs" % (stop_training-start_training,))
+
+		print()
 
 		print("Clause precision: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
 		print("Clause recall: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
 
+		print()
+
 		print("Mean clause precision: %.1f%%" % (100.0*clause_precision.mean()))
 		print("Mean clause recall: %.1f%%" % (100.0*clause_recall.mean()))
 
-		print("Average absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
-
+		print()
+		
 		print("Absolute votes per sample (votes, percentage):", end=' ')
 		for i in range(len(activations[0])):
 			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
 		print()
+
+		print("Mean absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
 
 		#f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		#f.flush()
