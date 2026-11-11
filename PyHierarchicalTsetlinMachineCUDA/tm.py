@@ -604,10 +604,9 @@ class CommonTsetlinMachine():
 		return hierarchy_votes, class_sum
 
 	def print_hierarchy(self, print_ta_state=False, precision_recall=None):
-
 		for i in range(self.number_of_clauses):
 			if precision_recall != None:
-				print("\nCLAUSE #%d (W:%d P:%.2f%% R:%.2f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]), end='')
+				print("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]), end='')
 			else:
 				print("\nCLAUSE #%d (W:%d): " % (i, self.get_clause_weight(i)), end='')
 
