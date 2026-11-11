@@ -212,8 +212,6 @@ for r in range(args.runs):
 
 		known = 1.0*transformed_X.max(axis=1).sum()/transformed_X.shape[0]
 
-		coverage = 1.0*transformed_X.sum(axis=1)
-
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
 		print(transformed_X.sum() / transformed_X.shape[0])		
@@ -233,10 +231,11 @@ for r in range(args.runs):
 		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
 			(r+1, e+1, 100.0 * known, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
-		print("Number of votes per sample (%):")
+		coverage = transformed_X.sum(axis=1)
+		print("Votes per sample (positive and negative):")
 		activations = np.unique(coverage, return_counts=True)
 		for i in range(len(activations[0])):
-			print("\t%d:%.2f%" % (activations[0][i], activations[1][i]))
+			print("\t%d:%.2f%%" % (activations[0][i], activations[1][i]))
 
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
