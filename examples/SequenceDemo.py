@@ -261,6 +261,30 @@ for r in range(args.runs):
 		print()
 		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
-		#f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X_test.shape[0], result_train))
-		#f.flush()
+		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (
+			r,
+			e,
+			100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),
+			result_test,
+			result_train,
+			100.0 * np.percentile(clause_precision_test, 1),
+			100.0 * np.percentile(clause_precision_test, 10),
+			100.0 * np.median(clause_precision_test),
+			100.0 * np.percentile(clause_precision_test, 90),
+			100.0 * np.percentile(clause_precision_test, 99),
+			100.0 * np.percentile(clause_recall_test, 1),
+			100.0 * np.percentile(clause_recall_test, 10),
+			100.0 * np.median(clause_recall_test),
+			100.0 * np.percentile(clause_recall_test, 90),
+			100.0 * np.percentile(clause_recall_test, 99),
+			100.0*clause_precision_test.mean(),
+			100.0*clause_recall_test.mean(),
+			100.0 * np.percentile(max_example_precision, 1),
+			100.0 * np.percentile(max_example_precision, 10),
+			100.0 * np.median(max_example_precision),
+			100.0 * np.percentile(max_example_precision, 90),
+			100.0 * np.percentile(max_example_precision, 99),
+			transformed_X_test.sum() / transformed_X_test.shape[0]
+		)
+		f.flush()
 f.close()
