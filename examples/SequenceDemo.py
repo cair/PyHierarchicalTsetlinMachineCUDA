@@ -219,10 +219,22 @@ for r in range(args.runs):
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
 
+		print("Number of unique patterns: %d", np.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length)
+		print("Number of unique patterns in the training data: %d", len(np.unique(X_train, axis=0)))
+		print("Number of unique patterns in the testing data: %d", len(np.unique(X_test, axis=0)))
+
+		unique_train = np.unique(X_train, axis=0)
+		unique_test = np.unique(X_test, axis=0)
+		overlap_count = np.sum(counts > 1)
+		print("Number of unique patterns occuring in both training and testing data: %d", overlap_count)
+
 		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
 			(r+1, e+1, 100.0 * known, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
-		print("Clause activations per test sample:", 100.0 * np.unique(coverage, return_counts=True)[1] / transformed_X.shape[0])
+		print("Number of clause activations per sample (%):")
+		activations = np.unique(coverage, return_counts=True)
+		for i in range(len(activations[0])):
+			print("\t", )
 
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
