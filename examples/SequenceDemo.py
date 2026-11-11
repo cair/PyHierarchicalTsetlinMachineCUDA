@@ -221,7 +221,7 @@ for r in range(args.runs):
 		print("Clause precision: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
 		print("Clause recall: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
 
-		print("Mean clause precision: %.1f%%" % (100.0*clause_precision.mean())
+		print("Mean clause precision: %.1f%%" % (100.0*clause_precision.mean()))
 		print("Mean clause recall: %.1f%%" % (100.0*clause_recall.mean()))
 
 		print("Average absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
