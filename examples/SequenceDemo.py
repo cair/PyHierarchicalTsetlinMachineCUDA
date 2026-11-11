@@ -191,7 +191,8 @@ for r in range(args.runs):
 
 		if args.print_hierarchy:
 			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision, clause_recall))
-
+			print()
+			
 		transformed_X = tsetlin_machine.transform(X_test)
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
