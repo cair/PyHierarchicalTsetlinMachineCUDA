@@ -232,17 +232,17 @@ for r in range(args.runs):
 
 		print()
 
+		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
+		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
+
+		print()
+
 		max_example_precision = np.zeros(transformed_X_test.shape[0])
 		for i in range(transformed_X_test.shape[0]):
 				if transformed_X_test[i, j] > 0 and clause_precision_test[j] >= max_example_precision[i]:
 					max_example_precision[i] = clause_precision_test[j]
 
 		print("Max clause precision per test sample: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(max_example_precision, 1), 100.0 * np.percentile(max_example_precision, 10), 100.0 * np.median(max_example_precision), 100.0 * np.percentile(max_example_precision, 90), 100.0 * np.percentile(max_example_precision, 99)))
-
-		print()
-
-		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
-		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
 
 		print()
 
