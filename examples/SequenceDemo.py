@@ -216,7 +216,7 @@ for r in range(args.runs):
 		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),))
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
-		print("Training accuracy:" % (result_train,))
+		print("Training accuracy: %.2f%%" % (result_train,))
 		
 		print()
 
