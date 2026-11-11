@@ -227,7 +227,7 @@ for r in range(args.runs):
 		overlap_count = np.sum(counts > 1)
 		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
 
-		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
+		print("#%d/%d Coverage: %.2f%% Test accuracy: %.2f%% Training accuracy: %.2f%% Training time: %.2fs Testing time: %.2fs" %
 			(r+1, e+1, 100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0])), result_test, result_train, stop_training-start_training, stop_testing-start_testing))
 
 		print("Clause precision: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
