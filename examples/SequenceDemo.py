@@ -66,6 +66,8 @@ config_dict = vars(args)
 ext_parts = [f"{v}" for v in sorted(config_dict.values())]
 raw_extension = "_".join(ext_parts)
 
+f = open("sequence_statistics_" + raw_extension, "w")
+
 if args.generate_data:
 	rng = np.random.default_rng(seed=10)
 
@@ -105,8 +107,6 @@ else:
 	test_data = np.loadtxt("./examples/SequenceTestingData.txt").astype(np.uint32)
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
-
-f = open("sequence_statistics_" + raw_extension, "w")
 
 for r in range(args.runs):
 	seed = np.random.randint(10000)
