@@ -192,7 +192,7 @@ for r in range(args.runs):
 		if args.print_hierarchy:
 			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision, clause_recall))
 			print()
-			
+
 		transformed_X = tsetlin_machine.transform(X_test)
 		max_precision = np.zeros(transformed_X.shape[0])
 		for i in range(transformed_X.shape[0]):
@@ -218,8 +218,11 @@ for r in range(args.runs):
 		print("#%d/%d Coverage: %.2f%% Test accuracy: %.2f%% Training accuracy: %.2f%% Training time: %.2fs Testing time: %.2fs" %
 			(r+1, e+1, 100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0])), result_test, result_train, stop_training-start_training, stop_testing-start_testing))
 
-		print("Clause precision: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
-		print("Clause recall: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
+		print("Clause precision: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
+		print("Clause recall: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
+
+		print("Mean clause precision: %.1f%%" % (100.0*clause_precision.mean())
+		print("Mean clause recall: %.1f%%" % (100.0*clause_recall.mean()))
 
 		print("Average absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
 
