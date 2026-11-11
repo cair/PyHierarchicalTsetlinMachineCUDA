@@ -186,18 +186,14 @@ for r in range(args.runs):
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
-		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
-		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
+		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
+		clause_recall_test = tsetlin_machine.clause_recall(X_test, Y_test)
 
 		if args.print_hierarchy:
-			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision, clause_recall))
+			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			print()
 
-		transformed_X = tsetlin_machine.transform(X_test)
-		max_precision = np.zeros(transformed_X.shape[0])
-		for i in range(transformed_X.shape[0]):
-				if transformed_X[i, j] > 0 and clause_precision[j] >= max_precision[i]:
-					max_precision[i] = clause_precision[j]
+		transformed_X_test = tsetlin_machine.transform(X_test)
 
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
@@ -205,7 +201,7 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		coverage = transformed_X.sum(axis=1)
+		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
 
 		unique_train = np.unique(X_train, axis=0)
@@ -217,7 +213,7 @@ for r in range(args.runs):
 
 		print()
 
-		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X.shape[0]),)))
+		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0]),)))
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
 		print("Training accuracy:" % (result_train,))
@@ -229,23 +225,32 @@ for r in range(args.runs):
 
 		print()
 
-		print("Clause precision: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
-		print("Clause recall: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
+		print("Testing clause precision: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision_test, 1), 100.0 * np.percentile(clause_precision_test, 10), 100.0 * np.median(clause_precision_test), 100.0 * np.percentile(clause_precision_test, 90), 100.0 * np.percentile(clause_precision_test, 99)))
+		print("Testing clause recall: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall_test, 1), 100.0 * np.percentile(clause_recall_test, 10), 100.0 * np.median(clause_recall_test), 100.0 * np.percentile(clause_recall_test, 90), 100.0 * np.percentile(clause_recall_test, 99)))
 
 		print()
 
-		print("Mean clause precision: %.1f%%" % (100.0*clause_precision.mean()))
-		print("Mean clause recall: %.1f%%" % (100.0*clause_recall.mean()))
+		max_example_precision = np.zeros(transformed_X_test.shape[0])
+		for i in range(transformed_X_test.shape[0]):
+				if transformed_X_test[i, j] > 0 and clause_precision_test[j] >= max_example_precision[i]:
+					max_example_precision[i] = clause_precision_test[j]
+
+		print("Max clause precision per test sample: %.1f%% (p1) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p99)" % (100.0 * np.percentile(max_example_precision, 1), 100.0 * np.percentile(max_example_precision, 10), 100.0 * np.median(max_example_precision), 100.0 * np.percentile(max_example_precision, 90), 100.0 * np.percentile(max_example_precision, 99)))
 
 		print()
 
-		print("Absolute votes per sample (votes, percentage):", end=' ')
+		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
+		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
+
+		print()
+
+		print("Absolute votes per test sample (votes, percentage):", end=' ')
 		for i in range(len(activations[0])):
-			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
+			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
 		print()
 
-		print("Mean absolute votes per sample: %.2f" % (transformed_X.sum() / transformed_X.shape[0]))
+		print("Mean absolute votes per sample: %.2f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
-		#f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
+		#f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X_test.shape[0], result_train))
 		#f.flush()
 f.close()
