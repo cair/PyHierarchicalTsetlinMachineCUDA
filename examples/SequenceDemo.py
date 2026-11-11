@@ -235,8 +235,9 @@ for r in range(args.runs):
 		print("Votes per sample (positive and negative):")
 		activations = np.unique(coverage, return_counts=True)
 		for i in range(len(activations[0])):
-			print("\t%d:%.2f%%" % (activations[0][i], activations[1][i]/transformed_X.shape[0]))
-
+			print("\t%d:%.2f%%" % (activations[0][i], 100.0*activations[1][i]/transformed_X.shape[0]), end=' ')
+		print()
+		
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
 f.close()
