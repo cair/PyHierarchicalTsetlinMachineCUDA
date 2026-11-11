@@ -604,10 +604,13 @@ class CommonTsetlinMachine():
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 		return hierarchy_votes, class_sum
 
-	def print_hierarchy(self, print_ta_state=False):
+	def print_hierarchy(self, print_ta_state=False, precision_recall=None):
 
 		for i in range(self.number_of_clauses):
-			print("\nCLAUSE #%d (%d): " % (i, self.get_clause_weight(i)), end='')
+			if precision_recall != None:
+				print("\nCLAUSE #%d (W:%d P:%.2f%% R:%.2f%%): " % (i, self.get_clause_weight(i), precision_recall[0][i], precision_recall[1][i]), end='')
+			else:
+				print("\nCLAUSE #%d (W:%d): " % (i, self.get_clause_weight(i)), end='')
 
 			previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
 			for j in range(self.hierarchy_size[1]):
