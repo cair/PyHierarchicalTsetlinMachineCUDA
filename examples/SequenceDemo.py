@@ -68,8 +68,6 @@ if args.generate_data:
 	for i in range(math.factorial(args.sequence_length)):
 		Y_unique[i] = count_inversions(permutations[i]) % 2
 
-		print(permutations[i], Y_unique[i])
-
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
@@ -194,6 +192,7 @@ for r in range(args.runs):
 
 		clause_precision = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall = tsetlin_machine.clause_recall(X_test, Y_test)
+
 		for i in range(tsetlin_machine.number_of_clauses):
 			print(i, clause_precision[i], clause_recall[i], tsetlin_machine.get_clause_weight(i))
 
@@ -226,13 +225,13 @@ for r in range(args.runs):
 		combined = np.vstack((unique_train, unique_test))
 		_, counts = np.unique(combined, axis=0, return_counts=True)
 		overlap_count = np.sum(counts > 1)
-		print("Number of unique patterns occuring in both training and testing data: %d" % (overlap_count,))
+		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
 
 		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
 			(r+1, e+1, 100.0 * known, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
-		print("Clause precision: %.2f (p1) %.2f (p10) %.2f (p50) %.2f (p90) %.2f (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
-		print("Clause recall: %.2f (p1) %.2f (p10) %.2f (p50) %.2f (p90) %.2f (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
+		print("Clause precision: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_precision, 1), 100.0 * np.percentile(clause_precision, 10), 100.0 * np.median(clause_precision), 100.0 * np.percentile(clause_precision, 90), 100.0 * np.percentile(clause_precision, 99)))
+		print("Clause recall: %.2f%% (p1) %.2f%% (p10) %.2f%% (p50) %.2f%% (p90) %.2f%% (p99)" % (100.0 * np.percentile(clause_recall, 1), 100.0 * np.percentile(clause_recall, 10), 100.0 * np.median(clause_recall), 100.0 * np.percentile(clause_recall, 90), 100.0 * np.percentile(clause_recall, 99)))
 
 		coverage = transformed_X.sum(axis=1)
 		print("Absolute votes per sample (votes, percentage):", end=' ')
