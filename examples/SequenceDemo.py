@@ -214,7 +214,7 @@ for r in range(args.runs):
 
 		print("STATISTICS #%d/%d\n" % (r+1, e+1))
 
-		print("Clause activations per test sample:", 100.0 * np.bincount(coverage) / transformed_X.shape[0])
+		print("Clause activations per test sample:", 100.0 * np.bincount(coverage).astype(np.float32) / transformed_X.shape[0])
 
 		print(transformed_X.sum() / transformed_X.shape[0])		
 		print(transformed_X.sum() / (transformed_X.shape[0] * tsetlin_machine.number_of_clauses))
