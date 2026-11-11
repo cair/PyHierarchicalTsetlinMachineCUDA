@@ -233,10 +233,10 @@ for r in range(args.runs):
 		print("#%d/%d Coverage: %.2f%% Test Accuracy: %.2f%% Test Precision: %.2f%% Test Recall: %.2f%% (%.2f%%/%.2f%%/%.2f%%/%.2f%%/%.2f%% %.2f%%) Training Accuracy: %.2f%% Training: %.2fs Testing: %.2fs" %
 			(r+1, e+1, 100.0 * known, result_test, precision_test, recall_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train, stop_training-start_training, stop_testing-start_testing))
 
-		print("Number of clause activations per sample (%):")
+		print("Number of votes per sample (%):")
 		activations = np.unique(coverage, return_counts=True)
 		for i in range(len(activations[0])):
-			print("\t%d:%.2f%", activations[0][i], activations[1][i])
+			print("\t%d:%.2f%" % (activations[0][i], activations[1][i]))
 
 		f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" % (r, e, result_test, 100.0 * np.percentile(max_precision, 1), 100.0 * np.percentile(max_precision, 10), 100.0 * np.median(max_precision), 100.0 * np.percentile(max_precision, 90), 100.0 * np.percentile(max_precision, 99), 100.0 * high_precision_matches / transformed_X.shape[0], result_train))
 		f.flush()
