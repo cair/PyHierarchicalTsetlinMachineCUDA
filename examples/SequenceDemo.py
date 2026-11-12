@@ -68,6 +68,8 @@ def default_args(**kwargs):
 	parser.add_argument('--literal-budget', default=36, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
+	parser.add_argument('--synonym-distribution-drift', action='store_true')
+	parser.add_argument('--sequence-distribution-drift', action='store_true')
 	parser.add_argument("--synonym-skewedness", default=0.0, type=float)
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--print-hierarchy", action='store_true')
@@ -118,10 +120,17 @@ if args.generate_data:
 		test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	else:
 		test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
+	
+	if args.sequence_distribution_drift:
+		test_indices = math.factorial(args.sequence_length) - 1 - test_indices
 
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, size=1)[0] - 1] = 1
+			if args.synonym_distribution_drift:
+				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+			else:
+				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+
 		Y_test[i] = Y_unique[test_indices[i]]
 
 	if args.negate_input:
