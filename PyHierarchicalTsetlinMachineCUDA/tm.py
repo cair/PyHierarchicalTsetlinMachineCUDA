@@ -920,6 +920,7 @@ class TsetlinMachine(CommonTsetlinMachine):
 			else:
 				clause_precision[i] = (1 - Y[X_transformed[:,i] > 0]).sum() / (X_transformed[:,i] > 0).sum()
 
+		print(clause_precision)
 		return clause_precision
 
 	def clause_recall(self, X, Y):
