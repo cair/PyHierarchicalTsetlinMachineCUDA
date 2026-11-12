@@ -247,7 +247,7 @@ for r in range(args.runs):
 		combined = np.vstack((unique_train, unique_test))
 		_, counts = np.unique(combined, axis=0, return_counts=True)
 		overlap_count = np.sum(counts > 1)
-		print("Number of unique patterns occuring in both the training and testing data: %d" % (overlap_count,))
+		print("Number of unique patterns occurring in both the training and testing data: %d" % (overlap_count,))
 
 		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)) - overlap_count,))
 
