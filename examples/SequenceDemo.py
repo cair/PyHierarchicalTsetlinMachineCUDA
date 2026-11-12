@@ -239,6 +239,10 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
+		pattern_frequency_train = np.unique(X_train, axis=0, return_counts=True)[1] / X_train.shape[0]
+
+		print("Training pattern frequency: %.2f%% (1p)" % 100*np.percentile(pattern_frequency_train, 1))
+
 		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
 
