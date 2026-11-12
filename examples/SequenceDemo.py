@@ -239,10 +239,6 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		pattern_frequency_train = np.unique(X_train, axis=0, return_counts=True)[1] / X_train.shape[0]
-
-		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p)  %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
-
 		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
 
@@ -254,6 +250,11 @@ for r in range(args.runs):
 		print("Number of unique patterns occurring in both the training and testing data: %d" % (overlap_count,))
 
 		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)) - overlap_count,))
+
+		print()
+
+		pattern_frequency_train = np.unique(X_train, axis=0, return_counts=True)[1] / X_train.shape[0]
+		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p)  %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
 
 		print()
 
