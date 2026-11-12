@@ -72,6 +72,7 @@ def default_args(**kwargs):
 	parser.add_argument('--sequence-distribution-drift', action='store_true')
 	parser.add_argument("--synonym-skewedness", default=0.0, type=float)
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
+	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
 
 	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
@@ -102,14 +103,17 @@ if args.generate_data:
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	
-	if args.sequence_skewedness == 0.0:
+	if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
 		train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	else:
 		train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
 
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
-			X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+			if args.skewed_test_data_only:
+				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=0.0, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+			else:
+				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
 		Y_train[i] = Y_unique[train_indices[i]]
 	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
@@ -263,7 +267,7 @@ for r in range(args.runs):
 		print()
 
 		pattern_frequency_train = np.unique(X_train, axis=0, return_counts=True)[1] / X_train.shape[0]
-		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p)  %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
+		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p) %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
 
 		print()
 
@@ -314,21 +318,21 @@ for r in range(args.runs):
 				result_test,
 				result_train,
 				100.0 * np.percentile(clause_precision_test, 1),
-				100.0 * np.percentile(clause_precision_test, 10),
+				100.0 * np.percentile(clause_precision_test, 5),
 				100.0 * np.median(clause_precision_test),
-				100.0 * np.percentile(clause_precision_test, 90),
+				100.0 * np.percentile(clause_precision_test, 95),
 				100.0 * np.percentile(clause_precision_test, 99),
 				100.0 * np.percentile(clause_recall_test, 1),
-				100.0 * np.percentile(clause_recall_test, 10),
+				100.0 * np.percentile(clause_recall_test, 5),
 				100.0 * np.median(clause_recall_test),
-				100.0 * np.percentile(clause_recall_test, 90),
+				100.0 * np.percentile(clause_recall_test, 95),
 				100.0 * np.percentile(clause_recall_test, 99),
 				100.0*clause_precision_test.mean(),
 				100.0*clause_recall_test.mean(),
 				100.0 * np.percentile(max_example_precision, 1),
-				100.0 * np.percentile(max_example_precision, 10),
+				100.0 * np.percentile(max_example_precision, 5),
 				100.0 * np.median(max_example_precision),
-				100.0 * np.percentile(max_example_precision, 90),
+				100.0 * np.percentile(max_example_precision, 95),
 				100.0 * np.percentile(max_example_precision, 99),
 				transformed_X_test.sum() / transformed_X_test.shape[0]
 			)
