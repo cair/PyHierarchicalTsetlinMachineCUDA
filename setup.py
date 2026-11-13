@@ -2,7 +2,7 @@ from setuptools import *
 
 setup(
    name='PyHierarchicalTsetlinMachineCUDA',
-   version='0.3.4',
+   version='0.3.5',
    author='Ole-Christoffer Granmo',
    author_email='ole.granmo@uia.no',
    url='https://github.com/cair/PyHierarchicalTsetlinMachineCUDA/',
