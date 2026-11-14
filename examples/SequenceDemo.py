@@ -99,7 +99,7 @@ if args.generate_data:
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 	permutations = list(itertools.permutations(range(args.sequence_length)))
 	for i in range(math.factorial(args.sequence_length)):
-		Y_unique[i] = count_inversions([x for x in a if x not in range(args.number_of_non_informative_elements)]) % 2
+		Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)]) % 2
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
