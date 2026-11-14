@@ -53,6 +53,7 @@ def default_args(**kwargs):
 	parser.add_argument("--q", default=1.0, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=6, type=int)
+	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
 	parser.add_argument("--number-of-synonyms", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
 	parser.add_argument("--number-of-and-alternatives", default=1, type=int)
@@ -98,7 +99,7 @@ if args.generate_data:
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 	permutations = list(itertools.permutations(range(args.sequence_length)))
 	for i in range(math.factorial(args.sequence_length)):
-		Y_unique[i] = count_inversions(permutations[i]) % 2
+		Y_unique[i] = count_inversions([x for x in a if x not in range(args.number_of_non_informative_elements)]) % 2
 
 	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
