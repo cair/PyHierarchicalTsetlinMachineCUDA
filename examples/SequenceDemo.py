@@ -230,6 +230,7 @@ for r in range(args.runs):
 	sampling_automata = np.ones(X_train.shape[0], dtype=np.int32) * (args.number_of_sampling_automata_states//2)
 
 	for e in range(args.epochs):
+		print(sampling_automata)
 		print(1.0*sampling_automata/sampling_automata.sum())
 		train_indices = np.random.choice(X_train.shape[0], size=args.number_of_examples, p=1.0*sampling_automata/sampling_automata.sum(), replace=True)
  
