@@ -227,7 +227,7 @@ for r in range(args.runs):
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
 
-	sampling_automata = np.ones(X_train.shape[0], dtype=np.int32) * (args.number_of_sampling_automata_states//2)
+	sampling_automata = np.ones(X_train.shape[0], dtype=np.int32) * (args.number_of_sampling_automata_states//2 + 1)
 
 	for e in range(args.epochs):
 		print(sampling_automata)
