@@ -229,7 +229,6 @@ for r in range(args.runs):
 
 	sampling_automata = np.ones(X_train.shape[0], dtype=np.int32) * (args.number_of_sampling_automata_states//2)
 
-
 	for e in range(args.epochs):
 		print(1.0*sampling_automata/sampling_automata.sum())
 		train_indices = np.random.choice(X_train.shape[0], size=args.number_of_examples, p=1.0*sampling_automata/sampling_automata.sum(), replace=True)
@@ -271,6 +270,7 @@ for r in range(args.runs):
 
 		# Use coverage to update automata...
 
+		print(coverage_train.shape, sampling_automata.shape)
 		sampling_automata -= (coverage_train > args.activation_target) and (sampling_automata > 1)
 		sampling_automata += coverage_train < args.activation_target and (sampling_automata < args.number_of_sampling_automata_states)
 
