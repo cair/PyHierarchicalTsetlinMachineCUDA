@@ -75,6 +75,8 @@ def default_args(**kwargs):
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
+	parser.add_argument('--activation-target', default=5, type=int)
+	parser.add_argument('--number-of-sampling-automata-states', default=10, type=int)
 
 	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
 
@@ -224,9 +226,16 @@ for r in range(args.runs):
 
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
+
+	sampling_automata = np.ones(X_train.shape[0], dtype=np.uint32) * (args.number_of_sampling_automata_states//2)
+
+	print(1.0*sampling_automata/sampling_automata.sum())
+
 	for e in range(args.epochs):
+		train_indices = np.random.choice(X_train.shape[0], size=args.number_of_examples, p=1.0*sampling_automata/sampling_automata.sum(), replace=True)
+ 
 		start_training = time()
-		tsetlin_machine.fit(X_train, Y_train)
+		tsetlin_machine.fit(X_train[train_indices], Y_train[train_indices])
 		stop_training = time()
 
 		start_testing = time()
@@ -255,6 +264,10 @@ for r in range(args.runs):
 
 		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
+
+		# Use coverage to update automata...
+
+		#sampling_automata += coverage > 
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
