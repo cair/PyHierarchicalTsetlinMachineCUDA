@@ -232,11 +232,7 @@ for r in range(args.runs):
 	for e in range(args.epochs):
 		print(sampling_automata)
 		print(1.0*sampling_automata/sampling_automata.sum())
-
-		_, sampling_automata_state_count = np.unique(sampling_automata, return_counts=True)
-
-		print(sampling_automata_state_count)
-		print("Sampling automata states: %d (p1) %d (p5) %d (p50) %d (p95) %d (p99)" % (np.percentile(sampling_automata_state_count, 1), np.percentile(sampling_automata_state_count, 5), np.percentile(sampling_automata_state_count, 50), np.percentile(sampling_automata_state_count, 95), np.percentile(sampling_automata_state_count, 99)))
+		print("Sampling automata states: %d (p1) %d (p5) %d (p50) %d (p95) %d (p99)" % (np.percentile(sampling_automata, 1), np.percentile(sampling_automata, 5), np.percentile(sampling_automata, 50), np.percentile(sampling_automata, 95), np.percentile(sampling_automata, 99)))
 
 		train_indices = np.random.choice(X_train.shape[0], size=args.number_of_examples, p=1.0*sampling_automata/sampling_automata.sum(), replace=True)
  
