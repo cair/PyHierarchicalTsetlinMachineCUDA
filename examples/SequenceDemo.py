@@ -227,11 +227,11 @@ for r in range(args.runs):
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
 
-	sampling_automata = np.ones(X_train.shape[0], dtype=np.uint32) * (args.number_of_sampling_automata_states//2)
+	sampling_automata = np.ones(X_train.shape[0], dtype=np.int32) * (args.number_of_sampling_automata_states//2)
 
-	print(1.0*sampling_automata/sampling_automata.sum())
 
 	for e in range(args.epochs):
+		print(1.0*sampling_automata/sampling_automata.sum())
 		train_indices = np.random.choice(X_train.shape[0], size=args.number_of_examples, p=1.0*sampling_automata/sampling_automata.sum(), replace=True)
  
 		start_training = time()
@@ -248,6 +248,7 @@ for r in range(args.runs):
 		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall_test = tsetlin_machine.clause_recall(X_test, Y_test)
 
+		transformed_X_train = tsetlin_machine.transform(X_train)
 		transformed_X_test = tsetlin_machine.transform(X_test)
 
 		print("CLAUSES RUN #%d EPOCH #%d\n" % (r+1, e+1))
@@ -262,12 +263,16 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		coverage = transformed_X_test.sum(axis=1)
-		activations = np.unique(coverage, return_counts=True)
+		coverage_test = transformed_X_test.sum(axis=1)
+		activations_test = np.unique(coverage_test, return_counts=True)
+
+		coverage_train = transformed_X_train.sum(axis=1)
+		activations_train = np.unique(coverage_train, return_counts=True)
 
 		# Use coverage to update automata...
 
-		#sampling_automata += coverage > 
+		sampling_automata -= (coverage_train > args.activation_target) and (sampling_automata > 1)
+		sampling_automata += coverage_train < args.activation_target and (sampling_automata < args.number_of_sampling_automata_states)
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
@@ -285,7 +290,7 @@ for r in range(args.runs):
 
 		print()
 
-		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),))
+		print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations_test[1][0]/transformed_X_test.shape[0])),))
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
 		print("Training accuracy: %.2f%%" % (result_train,))
@@ -318,8 +323,8 @@ for r in range(args.runs):
 		print()
 
 		print("Absolute votes per test sample (votes, percentage):", end=' ')
-		for i in range(len(activations[0])):
-			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
+		for i in range(len(activations_test[0])):
+			print("(%d,%.2f%%)" % (activations_test[0][i], 100.0*activations_test[1][i]/transformed_X_test.shape[0]), end=' ')
 		print()
 		print()
 		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
@@ -328,7 +333,7 @@ for r in range(args.runs):
 			(
 				r,
 				e,
-				100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),
+				100.0 * (1.0 - (activations_test[1][0]/transformed_X_test.shape[0])),
 				result_test,
 				result_train,
 				100.0 * np.percentile(clause_precision_test, 1),
