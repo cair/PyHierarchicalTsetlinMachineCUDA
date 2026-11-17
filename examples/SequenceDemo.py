@@ -56,12 +56,11 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
 	parser.add_argument("--number-of-synonyms", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
-	parser.add_argument("--number-of-and-alternatives", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
-	parser.add_argument('--and-alternatives', action='store_true')
+	parser.add_argument('--variant', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
@@ -158,7 +157,7 @@ for r in range(args.runs):
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses * args.number_of_and_alternatives * args.number_of_or_alternatives,
+			args.number_of_clauses * args.number_of_or_alternatives,
 			args.T,
 			args.s,
 			q=args.q,
@@ -177,9 +176,9 @@ for r in range(args.runs):
 				(tm.AND_GROUP, 1)
 			)
 		)
-	elif args.and_alternatives:
+	elif args.variant:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses* args.number_of_and_alternatives,
+			args.number_of_clauses,
 			args.T,
 			args.s,
 			q=args.q,
@@ -194,9 +193,9 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.number_of_synonyms * args.sequence_length),
+				(tm.AND_GROUP, args.number_of_synonyms),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length)
+				(tm.AND_GROUP, args.sequence_length * args.sequence_length)
 			)
 		)
 	else:
@@ -216,9 +215,9 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length),
-				(tm.OR_GROUP, args.sequence_length),
-				(tm.AND_ALTERNATIVES, args.number_of_and_alternatives)
+				(tm.AND_GROUP, args.sequence_length*args.number_of_synonyms),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.AND_GROUP, args.sequence_length)
 			)
 		)
 
