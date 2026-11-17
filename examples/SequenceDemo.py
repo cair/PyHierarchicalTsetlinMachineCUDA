@@ -281,8 +281,8 @@ for r in range(args.runs):
 		#sampling_automata -= np.logical_and((coverage_train > args.activation_target), (sampling_automata > 1))
 		#sampling_automata += np.logical_and((coverage_train < args.activation_target), (sampling_automata < args.number_of_sampling_automata_states))
 
-		sampling_automata -= np.logical_and((Y_train_pred == Y_train), (sampling_automata > 1))
-		sampling_automata += np.logical_and((Y_train_pred != Y_train), (sampling_automata < args.number_of_sampling_automata_states))
+		sampling_automata -= np.logical_and((Y_train_pred != Y_train), (sampling_automata > 1))
+		sampling_automata += np.logical_and((Y_train_pred == Y_train), (sampling_automata < args.number_of_sampling_automata_states))
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
