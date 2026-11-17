@@ -275,7 +275,7 @@ for r in range(args.runs):
 		if activations[0][0] == 0:
 			print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (((activations[1][0] > 0.0)/transformed_X_test.shape[0])),))
 		else:
-			print("Percentage of test data covered by at least one clause: 100%%")
+			print("Percentage of test data covered by at least one clause: 100%")
 		
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
