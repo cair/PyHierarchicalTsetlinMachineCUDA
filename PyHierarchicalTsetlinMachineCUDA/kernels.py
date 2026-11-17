@@ -120,9 +120,9 @@ code_update = """
 				update_probability = 1.0;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO <= 1.0) {
-					update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
+					update_probability = (fabsf(y - class_sum) + 1)/(2*THRESHOLD + 1);
 				} else {
-					update_probability = (1.0/CLAUSE_WEIGHT_UPDATE_RATIO)*fabsf(y - class_sum)/(2*THRESHOLD);
+					update_probability = (1.0/CLAUSE_WEIGHT_UPDATE_RATIO)*(fabsf(y - class_sum) + 1)/(2*THRESHOLD + 1);
 				}
 			#endif
 
@@ -166,9 +166,9 @@ code_update = """
 				update_probability = 1.0;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO < 1.0) {
-					update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*fabsf(y - class_sum)/(2*THRESHOLD);
+					update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*(fabsf(y - class_sum) + 1)/(2*THRESHOLD + 1);
 				} else {
-					update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
+					update_probability = (fabsf(y - class_sum) + 1)/(2*THRESHOLD + 1);
 				}
 			#endif
 
