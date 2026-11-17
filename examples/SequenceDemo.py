@@ -313,8 +313,24 @@ for r in range(args.runs):
 
 		print()
 
-		print("Testing clause precision: %.1f%% (p1) %.1f%% (p5) %.1f%% (p50) %.1f%% (p95) %.1f%% (p99)" % (100.0 * np.percentile(clause_precision_test, 1), 100.0 * np.percentile(clause_precision_test, 5), 100.0 * np.percentile(clause_precision_test, 50), 100.0 * np.percentile(clause_precision_test, 95), 100.0 * np.percentile(clause_precision_test, 99)))
-		print("Testing clause recall: %.1f%% (p1) %.1f%% (p5) %.1f%% (p50) %.1f%% (p95) %.1f%% (p99)" % (100.0 * np.percentile(clause_recall_test, 1), 100.0 * np.percentile(clause_recall_test, 5), 100.0 * np.percentile(clause_recall_test, 50), 100.0 * np.percentile(clause_recall_test, 95), 100.0 * np.percentile(clause_recall_test, 99)))
+		print("Testing clause precision: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
+			100.0 * np.percentile(clause_precision_test, 1),
+			100.0 * np.percentile(clause_precision_test, 5),
+			100.0 * np.percentile(clause_precision_test, 10),
+			100.0 * np.percentile(clause_precision_test, 50),
+			100.0 * np.percentile(clause_precision_test, 90),
+			100.0 * np.percentile(clause_precision_test, 95),
+			100.0 * np.percentile(clause_precision_test, 99))
+		)
+		print("Testing clause recall: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
+			100.0 * np.percentile(clause_recall_test, 1),
+			100.0 * np.percentile(clause_recall_test, 5),
+			100.0 * np.percentile(clause_recall_test, 10),
+			100.0 * np.percentile(clause_recall_test, 50),
+			100.0 * np.percentile(clause_recall_test, 90),
+			100.0 * np.percentile(clause_recall_test, 95),
+			100.0 * np.percentile(clause_recall_test, 99))
+		)
 
 		print()
 
@@ -329,7 +345,15 @@ for r in range(args.runs):
 				if transformed_X_test[i, j] > 0 and clause_precision_test[j] >= max_example_precision[i]:
 					max_example_precision[i] = clause_precision_test[j]
 
-		print("Max clause precision per test sample: %.1f%% (p1) %.1f%% (p5) %.1f%% (p50) %.1f%% (p95) %.1f%% (p99)" % (100.0 * np.percentile(max_example_precision, 1), 100.0 * np.percentile(max_example_precision, 5), 100.0 * np.percentile(max_example_precision, 50), 100.0 * np.percentile(max_example_precision, 95), 100.0 * np.percentile(max_example_precision, 99)))
+		print("Max clause precision per test sample: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
+			100.0 * np.percentile(max_example_precision, 1),
+			100.0 * np.percentile(max_example_precision, 5),
+			100.0 * np.percentile(max_example_precision, 10),
+			100.0 * np.percentile(max_example_precision, 50),
+			100.0 * np.percentile(max_example_precision, 90),
+			100.0 * np.percentile(max_example_precision, 95),
+			100.0 * np.percentile(max_example_precision, 99))
+		)
 
 		print()
 
