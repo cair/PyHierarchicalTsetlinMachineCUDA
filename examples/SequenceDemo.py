@@ -245,7 +245,10 @@ for r in range(args.runs):
 		stop_testing = time()
 
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
-		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
+
+		Y_train_pred = tsetlin_machine.predict(X_train)
+
+		result_train = 100*(Y_train_pred == Y_train).mean()
 
 		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall_test = tsetlin_machine.clause_recall(X_test, Y_test)
@@ -275,10 +278,11 @@ for r in range(args.runs):
 
 		print(coverage_train.shape, sampling_automata.shape)
 		
-		print((coverage_train > args.activation_target))
-		print((coverage_train > args.activation_target).shape)
-		sampling_automata -= np.logical_and((coverage_train > args.activation_target), (sampling_automata > 1))
-		sampling_automata += np.logical_and((coverage_train < args.activation_target), (sampling_automata < args.number_of_sampling_automata_states))
+		#sampling_automata -= np.logical_and((coverage_train > args.activation_target), (sampling_automata > 1))
+		#sampling_automata += np.logical_and((coverage_train < args.activation_target), (sampling_automata < args.number_of_sampling_automata_states))
+
+		sampling_automata -= np.logical_and((Y_train_pred == Y_train), (sampling_automata > 1))
+		sampling_automata += np.logical_and((Y_train_pred != Y_train), (sampling_automata < args.number_of_sampling_automata_states))
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
