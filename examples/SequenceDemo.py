@@ -56,6 +56,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
 	parser.add_argument("--number-of-synonyms", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
+	parser.add_argument("--number-of-or-alternatives-interior", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
@@ -219,7 +220,7 @@ for r in range(args.runs):
 				(tm.AND_GROUP, args.number_of_synonyms),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length * args.sequence_length // 2),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2)
 			)
 		)
