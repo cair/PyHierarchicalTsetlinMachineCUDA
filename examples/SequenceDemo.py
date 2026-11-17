@@ -252,8 +252,9 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		coverage = transformed_X_test.sum(axis=1).astype(np.int32)
+		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
+		print(activations)
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
