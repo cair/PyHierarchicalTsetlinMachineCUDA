@@ -252,7 +252,7 @@ for r in range(args.runs):
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		coverage = transformed_X_test.sum(axis=1)
+		coverage = transformed_X_test.sum(axis=1).astype(np.int32)
 		activations = np.unique(coverage, return_counts=True)
 
 		unique_train = np.unique(X_train, axis=0)
@@ -305,7 +305,7 @@ for r in range(args.runs):
 
 		print("Absolute votes per test sample (votes, percentage):", end=' ')
 		for i in range(len(activations[0])):
-			print("(%.2f,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
+			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
 		print()
 		print()
 		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
