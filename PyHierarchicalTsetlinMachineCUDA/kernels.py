@@ -172,6 +172,8 @@ code_update = """
 				}
 			#endif
 
+			update_probability = fpow(update_probability, 2.0);
+
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
 					// Type I Feedback
