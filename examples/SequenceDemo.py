@@ -254,7 +254,6 @@ for r in range(args.runs):
 
 		coverage = transformed_X_test.sum(axis=1)
 		activations = np.unique(coverage, return_counts=True)
-		print(activations)
 
 		unique_train = np.unique(X_train, axis=0)
 		unique_test = np.unique(X_test, axis=0)
