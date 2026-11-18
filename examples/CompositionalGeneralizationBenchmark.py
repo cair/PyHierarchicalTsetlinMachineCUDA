@@ -356,13 +356,14 @@ for r in range(args.runs):
 			100.0 * np.percentile(max_example_precision, 99))
 		)
 
-		print()
 
 		if args.print_clause_activation_statistics:
+			print()
 			print("Absolute votes per test sample (votes, percentage):", end=' ')
 			for i in range(len(activations[0])):
 				print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
 			print()
+
 		print()
 		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
