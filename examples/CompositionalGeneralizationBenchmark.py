@@ -76,8 +76,9 @@ def default_args(**kwargs):
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
+	parser.add_argument("--print-clause-activation-statistics", action='store_true')
 
-	# Run with: python3 ./examples/SequenceDemo.py --generate-data --weighted-clauses --append-negated
+	# Run with: python3 ./examples/CompositionalGeneralizationBenchmark.py --generate-data --weighted-clauses --append-negated
 
 	args = parser.parse_args()
 	for key, value in kwargs.items():
@@ -357,10 +358,11 @@ for r in range(args.runs):
 
 		print()
 
-		print("Absolute votes per test sample (votes, percentage):", end=' ')
-		for i in range(len(activations[0])):
-			print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
-		print()
+		if args.print_clause_activation_statistics:
+			print("Absolute votes per test sample (votes, percentage):", end=' ')
+			for i in range(len(activations[0])):
+				print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
+			print()
 		print()
 		print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
