@@ -464,17 +464,17 @@ code_update = """
 					float min_clause_vote = THRESHOLD;
 					for (int clause = 0; clause < CLAUSES; clause += 1) {
 						if (clause_output[clause]) {
-							//if (fabsf(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
-							//	max_absolute_clause_vote = fabsf(clause_weights[class_id*CLAUSES + clause]);
-							//	class_sum[class_id] = clause_weights[class_id*CLAUSES + clause];
+							//if (clause_output[clause]*fabsf(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
+							//	max_absolute_clause_vote = clause_output[clause]*fabsf(clause_weights[class_id*CLAUSES + clause]);
+							//	class_sum[class_id] = clause_output[clause]*clause_weights[class_id*CLAUSES + clause];
 							//}
 
-							if (clause_weights[class_id*CLAUSES + clause] > max_clause_vote) {
-								max_clause_vote = clause_weights[class_id*CLAUSES + clause];
+							if (clause_output[clause]*clause_weights[class_id*CLAUSES + clause] > max_clause_vote) {
+								max_clause_vote = clause_output[clause]*clause_weights[class_id*CLAUSES + clause];
 							}
 
-							if (clause_weights[class_id*CLAUSES + clause] < min_clause_vote) {
-								min_clause_vote = clause_weights[class_id*CLAUSES + clause];
+							if (clause_output[clause]*clause_weights[class_id*CLAUSES + clause] < min_clause_vote) {
+								min_clause_vote = clause_output[clause]*clause_weights[class_id*CLAUSES + clause];
 							}
 						}	
 					}
