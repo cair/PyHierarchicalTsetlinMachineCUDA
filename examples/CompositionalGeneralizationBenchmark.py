@@ -161,7 +161,7 @@ for r in range(args.runs):
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses * args.number_of_or_alternatives,
+			args.number_of_clauses * args.number_of_or_alternatives * args.number_of_or_alternatives_interior,
 			args.T,
 			args.s,
 			q=args.q,
