@@ -70,6 +70,7 @@ def default_args(**kwargs):
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 	parser.add_argument('--hierarchical', action='store_true')
+	parser.add_argument('--hierarchical-simple', action='store_true')
 	parser.add_argument('--synonym-distribution-drift', action='store_true')
 	parser.add_argument('--sequence-distribution-drift', action='store_true')
 	parser.add_argument("--synonym-skewedness", default=0.0, type=float)
@@ -221,6 +222,30 @@ for r in range(args.runs):
 				(tm.AND_GROUP, args.number_of_synonyms * args.sequence_length),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length // 2),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
+				(tm.AND_GROUP, 2)
+			)
+		)
+	elif args.hierarchical_simple:
+		tsetlin_machine = TsetlinMachine(
+			args.number_of_clauses,
+			args.T,
+			args.s,
+			q=args.q,
+			clause_weight_update_ratio=args.clause_weight_update_ratio,
+			literal_budget=args.literal_budget,
+			weighted_clauses=args.weighted_clauses,
+			binary_inference=args.binary_inference,
+			constant_update_p=args.constant_update_p,
+			and_group_normalization=args.and_group_normalization,
+			seed=seed,
+			number_of_state_bits=args.number_of_state_bits,
+			no_clipping=args.no_clipping,
+			append_negated=args.append_negated,
+			hierarchy_structure=(
+				(tm.AND_GROUP, args.number_of_synonyms),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.AND_GROUP, args.sequence_length * args.sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2)
 			)
