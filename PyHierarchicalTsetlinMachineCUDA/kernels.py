@@ -457,15 +457,17 @@ code_update = """
 
 			// Add up the votes from each clause
 
-			for (int clause = index; clause < CLAUSES; clause += stride) {
-				if (clause_output[clause]) {
-					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
-						#if BINARY_INFERENCE == 0
-							atomicMax(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * clause_output[clause]);
-						#else
-							atomicMax(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause]);
-						#endif
-					}	
+			if (index == 0) {
+				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
+					float max_absolute_clause_vote = -1;
+					for (int clause = 0; clause < CLAUSES; clause += stride) {
+						if (clause_output[clause]) {
+							if (fabs(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
+								max_absolute_clause_vote = fabs(clause_weights[class_id*CLAUSES + clause]);
+								class_sum[class_id] = clause_weights[class_id*CLAUSES + clause];
+							}
+						}	
+					}
 				}
 			}
 		}
