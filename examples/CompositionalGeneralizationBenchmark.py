@@ -290,6 +290,9 @@ for r in range(args.runs):
 		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
 		clause_recall_test = tsetlin_machine.clause_recall(X_test, Y_test)
 
+		clause_precision_train = tsetlin_machine.clause_precision(X_train, Y_train)
+		clause_recall_train = tsetlin_machine.clause_recall(X_train, Y_train)
+
 		transformed_X_test = tsetlin_machine.transform(X_test)
 
 		print("CLAUSES RUN #%d EPOCH #%d\n" % (r+1, e+1))
@@ -360,8 +363,37 @@ for r in range(args.runs):
 
 		print()
 
+		print("Training clause precision: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
+			100.0 * np.percentile(clause_precision_train, 1),
+			100.0 * np.percentile(clause_precision_train, 5),
+			100.0 * np.percentile(clause_precision_train, 10),
+			100.0 * np.percentile(clause_precision_train, 50),
+			100.0 * np.percentile(clause_precision_train, 90),
+			100.0 * np.percentile(clause_precision_train, 95),
+			100.0 * np.percentile(clause_precision_train, 99))
+		)
+
+		print()
+
 		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
 		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
+
+		print()
+
+		print("Training clause recall: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
+			100.0 * np.percentile(clause_recall_train, 1),
+			100.0 * np.percentile(clause_recall_train, 5),
+			100.0 * np.percentile(clause_recall_train, 10),
+			100.0 * np.percentile(clause_recall_train, 50),
+			100.0 * np.percentile(clause_recall_train, 90),
+			100.0 * np.percentile(clause_recall_train, 95),
+			100.0 * np.percentile(clause_recall_train, 99))
+		)
+
+		print()
+
+		print("Mean training clause precision: %.1f%%" % (100.0*clause_precision_train.mean()))
+		print("Mean training clause recall: %.1f%%" % (100.0*clause_recall_train.mean()))
 
 		print()
 
