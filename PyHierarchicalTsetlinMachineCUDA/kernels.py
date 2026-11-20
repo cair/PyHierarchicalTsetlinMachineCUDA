@@ -460,7 +460,7 @@ code_update = """
 			if (index == 0) {
 				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 					float max_absolute_clause_vote = -1;
-					for (int clause = 0; clause < CLAUSES; clause += stride) {
+					for (int clause = 0; clause < CLAUSES; clause += 1) {
 						if (clause_output[clause]) {
 							if (fabsf(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
 								max_absolute_clause_vote = fabsf(clause_weights[class_id*CLAUSES + clause]);
