@@ -461,9 +461,9 @@ code_update = """
 				if (clause_output[clause]) {
 					for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 						#if BINARY_INFERENCE == 0
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * clause_output[clause]);
+							atomicMax(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause] * clause_output[clause]);
 						#else
-							atomicAdd(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause]);
+							atomicMax(&class_sum[class_id], (float) clause_weights[class_id*CLAUSES + clause]);
 						#endif
 					}	
 				}
