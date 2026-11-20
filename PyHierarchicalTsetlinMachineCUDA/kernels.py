@@ -460,14 +460,26 @@ code_update = """
 			if (index == 0) {
 				for (int class_id = 0; class_id < number_of_outputs; ++class_id) {
 					float max_absolute_clause_vote = -1;
+					float max_clause_vote = -THRESHOLD;
+					float min_clause_vote = THRESHOLD;
 					for (int clause = 0; clause < CLAUSES; clause += 1) {
 						if (clause_output[clause]) {
-							if (fabsf(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
-								max_absolute_clause_vote = fabsf(clause_weights[class_id*CLAUSES + clause]);
-								class_sum[class_id] = clause_weights[class_id*CLAUSES + clause];
+							//if (fabsf(clause_weights[class_id*CLAUSES + clause]) > max_absolute_clause_vote) {
+							//	max_absolute_clause_vote = fabsf(clause_weights[class_id*CLAUSES + clause]);
+							//	class_sum[class_id] = clause_weights[class_id*CLAUSES + clause];
+							//}
+
+							if (clause_weights[class_id*CLAUSES + clause] > max_clause_vote) {
+								max_clause_vote = clause_weights[class_id*CLAUSES + clause];
+							}
+
+							if (clause_weights[class_id*CLAUSES + clause] < min_clause_vote) {
+								min_clause_vote = clause_weights[class_id*CLAUSES + clause];
 							}
 						}	
 					}
+
+					class_sum[class_id] = max_clause_vote + min_clause_vote;
 				}
 			}
 		}
