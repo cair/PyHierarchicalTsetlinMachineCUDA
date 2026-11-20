@@ -363,6 +363,11 @@ for r in range(args.runs):
 
 		print()
 
+		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
+		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
+
+		print()
+
 		print("Training clause precision: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
 			100.0 * np.percentile(clause_precision_train, 1),
 			100.0 * np.percentile(clause_precision_train, 5),
@@ -372,13 +377,6 @@ for r in range(args.runs):
 			100.0 * np.percentile(clause_precision_train, 95),
 			100.0 * np.percentile(clause_precision_train, 99))
 		)
-
-		print()
-
-		print("Mean testing clause precision: %.1f%%" % (100.0*clause_precision_test.mean()))
-		print("Mean testing clause recall: %.1f%%" % (100.0*clause_recall_test.mean()))
-
-		print()
 
 		print("Training clause recall: %.1f%% (p1) %.1f%% (p5) %.1f%% (p10) %.1f%% (p50) %.1f%% (p90) %.1f%% (p95) %.1f%% (p99)" % (
 			100.0 * np.percentile(clause_recall_train, 1),
