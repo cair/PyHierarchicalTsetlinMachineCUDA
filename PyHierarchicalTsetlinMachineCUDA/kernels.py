@@ -153,7 +153,14 @@ code_update = """
 
 		__device__ inline void update_component_hierarchy(curandState *localState, int number_of_outputs, int *clause_weight, unsigned int *ta_state, int component_output, int *X, int y, float class_sum)
 		{
-			int target = 1 - 2*(class_sum > y);
+			int target;
+			if (y == THRESHOLD) {
+				target = 1;
+			} else if (y == -THRESHOLD) {
+				target = -1;
+			} else {
+				target = 1 - 2*(class_sum > y);
+			}
 
 			if (target == -1 && curand_uniform(localState) > 1.0*Q/max(1, number_of_outputs-1)) {
 				return;
