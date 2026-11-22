@@ -100,9 +100,16 @@ code_update = """
 		}
 
 		__device__ inline void update_clause_weight(curandState *localState, int tm_type, int number_of_outputs, int *clause_weight, int clause_output, int y, float class_sum)
-		{
-			int target = 1 - 2*(class_sum > y);
-			
+		{			
+			int target;
+			if (y == THRESHOLD) {
+				target = 1;
+			} else if (y == -THRESHOLD) {
+				target = -1;
+			} else {
+				target = 1 - 2*(class_sum > y);
+			}
+
 			if (target == -1 && curand_uniform(localState) > 1.0/max(1, number_of_outputs-1)) {
 				return;
 			}
@@ -117,7 +124,7 @@ code_update = """
 		
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
-				update_probability = 1.0;
+				update_probability = 0.1;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO <= 1.0) {
 					update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
@@ -170,7 +177,7 @@ code_update = """
 		
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
-				update_probability = 1.0;
+				update_probability = 0.1;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO < 1.0) {
 					update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*fabsf(y - class_sum)/(2*THRESHOLD);
