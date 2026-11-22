@@ -124,7 +124,7 @@ code_update = """
 		
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
-				update_probability = 0.1;
+				update_probability = 1.0;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO <= 1.0) {
 					update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
@@ -177,7 +177,7 @@ code_update = """
 		
 			float update_probability;
 			#if CONSTANT_UPDATE_P == 1
-				update_probability = 0.1;
+				update_probability = 1.0;
 			#else
 				if (CLAUSE_WEIGHT_UPDATE_RATIO < 1.0) {
 					update_probability = CLAUSE_WEIGHT_UPDATE_RATIO*fabsf(y - class_sum)/(2*THRESHOLD);
