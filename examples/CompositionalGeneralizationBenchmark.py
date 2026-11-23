@@ -77,6 +77,8 @@ def default_args(**kwargs):
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
+	parser.add_argument("--data-seed", default=36, type=int)
+	parser.add_argument("--run-seed", default=36, type=int)
 	parser.add_argument("--print-clause-activation-statistics", action='store_true')
 
 	# Run with: python3 ./examples/CompositionalGeneralizationBenchmark.py --generate-data --weighted-clauses --append-negated
@@ -94,10 +96,10 @@ config_dict = vars(args)
 ext_parts = [f"{v}" for v in sorted(config_dict.values())]
 raw_extension = "_".join(ext_parts)
 
-f = open("sequence_statistics_" + raw_extension + ".txt", "w")
+f = open(f"sequence_statistics_{raw_extension}_{args.data_seed}_{args.run_seed}.txt", "w")
 
 if args.generate_data:
-	rng = np.random.default_rng(seed=10)
+	rng_data = np.random.default_rng(seed=args.data_seed)
 
 	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 	permutations = list(itertools.permutations(range(args.sequence_length)))
@@ -108,26 +110,26 @@ if args.generate_data:
 	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 	
 	if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
-		train_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+		train_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	else:
-		train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
+		train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
 
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
 			if args.skewed_test_data_only:
-				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=0.0, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=0.0, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
 			else:
-				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
 		Y_train[i] = Y_unique[train_indices[i]]
-	Y_train = np.where(np.random.rand(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
+	Y_train = np.where(rng_data.random(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
 	X_test = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
 	Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
 
 	if args.sequence_skewedness == 0.0:
-		test_indices = np.random.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+		test_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 	else:
-		test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples)
+		test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
 	
 	if args.sequence_distribution_drift:
 		test_indices = math.factorial(args.sequence_length) - 1 - test_indices
@@ -135,9 +137,9 @@ if args.generate_data:
 	for i in range(args.number_of_examples):
 		for j in range(args.sequence_length):
 			if args.synonym_distribution_drift:
-				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
 			else:
-				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1)[0]] = 1
+				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
 
 		Y_test[i] = Y_unique[test_indices[i]]
 
@@ -156,8 +158,10 @@ else:
 	X_test = test_data[:,0:-1]
 	Y_test = test_data[:,-1]
 
+rng_run = np.random.default_rng(seed=args.run_seed)
+
 for r in range(args.runs):
-	seed = np.random.randint(10000)
+	seed = rng_run.integers(10000)
 
 	if args.vanilla:
 		tsetlin_machine = TsetlinMachine(
