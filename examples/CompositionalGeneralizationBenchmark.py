@@ -93,7 +93,7 @@ args = default_args()
 
 config_dict = vars(args)
 
-ext_parts = [f"{v}" for v in sorted(config_dict.values())]
+ext_parts = [f"{v}" for v in config_dict.values()]
 raw_extension = "_".join(ext_parts)
 
 f = open(f"sequence_statistics_{raw_extension}.txt", "w")
