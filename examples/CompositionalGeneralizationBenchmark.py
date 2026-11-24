@@ -294,8 +294,11 @@ for r in range(args.runs):
 
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
+		print("Number of unique examples: %d" % (math.factorial(args.sequence_length)/math.factorial(args.number_of_non_informative_elements) * (args.number_of_synonyms**number_of_informative_elements) * (args.non_informative_vocabulary_size**args.number_of_non_informative_elements),))
 		print("Number of unique examples in the training data: %d" % (len(np.unique(X_train, axis=0)),))
 		print("Number of unique examples in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
+
+		print()
 
 		print("Number of unique patterns: %d" % (math.factorial(number_of_informative_elements) * args.number_of_synonyms**number_of_informative_elements,))
 		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train_informative, axis=0)),))
