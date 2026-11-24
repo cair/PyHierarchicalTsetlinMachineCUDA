@@ -22,7 +22,6 @@ from PyHierarchicalTsetlinMachineCUDA.tm import TsetlinMachine
 import numpy as np
 from time import time
 import PyHierarchicalTsetlinMachineCUDA.tm as tm
-from keras.datasets import mnist
 import argparse
 import itertools
 import math
