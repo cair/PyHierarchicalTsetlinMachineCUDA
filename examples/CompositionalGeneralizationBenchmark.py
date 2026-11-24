@@ -183,6 +183,35 @@ if args.negate_input:
 	X_train = 1 - X_train
 	X_test = 1 - X_test
 
+# Data statistics (constant across runs and epochs, so calculated once)
+
+def unique_statistics(train, test):
+	"""Returns (unique in train, unique in test, unique in both, unique in test only), counting identical rows once."""
+	unique_train = np.unique(train, axis=0)
+	unique_test = np.unique(test, axis=0)
+	_, counts = np.unique(np.vstack((unique_train, unique_test)), axis=0, return_counts=True)
+	overlap = int(np.sum(counts > 1))
+	return len(unique_train), len(unique_test), overlap, len(unique_test) - overlap
+
+number_of_unique_examples = math.factorial(args.sequence_length) // math.factorial(args.number_of_non_informative_elements) * args.number_of_synonyms**number_of_informative_elements * args.non_informative_vocabulary_size**args.number_of_non_informative_elements
+(
+	number_of_unique_training_examples,
+	number_of_unique_testing_examples,
+	number_of_overlapping_training_and_testing_examples,
+	number_of_unseen_testing_examples
+) = unique_statistics(X_train, X_test)
+
+number_of_unique_patterns = math.factorial(number_of_informative_elements) * args.number_of_synonyms**number_of_informative_elements
+(
+	number_of_unique_training_patterns,
+	number_of_unique_testing_patterns,
+	number_of_overlapping_training_and_testing_patterns,
+	number_of_unseen_testing_patterns
+) = unique_statistics(X_train_informative, X_test_informative)
+
+pattern_frequency_train = np.unique(X_train_informative, axis=0, return_counts=True)[1] / X_train_informative.shape[0]
+pattern_frequency_train_percentiles = 100.0 * np.percentile(pattern_frequency_train, [1, 5, 50, 95, 99])
+
 rng_run = np.random.default_rng(seed=args.run_seed)
 rng_resample = np.random.default_rng(seed=args.resample_seed)
 
@@ -294,29 +323,23 @@ for r in range(args.runs):
 
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
-		print("Number of unique examples: %d" % (math.factorial(args.sequence_length)/math.factorial(args.number_of_non_informative_elements) * (args.number_of_synonyms**number_of_informative_elements) * (args.non_informative_vocabulary_size**args.number_of_non_informative_elements),))
-		print("Number of unique examples in the training data: %d" % (len(np.unique(X_train, axis=0)),))
-		print("Number of unique examples in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
+		print("Number of unique examples: %d" % (number_of_unique_examples,))
+		print("Number of unique examples in the training data: %d" % (number_of_unique_training_examples,))
+		print("Number of unique examples in the testing data: %d" % (number_of_unique_testing_examples,))
+		print("Number of unique examples occurring in both the training and testing data: %d" % (number_of_overlapping_training_and_testing_examples,))
+		print("Number of unseen examples in the testing data: %d" % (number_of_unseen_testing_examples,))
 
 		print()
 
-		print("Number of unique patterns: %d" % (math.factorial(number_of_informative_elements) * args.number_of_synonyms**number_of_informative_elements,))
-		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train_informative, axis=0)),))
-		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test_informative, axis=0)),))
-
-		unique_train = np.unique(X_train_informative, axis=0)
-		unique_test = np.unique(X_test_informative, axis=0)
-		combined = np.vstack((unique_train, unique_test))
-		_, counts = np.unique(combined, axis=0, return_counts=True)
-		overlap_count = np.sum(counts > 1)
-		print("Number of unique patterns occurring in both the training and testing data: %d" % (overlap_count,))
-
-		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test_informative, axis=0)) - overlap_count,))
+		print("Number of unique patterns: %d" % (number_of_unique_patterns,))
+		print("Number of unique patterns in the training data: %d" % (number_of_unique_training_patterns,))
+		print("Number of unique patterns in the testing data: %d" % (number_of_unique_testing_patterns,))
+		print("Number of unique patterns occurring in both the training and testing data: %d" % (number_of_overlapping_training_and_testing_patterns,))
+		print("Number of unseen patterns in the testing data: %d" % (number_of_unseen_testing_patterns,))
 
 		print()
 
-		pattern_frequency_train = np.unique(X_train_informative, axis=0, return_counts=True)[1] / X_train_informative.shape[0]
-		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p) %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
+		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p) %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % tuple(pattern_frequency_train_percentiles))
 
 		print()
 
