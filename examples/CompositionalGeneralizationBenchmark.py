@@ -54,24 +54,23 @@ def default_args(**kwargs):
 	parser.add_argument("--sequence-length", default=6, type=int)
 	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
 	parser.add_argument("--number-of-synonyms", default=3, type=int)
+	parser.add_argument("--non-informative-vocabulary-size", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
 	parser.add_argument("--number-of-or-alternatives-interior", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
-	parser.add_argument('--variant', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
-	parser.add_argument('--generate-data', action='store_true')
 	parser.add_argument('--literal-budget', default=36, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 	parser.add_argument('--hierarchical', action='store_true')
-	parser.add_argument('--hierarchical-simple', action='store_true')
 	parser.add_argument('--synonym-distribution-drift', action='store_true')
 	parser.add_argument('--sequence-distribution-drift', action='store_true')
+	parser.add_argument("--non-informative-vocabulary-skewedness", default=0.0, type=float)
 	parser.add_argument("--synonym-skewedness", default=0.0, type=float)
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--skewed-test-data-only", action='store_true')
@@ -84,8 +83,6 @@ def default_args(**kwargs):
 	sampling.add_argument("--resample", action='store_true')
 	sampling.add_argument("--shuffle", action='store_true')
 	
-	# Run with: python3 ./examples/CompositionalGeneralizationBenchmark.py --generate-data --weighted-clauses --append-negated
-
 	args = parser.parse_args()
 	for key, value in kwargs.items():
 		if key in args.__dict__:
@@ -99,67 +96,92 @@ config_dict = vars(args)
 ext_parts = [f"{v}" for v in config_dict.values()]
 raw_extension = "_".join(ext_parts)
 
+rng_data = np.random.default_rng(seed=args.data_seed)
+
 f = open(f"sequence_statistics_{raw_extension}.txt", "w")
 
-if args.generate_data:
-	rng_data = np.random.default_rng(seed=args.data_seed)
+number_of_informative_elements = args.sequence_length - args.number_of_non_informative_elements
+number_of_features_per_sequence_element = args.non_informative_vocabulary_size + number_of_informative_elements*args.number_of_synonyms
+number_of_features_per_sequence_element_informative = number_of_informative_elements*args.number_of_synonyms
 
-	Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
-	permutations = list(itertools.permutations(range(args.sequence_length)))
-	for i in range(math.factorial(args.sequence_length)):
-		Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)]) % 2
+Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
+permutations = list(itertools.permutations(range(args.sequence_length)))
+for i in range(math.factorial(args.sequence_length)):
+	Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)]) % 2
 
-	X_train = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
-	Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
-	
-	if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
-		train_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	else:
-		train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
+X_train = np.zeros((args.number_of_examples, args.sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
+X_train_informative = np.zeros((args.number_of_examples, (args.sequence_length - args.number_of_non_informative_elements) * number_of_features_per_sequence_element_informative), dtype=np.uint32)
+Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 
-	for i in range(args.number_of_examples):
-		for j in range(args.sequence_length):
-			if args.skewed_test_data_only:
-				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=0.0, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
-			else:
-				X_train[i, j*args.sequence_length*args.number_of_synonyms + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
-		Y_train[i] = Y_unique[train_indices[i]]
-	Y_train = np.where(rng_data.random(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
-
-	X_test = np.zeros((args.number_of_examples, args.sequence_length * args.sequence_length * args.number_of_synonyms), dtype=np.uint32)
-	Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
-
-	if args.sequence_skewedness == 0.0:
-		test_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
-	else:
-		test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
-	
-	if args.sequence_distribution_drift:
-		test_indices = math.factorial(args.sequence_length) - 1 - test_indices
-
-	for i in range(args.number_of_examples):
-		for j in range(args.sequence_length):
-			if args.synonym_distribution_drift:
-				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
-			else:
-				X_test[i, j*args.sequence_length*args.number_of_synonyms + permutations[test_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]] = 1
-
-		Y_test[i] = Y_unique[test_indices[i]]
-
-	if args.negate_input:
-		X_train = 1 - X_train
-		X_test = 1 - X_test
-
-	np.savetxt("examples/SequenceTrainingData.txt", np.append(X_train, Y_train.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
-	np.savetxt("examples/SequenceTestingData.txt", np.append(X_test, Y_test.reshape((args.number_of_examples, 1)), axis=1), fmt='%d')
+if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
+	train_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
 else:
-	train_data = np.loadtxt("./examples/SequenceTrainingData.txt").astype(np.uint32)
-	X_train = train_data[:,0:-1]
-	Y_train = train_data[:,-1]
+	train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
 
-	test_data = np.loadtxt("./examples/SequenceTestingData.txt").astype(np.uint32)
-	X_test = test_data[:,0:-1]
-	Y_test = test_data[:,-1]
+non_informative_vocabulary_skewedness = 0.0 if args.skewed_test_data_only else args.non_informative_vocabulary_skewedness
+synonym_skewedness = 0.0 if args.skewed_test_data_only else args.synonym_skewedness
+
+for i in range(args.number_of_examples):
+	j_informative = 0
+	for j in range(args.sequence_length):
+		if permutations[train_indices[i]][j] < args.number_of_non_informative_elements:
+			pos = zipfian.rvs(a=non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
+		else:
+			# Finds the slot for the current informative symbol, and then the synonym inside that slot
+			pos = (permutations[train_indices[i]][j] - args.number_of_non_informative_elements)*args.number_of_synonyms + zipfian.rvs(a=synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
+			
+			# Inserts the synonym inside the correct sequence slot
+			X_train_informative[i, j_informative*number_of_features_per_sequence_element_informative + pos] = 1
+			j_informative += 1
+
+			pos += args.non_informative_vocabulary_size
+		
+		X_train[i, j*number_of_features_per_sequence_element + pos] = 1
+
+	Y_train[i] = Y_unique[train_indices[i]]
+
+Y_train = np.where(rng_data.random(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
+
+X_test = np.zeros((args.number_of_examples, args.sequence_length*number_of_features_per_sequence_element), dtype=np.uint32)
+X_test_informative = np.zeros((args.number_of_examples, (args.sequence_length - args.number_of_non_informative_elements)*number_of_features_per_sequence_element_informative), dtype=np.uint32)
+Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
+
+if args.sequence_skewedness == 0.0:
+	test_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+else:
+	test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
+
+if args.sequence_distribution_drift:
+	test_indices = math.factorial(args.sequence_length) - 1 - test_indices
+
+for i in range(args.number_of_examples):
+	j_informative = 0
+	for j in range(args.sequence_length):
+		if permutations[test_indices[i]][j] < args.number_of_non_informative_elements:
+			pos = zipfian.rvs(a=args.non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
+		else:
+			# Finds the slot for the current informative symbol
+			pos = (permutations[test_indices[i]][j] - args.number_of_non_informative_elements) * args.number_of_synonyms
+
+			# Finds the synonym inside the slot
+			if args.synonym_distribution_drift:
+				pos += args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
+			else:
+				pos += zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
+
+			# Inserts the synonym inside the correct sequence slot
+			X_test_informative[i, j_informative*number_of_features_per_sequence_element_informative + pos] = 1
+			j_informative += 1
+
+			pos += args.non_informative_vocabulary_size
+
+		X_test[i, j*number_of_features_per_sequence_element + pos] = 1
+
+	Y_test[i] = Y_unique[test_indices[i]]
+
+if args.negate_input:
+	X_train = 1 - X_train
+	X_test = 1 - X_test
 
 rng_run = np.random.default_rng(seed=args.run_seed)
 rng_resample = np.random.default_rng(seed=args.resample_seed)
@@ -184,30 +206,8 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length*args.sequence_length*args.number_of_synonyms),
+				(tm.AND_GROUP, args.sequence_length * number_of_features_per_sequence_element),
 				(tm.AND_GROUP, 1)
-			)
-		)
-	elif args.variant:
-		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses,
-			args.T,
-			args.s,
-			q=args.q,
-			clause_weight_update_ratio=args.clause_weight_update_ratio,
-			literal_budget=args.literal_budget,
-			weighted_clauses=args.weighted_clauses,
-			binary_inference=args.binary_inference,
-			constant_update_p=args.constant_update_p,
-			and_group_normalization=args.and_group_normalization,
-			seed=seed,
-			number_of_state_bits=args.number_of_state_bits,
-			no_clipping=args.no_clipping,
-			append_negated=args.append_negated,
-			hierarchy_structure=(
-				(tm.AND_GROUP, args.number_of_synonyms),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length * args.sequence_length)
 			)
 		)
 	elif args.hierarchical:
@@ -227,33 +227,9 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.number_of_synonyms * args.sequence_length),
+				(tm.AND_GROUP, number_of_features_per_sequence_element),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length // 2),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
-				(tm.AND_GROUP, 2)
-			)
-		)
-	elif args.hierarchical_simple:
-		tsetlin_machine = TsetlinMachine(
-			args.number_of_clauses,
-			args.T,
-			args.s,
-			q=args.q,
-			clause_weight_update_ratio=args.clause_weight_update_ratio,
-			literal_budget=args.literal_budget,
-			weighted_clauses=args.weighted_clauses,
-			binary_inference=args.binary_inference,
-			constant_update_p=args.constant_update_p,
-			and_group_normalization=args.and_group_normalization,
-			seed=seed,
-			number_of_state_bits=args.number_of_state_bits,
-			no_clipping=args.no_clipping,
-			append_negated=args.append_negated,
-			hierarchy_structure=(
-				(tm.AND_GROUP, args.number_of_synonyms),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length * args.sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2)
 			)
@@ -275,7 +251,7 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length*args.number_of_synonyms),
+				(tm.AND_GROUP, number_of_features_per_sequence_element),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length)
 			)
@@ -318,28 +294,31 @@ for r in range(args.runs):
 
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
-		print("Number of unique patterns: %d" % (math.factorial(args.sequence_length) * args.number_of_synonyms**args.sequence_length,))
-		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train, axis=0)),))
-		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
+		print("Number of unique examples in the training data: %d" % (len(np.unique(X_train, axis=0)),))
+		print("Number of unique examples in the testing data: %d" % (len(np.unique(X_test, axis=0)),))
 
-		coverage = transformed_X_test.sum(axis=1)
-		activations = np.unique(np.ceil(coverage), return_counts=True)
+		print("Number of unique patterns: %d" % (math.factorial(number_of_informative_elements) * args.number_of_synonyms**number_of_informative_elements,))
+		print("Number of unique patterns in the training data: %d" % (len(np.unique(X_train_informative, axis=0)),))
+		print("Number of unique patterns in the testing data: %d" % (len(np.unique(X_test_informative, axis=0)),))
 
-		unique_train = np.unique(X_train, axis=0)
-		unique_test = np.unique(X_test, axis=0)
+		unique_train = np.unique(X_train_informative, axis=0)
+		unique_test = np.unique(X_test_informative, axis=0)
 		combined = np.vstack((unique_train, unique_test))
 		_, counts = np.unique(combined, axis=0, return_counts=True)
 		overlap_count = np.sum(counts > 1)
 		print("Number of unique patterns occurring in both the training and testing data: %d" % (overlap_count,))
 
-		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test, axis=0)) - overlap_count,))
+		print("Number of unseen patterns in the testing data: %d" % (len(np.unique(X_test_informative, axis=0)) - overlap_count,))
 
 		print()
 
-		pattern_frequency_train = np.unique(X_train, axis=0, return_counts=True)[1] / X_train.shape[0]
+		pattern_frequency_train = np.unique(X_train_informative, axis=0, return_counts=True)[1] / X_train_informative.shape[0]
 		print("Training pattern frequency: %.3f%% (1p) %.3f%% (5p) %.3f%% (50p) %.3f%% (95p) %.3f%% (99p)" % (100.0 * np.percentile(pattern_frequency_train, 1), 100.0 * np.percentile(pattern_frequency_train, 5), 100.0 * np.percentile(pattern_frequency_train, 50), 100.0 * np.percentile(pattern_frequency_train, 95), 100.0 * np.percentile(pattern_frequency_train, 99)))
 
 		print()
+
+		coverage = transformed_X_test.sum(axis=1)
+		activations = np.unique(np.ceil(coverage), return_counts=True)
 
 		if activations[0][0] == 0:
 			print("Percentage of test data covered by at least one clause: %.2f%%" % (100.0 * (1.0 - (activations[1][0]/transformed_X_test.shape[0])),))
