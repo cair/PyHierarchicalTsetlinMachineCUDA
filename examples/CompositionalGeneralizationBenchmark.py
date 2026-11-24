@@ -78,9 +78,13 @@ def default_args(**kwargs):
 	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
 	parser.add_argument("--data-seed", default=36, type=int)
-	parser.add_argument("--run-seed", default=36, type=int)
+	parser.add_argument("--run-seed", default=37, type=int)
+	parser.add_argument("--resample-seed", default=38, type=int)
 	parser.add_argument("--print-clause-activation-statistics", action='store_true')
-
+	sampling = parser.add_mutually_exclusive_group()
+	sampling.add_argument("--resample", action='store_true')
+	sampling.add_argument("--shuffle", action='store_true')
+	
 	# Run with: python3 ./examples/CompositionalGeneralizationBenchmark.py --generate-data --weighted-clauses --append-negated
 
 	args = parser.parse_args()
@@ -159,6 +163,7 @@ else:
 	Y_test = test_data[:,-1]
 
 rng_run = np.random.default_rng(seed=args.run_seed)
+rng_resample = np.random.default_rng(seed=args.resample_seed)
 
 for r in range(args.runs):
 	seed = rng_run.integers(10000)
@@ -280,8 +285,15 @@ for r in range(args.runs):
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
 	for e in range(args.epochs):
+		if args.resample:
+			sample_indices = rng_resample.choice(X_train.shape[0], size=X_train.shape[0], replace=True)
+		elif args.shuffle:
+			sample_indices = rng_resample.permutation(X_train.shape[0])
+		else:
+			sample_indices = np.arange(X_train.shape[0])
+
 		start_training = time()
-		tsetlin_machine.fit(X_train, Y_train)
+		tsetlin_machine.fit(X_train[sample_indices], Y_train[sample_indices])
 		stop_training = time()
 
 		start_testing = time()
@@ -414,7 +426,6 @@ for r in range(args.runs):
 			100.0 * np.percentile(max_example_precision, 95),
 			100.0 * np.percentile(max_example_precision, 99))
 		)
-
 
 		if args.print_clause_activation_statistics:
 			print()
