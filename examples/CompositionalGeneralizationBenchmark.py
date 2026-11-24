@@ -59,6 +59,7 @@ def default_args(**kwargs):
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
 	parser.add_argument("--number-of-or-alternatives-interior", default=1, type=int)
 	parser.add_argument("--noise", default=0.0, type=float)
+	parser.add_argument("--number-of-missing-training-permutations", default=0, type=int)
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
@@ -107,6 +108,7 @@ number_of_features_per_sequence_element_informative = number_of_informative_elem
 
 Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 permutations = list(itertools.permutations(range(args.sequence_length)))
+rng_data.shuffle(permutations)
 for i in range(math.factorial(args.sequence_length)):
 	Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)]) % 2
 
@@ -115,9 +117,9 @@ X_train_informative = np.zeros((args.number_of_examples, args.sequence_length * 
 Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 
 if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
-	train_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	train_indices = rng_data.choice(math.factorial(args.sequence_length) - args.number_of_missing_training_permutations, size=args.number_of_examples, replace=True)
 else:
-	train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
+	train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length) - args.number_of_missing_training_permutations, size=args.number_of_examples, random_state=rng_data)
 
 non_informative_vocabulary_skewedness = 0.0 if args.skewed_test_data_only else args.non_informative_vocabulary_skewedness
 synonym_skewedness = 0.0 if args.skewed_test_data_only else args.synonym_skewedness
@@ -148,6 +150,8 @@ else:
 
 if args.sequence_distribution_drift:
 	test_indices = math.factorial(args.sequence_length) - 1 - test_indices
+
+held_out_test = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
 
 for i in range(args.number_of_examples):
 	for j in range(args.sequence_length):
@@ -298,6 +302,7 @@ for r in range(args.runs):
 		stop_testing = time()
 
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
+		result_test_held_out = 100 * (Y_test_pred[held_out_test] == Y_test[held_out_test]).mean()
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
 		clause_precision_test = tsetlin_machine.clause_precision(X_test, Y_test)
@@ -346,6 +351,7 @@ for r in range(args.runs):
 		
 		print()
 		print("Testing accuracy: %.2f%%" % (result_test,))
+		print("Held out testing accuracy: %.2f%%" % (result_test_held_out,))
 		print("Training accuracy: %.2f%%" % (result_train,))
 		
 		print()
