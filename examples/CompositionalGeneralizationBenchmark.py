@@ -64,7 +64,7 @@ def default_args(**kwargs):
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
-	parser.add_argument('--literal-budget', default=36, type=int)
+	parser.add_argument('--literal-budget', default=None, type=int)
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 	parser.add_argument('--hierarchical', action='store_true')
