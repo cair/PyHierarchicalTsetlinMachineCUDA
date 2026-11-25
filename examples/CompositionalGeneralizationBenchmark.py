@@ -217,8 +217,23 @@ rng_run = np.random.default_rng(seed=args.run_seed)
 rng_resample = np.random.default_rng(seed=args.resample_seed)
 
 if args.hierarchical_overlapping:
-	X_train = np.concatenate((X_train[:,0:number_of_features_per_sequence_element*args.sequence_length//2], X_train[:,1*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 1)], X_train[:,2*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 2)], X_train[:,3*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 3)]), axis=1)
-	X_test = np.concatenate((X_test[:,0:number_of_features_per_sequence_element*args.sequence_length//2], X_test[:,1*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 1)], X_test[:,2*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 2)], X_test[:,3*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 3)]), axis=1)
+	X_train = np.concatenate(
+		(
+			X_train
+			np.roll(X_train, shift=1*number_of_features_per_sequence_element, axis=1),
+			np.roll(X_train, shift=2*number_of_features_per_sequence_element, axis=1)
+		),
+		axis=1
+	)
+
+	X_test = np.concatenate(
+		(
+			X_test,
+			np.roll(X_test, shift=1*number_of_features_per_sequence_element, axis=1),
+			np.roll(X_test, shift=2*number_of_features_per_sequence_element, axis=1),
+		),
+		axis=1
+	)
 
 for r in range(args.runs):
 	seed = rng_run.integers(10000)
@@ -292,10 +307,10 @@ for r in range(args.runs):
 			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, number_of_features_per_sequence_element),
-				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
 				(tm.AND_GROUP, args.sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
-				(tm.AND_GROUP, 4)
+				(tm.AND_GROUP, 2),
+				(tm.OR_GROUP, 3)
 			)
 		)
 	else:
