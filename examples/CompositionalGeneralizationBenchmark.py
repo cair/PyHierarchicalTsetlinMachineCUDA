@@ -219,7 +219,7 @@ rng_resample = np.random.default_rng(seed=args.resample_seed)
 if args.hierarchical_overlapping:
 	X_train = np.concatenate(
 		(
-			X_train
+			X_train,
 			np.roll(X_train, shift=1*number_of_features_per_sequence_element, axis=1),
 			np.roll(X_train, shift=2*number_of_features_per_sequence_element, axis=1)
 		),
