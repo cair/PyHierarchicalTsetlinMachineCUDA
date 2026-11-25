@@ -102,7 +102,7 @@ raw_extension = "_".join(ext_parts)
 
 rng_data = np.random.default_rng(seed=args.data_seed)
 
-f = open(f"sequence_statistics_{raw_extension}.txt", "w")
+f = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
 
 number_of_informative_elements = args.sequence_length - args.number_of_non_informative_elements
 number_of_features_per_sequence_element = args.non_informative_vocabulary_size + number_of_informative_elements*args.number_of_synonyms
