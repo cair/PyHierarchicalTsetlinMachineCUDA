@@ -192,11 +192,11 @@ code_update = """
 				}
 			#endif
 
-//			if (TYPE_IA_II_RATIO_CLAUSES < 1.0 && target*sign > 0 && component_output) {
-//				update_probability *= TYPE_IA_II_RATIO_CLAUSES;
-//			} else if (TYPE_IA_II_RATIO_CLAUSES > 1.0 && target*sign < 0 && component_output) {
-//				update_probability *= (1.0/TYPE_IA_II_RATIO_CLAUSES);
-//			}
+			if (TYPE_IA_II_RATIO_CLAUSES < 1.0 && target*sign > 0 && component_output) {
+				update_probability *= TYPE_IA_II_RATIO_CLAUSES;
+			} else if (TYPE_IA_II_RATIO_CLAUSES > 1.0 && target*sign < 0 && component_output) {
+				update_probability *= (1.0/TYPE_IA_II_RATIO_CLAUSES);
+			}
 
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
@@ -213,18 +213,11 @@ code_update = """
 							}
 						}
 
-						unsigned int la_feedback_2 = 0;
-						for (int b = 0; b < INT_SIZE; ++b) {
-							if (curand_uniform(localState) <= TYPE_IA_II_RATIO_CLAUSES) {
-								la_feedback_2 |= (1 << b);
-							}
-						}
-
 						if (component_output && included_literals <= LITERAL_BUDGET) {
 							#if BOOST_TRUE_POSITIVE_FEEDBACK == 1
-								inc(ta_state, ta_chunk, X[ta_chunk] & la_feedback_2);
+								inc(ta_state, ta_chunk, X[ta_chunk]);
 							#else
-								inc(ta_state, ta_chunk, X[ta_chunk] & (~la_feedback) & la_feedback_2);
+								inc(ta_state, ta_chunk, X[ta_chunk] & (~la_feedback));
 							#endif
 
 							dec(ta_state, ta_chunk, (~X[ta_chunk]) & la_feedback);
