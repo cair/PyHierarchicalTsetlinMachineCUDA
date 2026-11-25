@@ -220,8 +220,8 @@ if args.hierarchical_rotations:
 	X_train = np.concatenate(
 		(
 			X_train,
-			np.roll(X_train, shift=1*number_of_features_per_sequence_element, axis=1),
-			np.roll(X_train, shift=2*number_of_features_per_sequence_element, axis=1)
+			np.roll(X_train, shift=2*number_of_features_per_sequence_element, axis=1),
+			np.roll(X_train, shift=4*number_of_features_per_sequence_element, axis=1)
 		),
 		axis=1
 	)
@@ -229,8 +229,8 @@ if args.hierarchical_rotations:
 	X_test = np.concatenate(
 		(
 			X_test,
-			np.roll(X_test, shift=1*number_of_features_per_sequence_element, axis=1),
 			np.roll(X_test, shift=2*number_of_features_per_sequence_element, axis=1),
+			np.roll(X_test, shift=4*number_of_features_per_sequence_element, axis=1),
 		),
 		axis=1
 	)
@@ -310,7 +310,7 @@ for r in range(args.runs):
 				(tm.AND_GROUP, args.sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2),
-				(tm.OR_GROUP, 3)
+				(tm.OR_GROUP_CONVOLUTION, 3)
 			)
 		)
 	else:
