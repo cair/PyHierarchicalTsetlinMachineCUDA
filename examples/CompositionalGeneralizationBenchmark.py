@@ -65,6 +65,7 @@ def default_args(**kwargs):
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
+	parser.add_argument('--hierarchical-overlapping', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
@@ -215,6 +216,10 @@ pattern_frequency_train_percentiles = 100.0 * np.percentile(pattern_frequency_tr
 rng_run = np.random.default_rng(seed=args.run_seed)
 rng_resample = np.random.default_rng(seed=args.resample_seed)
 
+if args.hierarchical_overlapping:
+	X_train = np.concatenate((X_train[:,0:number_of_features_per_sequence_element*args.sequence_length//2], X_train[:,1*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 1)], X_train[:,2*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 2)], X_train[:,3*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 3)]), axis=1)
+	X_test = np.concatenate((X_test[:,0:number_of_features_per_sequence_element*args.sequence_length//2], X_test[:,1*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 1)], X_test[:,2*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 2)], X_test[:,3*number_of_features_per_sequence_element:number_of_features_per_sequence_element*(args.sequence_length//2 + 3)]), axis=1)
+
 for r in range(args.runs):
 	seed = rng_run.integers(10000)
 
@@ -265,6 +270,32 @@ for r in range(args.runs):
 				(tm.AND_GROUP, args.sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2)
+			)
+		)
+	elif args.hierarchical_overlapping:
+		tsetlin_machine = TsetlinMachine(
+			args.number_of_clauses,
+			args.T,
+			args.s,
+			q=args.q,
+			type_ia_ii_ratio_clauses = args.type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights = args.type_ia_ii_ratio_weights,
+			clause_weight_update_ratio=args.clause_weight_update_ratio,
+			literal_budget=args.literal_budget,
+			weighted_clauses=args.weighted_clauses,
+			binary_inference=args.binary_inference,
+			constant_update_p=args.constant_update_p,
+			and_group_normalization=args.and_group_normalization,
+			seed=seed,
+			number_of_state_bits=args.number_of_state_bits,
+			no_clipping=args.no_clipping,
+			append_negated=args.append_negated,
+			hierarchy_structure=(
+				(tm.AND_GROUP, number_of_features_per_sequence_element),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
+				(tm.AND_GROUP, args.sequence_length // 2),
+				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
+				(tm.AND_GROUP, 4)
 			)
 		)
 	else:
