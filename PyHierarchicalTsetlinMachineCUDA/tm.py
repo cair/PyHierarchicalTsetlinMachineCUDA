@@ -45,13 +45,37 @@ COALESCED_TM = 2
 
 class CommonTsetlinMachine():
 
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False,
-		clip_weights=False, hierarchy_structure=None, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(
+			self,
+			number_of_clauses,
+			T,
+			s,
+			q=1.0,
+			type_ia_ii_ratio_clauses=1.0,
+			type_ia_ii_ratio_weights=1.0,
+			clause_weight_update_ratio=1.0,
+			literal_budget=None,
+			no_clipping=False,
+			constant_update_p=0,
+			binary_inference=False,
+			and_group_normalization=False,
+			clip_weights=False,
+			hierarchy_structure=None,
+			boost_true_positive_feedback=1,
+			number_of_state_bits=8,
+			append_negated=True,
+			grid=(16*13,1,1),
+			block=(128,1,1),
+			seed=None
+			):
+		
 		self.number_of_clauses = number_of_clauses
 		self.number_of_state_bits = number_of_state_bits
 		self.T = float(T)
 		self.s = s
 		self.q = q
+		self.type_ia_ii_ratio_clauses = type_ia_ii_ratio_clauses
+		self.type_ia_ii_ratio_weights = type_ia_ii_ratio_weights
 		self.clause_weight_update_ratio = clause_weight_update_ratio
 		self.literal_budget = literal_budget
 		self.no_clipping = no_clipping
@@ -140,6 +164,9 @@ class CommonTsetlinMachine():
 	#define S %f
 	#define THRESHOLD %d
 	#define Q %f
+	#define TYPE_IA_II_RATIO_CLAUSES %f
+	#define TYPE_IA_II_RATIO_WEIGHTS %f
+	#define CLAUSE_WEIGHT_UPDATE_RATIO %f
 	#define CLAUSE_WEIGHT_UPDATE_RATIO %f
 	#define LITERAL_BUDGET %d
 	#define BINARY_INFERENCE %d
@@ -167,6 +194,8 @@ class CommonTsetlinMachine():
 			self.s,
 			self.T,
 			self.q,
+			self.type_ia_ii_ratio_clauses,
+			self.type_ia_ii_ratio_weights,
 			self.clause_weight_update_ratio,
 			self.literal_budget,
 			self.binary_inference,
@@ -714,9 +743,49 @@ class CommonTsetlinMachine():
 
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False, boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(
+			self,
+			number_of_clauses,
+			T,
+			s,
+			q=1.0,
+			type_ia_ii_ratio_clauses=1.0,
+			type_ia_ii_ratio_weights=1.0,
+			clause_weight_update_ratio=1.0,
+			literal_budget=None,
+			no_clipping=False,
+			constant_update_p=0,
+			binary_inference=False,
+			and_group_normalization=False,
+			boost_true_positive_feedback=1,
+			number_of_state_bits=8,
+			append_negated=True,
+			grid=(16*13,1,1),
+			block=(128,1,1),
+			seed=None
+			):
+		
 		self.negative_clauses = 1
-		super().__init__(number_of_clauses, T, s, q=q, clause_weight_update_ratio=clause_weight_update_ratio, literal_budget=literal_budget, no_clipping=no_clipping, constant_update_p=constant_update_p, binary_inference=binary_inference, and_group_normalization=and_group_normalization, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(
+			number_of_clauses,
+			T,
+			s,
+			type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
+			q=q,
+			clause_weight_update_ratio=clause_weight_update_ratio,
+			literal_budget=literal_budget,
+			no_clipping=no_clipping,
+			constant_update_p=constant_update_p,
+			binary_inference=binary_inference,
+			and_group_normalization=and_group_normalization,
+			boost_true_positive_feedback=boost_true_positive_feedback,
+			number_of_state_bits=number_of_state_bits,
+			append_negated=append_negated,
+			grid=grid,
+			block=block,
+			seed=seed
+			)
 
 	def fit(self, X, Y):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -745,6 +814,8 @@ class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
 		T,
 		s,
 		q=1.0,
+		type_ia_ii_ratio_clauses=1.0,
+		type_ia_ii_ratio_weights=1.0,
 		clause_weight_update_ratio=1.0,
 		literal_budget=None,
 		no_clipping=False,
@@ -763,7 +834,27 @@ class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
 		self.tm_type = COALESCED_TM
 		self.flip_polarity = 1
 
-		super().__init__(number_of_clauses, T, s, q=q, clause_weight_update_ratio=clause_weight_update_ratio, literal_budget=literal_budget, no_clipping=no_clipping, constant_update_p=constant_update_p, binary_inference=binary_inference, and_group_normalization=and_group_normalization, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(
+			number_of_clauses,
+			T,
+			s,
+			q=q,
+			type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
+			clause_weight_update_ratio=clause_weight_update_ratio,
+			literal_budget=literal_budget,
+			no_clipping=no_clipping,
+			constant_update_p=constant_update_p,
+			binary_inference=binary_inference,
+			and_group_normalization=and_group_normalization,
+			hierarchy_structure=hierarchy_structure,
+			boost_true_positive_feedback=boost_true_positive_feedback,
+			number_of_state_bits=number_of_state_bits,
+			append_negated=append_negated,
+			grid=grid,
+			block=block,
+			seed=seed
+			)
 
 	def fit(self, X, Y):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -790,11 +881,36 @@ class MultiClassCoalescedTsetlinMachine(CommonTsetlinMachine):
 		return np.argmax(self.score(X), axis=0)
 
 class MultiClassTsetlinMachine:
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(
+			self,
+			number_of_clauses,
+			T,
+			s,
+			q=1.0,
+			type_ia_ii_ratio_clauses=1.0,
+			type_ia_ii_ratio_weights=1.0,
+			clause_weight_update_ratio=1.0,
+			literal_budget=None,
+			no_clipping=False,
+			constant_update_p=0,
+			binary_inference=False,
+			and_group_normalization=False,
+			weighted_clauses=False,
+			hierarchy_structure=((AND_GROUP, 1)),
+			boost_true_positive_feedback=1,
+			number_of_state_bits=8,
+			append_negated=True,
+			grid=(16*13,1,1),
+			block=(128,1,1),
+			seed=None
+			):
+
 		self.number_of_clauses = number_of_clauses
 		self.T = T
 		self.s = s
 		self.q = q
+		self.type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
+		self.type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
 		self.clause_weight_update_ratio=clause_weight_update_ratio
 		self.literal_budget = literal_budget
 		self.no_clipping = no_clipping
@@ -818,7 +934,28 @@ class MultiClassTsetlinMachine:
 		if not self.configured:
 			self.tms = []
 			for i in range(self.number_of_outputs):
-				self.tms.append(TsetlinMachine(self.number_of_clauses, self.T, self.s, q=self.q, clause_weight_update_ratio=self.clause_weight_update_ratio, literal_budget=self.literal_budget, no_clipping=self.no_clipping, constant_update_p=self.constant_update_p, binary_inference=self.binary_inference, and_group_normalization=self.and_group_normalization, weighted_clauses=self.weighted_clauses, hierarchy_structure=self.hierarchy_structure, boost_true_positive_feedback=self.boost_true_positive_feedback, number_of_state_bits=self.number_of_state_bits, append_negated=self.append_negated, grid=self.grid, block=self.block, seed=self.seed+i))
+				self.tms.append(TsetlinMachine(
+					self.number_of_clauses,
+					self.T,
+					self.s,
+					q=self.q,
+					type_ia_ii_ratio_clauses=self.type_ia_ii_ratio_clauses,
+					type_ia_ii_ratio_weights=self.type_ia_ii_ratio_weights,
+					clause_weight_update_ratio=self.clause_weight_update_ratio,
+					literal_budget=self.literal_budget,
+					no_clipping=self.no_clipping,
+					constant_update_p=self.constant_update_p,
+					binary_inference=self.binary_inference,
+					and_group_normalization=self.and_group_normalization,
+					weighted_clauses=self.weighted_clauses,
+					hierarchy_structure=self.hierarchy_structure,
+					boost_true_positive_feedback=self.boost_true_positive_feedback,
+					number_of_state_bits=self.number_of_state_bits,
+					append_negated=self.append_negated,
+					grid=self.grid,
+					block=self.block,
+					seed=self.seed+i
+					))
 
 			self.configured = True
 
@@ -884,7 +1021,30 @@ class MultiClassTsetlinMachine:
 		self.configured = True
 
 class TsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, no_clipping=False, constant_update_p=0, binary_inference=False, and_group_normalization=False, weighted_clauses=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(
+			self,
+			number_of_clauses,
+			T,
+			s,
+			q=1.0,
+			type_ia_ii_ratio_clauses=1.0,
+			type_ia_ii_ratio_weights=1.0,
+			clause_weight_update_ratio=1.0,
+			literal_budget=None,
+			no_clipping=False,
+			constant_update_p=0,
+			binary_inference=False,
+			and_group_normalization=False,
+			weighted_clauses=False,
+			hierarchy_structure=((AND_GROUP, 1)),
+			boost_true_positive_feedback=1,
+			number_of_state_bits=8,
+			append_negated=True,
+			grid=(16*13,1,1),
+			block=(128,1,1),
+			seed=None
+			):
+
 		self.negative_clauses = 1
 		self.flip_polarity = 0
 
@@ -893,7 +1053,27 @@ class TsetlinMachine(CommonTsetlinMachine):
 		else:
 			self.tm_type = VANILLA_TM
 
-		super().__init__(number_of_clauses, T, s, q=q, clause_weight_update_ratio=clause_weight_update_ratio, literal_budget=literal_budget, no_clipping=no_clipping, constant_update_p=constant_update_p, binary_inference=binary_inference, and_group_normalization=and_group_normalization, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(
+			number_of_clauses,
+			T,
+			s,
+			q=q,
+			type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
+			clause_weight_update_ratio=clause_weight_update_ratio,
+			literal_budget=literal_budget,
+			no_clipping=no_clipping,
+			constant_update_p=constant_update_p,
+			binary_inference=binary_inference,
+			and_group_normalization=and_group_normalization,
+			hierarchy_structure=hierarchy_structure,
+			boost_true_positive_feedback=boost_true_positive_feedback,
+			number_of_state_bits=number_of_state_bits,
+			append_negated=append_negated,
+			grid=grid,
+			block=block,
+			seed=seed
+			)
 
 	def fit(self, X, Y):
 		X = X.reshape(X.shape[0], X.shape[1], 1)
@@ -944,11 +1124,47 @@ class TsetlinMachine(CommonTsetlinMachine):
 		return (self.score(X) >= 0).astype(np.int32)
 
 class RegressionTsetlinMachine(CommonTsetlinMachine):
-	def __init__(self, number_of_clauses, T, s, q=1.0, clause_weight_update_ratio=1.0, literal_budget=None, and_group_normalization=False, hierarchy_structure=((AND_GROUP, 1)), boost_true_positive_feedback=1, number_of_state_bits=8, append_negated=True, grid=(16*13,1,1), block=(128,1,1), seed=None):
+	def __init__(
+			self,
+			number_of_clauses,
+			T,
+			s,
+			q=1.0,
+			type_ia_ii_ratio_clauses=1.0,
+			type_ia_ii_ratio_weights=1.0,
+			clause_weight_update_ratio=1.0,
+			literal_budget=None,
+			and_group_normalization=False,
+			hierarchy_structure=((AND_GROUP, 1)),
+			boost_true_positive_feedback=1,
+			number_of_state_bits=8,
+			append_negated=True,
+			grid=(16*13,1,1),
+			block=(128,1,1),
+			seed=None
+			):
+
 		self.negative_clauses = 0
 		self.flip_polarity = 0
 
-		super().__init__(number_of_clauses, T, s, q=q, clause_weight_update_ratio=clause_weight_update_ratio, literal_budget=literal_budget, and_group_normalization=and_group_normalization, hierarchy_structure=hierarchy_structure, boost_true_positive_feedback=boost_true_positive_feedback, number_of_state_bits=number_of_state_bits, append_negated=append_negated, grid=grid, block=block, seed=seed)
+		super().__init__(
+			number_of_clauses,
+			T,
+			s,
+			q=q,
+			type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
+			clause_weight_update_ratio=clause_weight_update_ratio,
+			literal_budget=literal_budget,
+			and_group_normalization=and_group_normalization,
+			hierarchy_structure=hierarchy_structure,
+			boost_true_positive_feedback=boost_true_positive_feedback,
+			number_of_state_bits=number_of_state_bits,
+			append_negated=append_negated,
+			grid=grid,
+			block=block,
+			seed=seed
+			)
 
 	def fit(self, X, Y):
 		X = X.reshape(X.shape[0], X.shape[1], 1)

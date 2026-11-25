@@ -133,6 +133,12 @@ code_update = """
 				}
 			#endif
 
+			if (TYPE_IA_II_RATIO_WEIGHTS < 1.0 && target*sign > 0) {
+				update_probability *= TYPE_IA_II_RATIO_WEIGHTS;
+			} else if (TYPE_IA_II_RATIO_WEIGHTS > 1.0 && target*sign < 0) {
+				update_probability *= (1.0/TYPE_IA_II_RATIO_WEIGHTS);
+			}
+
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {
 					#if CLIP_WEIGHTS == 1
@@ -185,6 +191,12 @@ code_update = """
 					update_probability = fabsf(y - class_sum)/(2*THRESHOLD);
 				}
 			#endif
+
+			if (TYPE_IA_II_RATIO_CLAUSES < 1.0 && target*sign > 0) {
+				update_probability *= TYPE_IA_II_RATIO_CLAUSES;
+			} else if (TYPE_IA_II_RATIO_CLAUSES > 1.0 && target*sign < 0) {
+				update_probability *= (1.0/TYPE_IA_II_RATIO_CLAUSES);
+			}
 
 			if (curand_uniform(localState) <= update_probability) {
 				if (target*sign > 0) {

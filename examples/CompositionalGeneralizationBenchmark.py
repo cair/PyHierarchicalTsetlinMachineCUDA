@@ -51,6 +51,8 @@ def default_args(**kwargs):
 	parser.add_argument("--T", default=20, type=int)
 	parser.add_argument("--s", default=10.0, type=float)
 	parser.add_argument("--q", default=1.0, type=float)
+	parser.add_argument("--type_ia_ii_ratio_clauses", default=1.0, type=float)
+	parser.add_argument("--type_ia_ii_ratio_weights", default=1.0, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
 	parser.add_argument("--sequence-length", default=6, type=int)
 	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
@@ -221,6 +223,8 @@ for r in range(args.runs):
 			args.T,
 			args.s,
 			q=args.q,
+			type_ia_ii_ratio_clauses = args.type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights = args.type_ia_ii_ratio_weights,
 			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
@@ -242,6 +246,8 @@ for r in range(args.runs):
 			args.T,
 			args.s,
 			q=args.q,
+			type_ia_ii_ratio_clauses = args.type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights = args.type_ia_ii_ratio_weights,
 			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
@@ -266,6 +272,8 @@ for r in range(args.runs):
 			args.T,
 			args.s,
 			q=args.q,
+			type_ia_ii_ratio_clauses = args.type_ia_ii_ratio_clauses,
+			type_ia_ii_ratio_weights = args.type_ia_ii_ratio_weights,
 			clause_weight_update_ratio=args.clause_weight_update_ratio,
 			literal_budget=args.literal_budget,
 			weighted_clauses=args.weighted_clauses,
