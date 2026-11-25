@@ -167,7 +167,6 @@ class CommonTsetlinMachine():
 	#define TYPE_IA_II_RATIO_CLAUSES %f
 	#define TYPE_IA_II_RATIO_WEIGHTS %f
 	#define CLAUSE_WEIGHT_UPDATE_RATIO %f
-	#define CLAUSE_WEIGHT_UPDATE_RATIO %f
 	#define LITERAL_BUDGET %d
 	#define BINARY_INFERENCE %d
 	#define CONSTANT_UPDATE_P %d
