@@ -908,8 +908,8 @@ class MultiClassTsetlinMachine:
 		self.T = T
 		self.s = s
 		self.q = q
-		self.type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses,
-		self.type_ia_ii_ratio_weights=type_ia_ii_ratio_weights,
+		self.type_ia_ii_ratio_clauses=type_ia_ii_ratio_clauses
+		self.type_ia_ii_ratio_weights=type_ia_ii_ratio_weights
 		self.clause_weight_update_ratio=clause_weight_update_ratio
 		self.literal_budget = literal_budget
 		self.no_clipping = no_clipping

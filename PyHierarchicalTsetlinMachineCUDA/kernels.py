@@ -133,9 +133,9 @@ code_update = """
 				}
 			#endif
 
-			if (TYPE_IA_II_RATIO_WEIGHTS < 1.0 && target*sign > 0) {
+			if (TYPE_IA_II_RATIO_WEIGHTS < 1.0 && target*sign > 0 && clause_output) {
 				update_probability *= TYPE_IA_II_RATIO_WEIGHTS;
-			} else if (TYPE_IA_II_RATIO_WEIGHTS > 1.0 && target*sign < 0) {
+			} else if (TYPE_IA_II_RATIO_WEIGHTS > 1.0 && target*sign < 0 && clause_output) {
 				update_probability *= (1.0/TYPE_IA_II_RATIO_WEIGHTS);
 			}
 
@@ -192,9 +192,9 @@ code_update = """
 				}
 			#endif
 
-			if (TYPE_IA_II_RATIO_CLAUSES < 1.0 && target*sign > 0) {
+			if (TYPE_IA_II_RATIO_CLAUSES < 1.0 && target*sign > 0 && component_output) {
 				update_probability *= TYPE_IA_II_RATIO_CLAUSES;
-			} else if (TYPE_IA_II_RATIO_CLAUSES > 1.0 && target*sign < 0) {
+			} else if (TYPE_IA_II_RATIO_CLAUSES > 1.0 && target*sign < 0 && component_output) {
 				update_probability *= (1.0/TYPE_IA_II_RATIO_CLAUSES);
 			}
 
