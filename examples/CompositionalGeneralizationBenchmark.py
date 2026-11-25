@@ -65,7 +65,7 @@ def default_args(**kwargs):
 	parser.add_argument("--constant-update-p", action='store_true')
 	parser.add_argument('--binary-inference', action='store_true')
 	parser.add_argument('--vanilla', action='store_true')
-	parser.add_argument('--hierarchical-overlapping', action='store_true')
+	parser.add_argument('--hierarchical-rotations', action='store_true')
 	parser.add_argument('--and-group-normalization', action='store_true')
 	parser.add_argument('--no-clipping', action='store_true')
 	parser.add_argument('--weighted-clauses', action='store_true')
@@ -216,7 +216,7 @@ pattern_frequency_train_percentiles = 100.0 * np.percentile(pattern_frequency_tr
 rng_run = np.random.default_rng(seed=args.run_seed)
 rng_resample = np.random.default_rng(seed=args.resample_seed)
 
-if args.hierarchical_overlapping:
+if args.hierarchical_rotations:
 	X_train = np.concatenate(
 		(
 			X_train,
@@ -287,7 +287,7 @@ for r in range(args.runs):
 				(tm.AND_GROUP, 2)
 			)
 		)
-	elif args.hierarchical_overlapping:
+	elif args.hierarchical_rotations:
 		tsetlin_machine = TsetlinMachine(
 			args.number_of_clauses,
 			args.T,
