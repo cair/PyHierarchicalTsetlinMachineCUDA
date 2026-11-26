@@ -31,13 +31,13 @@ import math
 
 np.set_printoptions(formatter={'float_kind': '{:.2f}'.format})
 
-def count_inversions(permutation):
+def count_inversions(permutation, relation_range):
     """Counts the number of inversions to determine parity."""
     inv = 0
     n = len(permutation)
     for i in range(n):
         for j in range(i + 1, n):
-            if permutation[i] > permutation[j]:
+            if (permutation[i] > permutation[j]) and (abs(permutation[i] - permutation[j]) <= relation_range):
                 inv += 1
     return inv
 
@@ -98,6 +98,7 @@ def default_args(**kwargs):
 	parser.add_argument('--append-negated', action='store_true')
 	parser.add_argument('--negate-input', action='store_true')
 	parser.add_argument('--extended-statistics', action='store_true')
+	parser.add_argument('--relation-range', default=None, type=int)
 	parser.add_argument('--hierarchical', action='store_true')
 	parser.add_argument('--synonym-distribution-drift', action='store_true')
 	parser.add_argument('--sequence-distribution-drift', action='store_true')
@@ -135,11 +136,16 @@ number_of_informative_elements = args.sequence_length - args.number_of_non_infor
 number_of_features_per_sequence_element = args.non_informative_vocabulary_size + number_of_informative_elements*args.number_of_synonyms
 number_of_features_per_sequence_element_informative = number_of_informative_elements*args.number_of_synonyms
 
+if args.relation_range == None:
+	args.relation_range = number_of_informative_elements
+
+assert args.relation_range >= 1
+
 Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
 permutations = list(itertools.permutations(range(args.sequence_length)))
 rng_data.shuffle(permutations)
 for i in range(math.factorial(args.sequence_length)):
-	Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)]) % 2
+	Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)], args.relation_range) % 2
 
 X_train = np.zeros((args.number_of_examples, args.sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
 X_train_informative = np.zeros((args.number_of_examples, args.sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
