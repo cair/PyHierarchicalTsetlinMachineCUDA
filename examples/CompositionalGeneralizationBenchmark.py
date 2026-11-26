@@ -41,6 +41,31 @@ def count_inversions(permutation):
                 inv += 1
     return inv
 
+def get_missing_row_indices(A: np.ndarray, B: np.ndarray) -> np.ndarray:
+    # Ensure both arrays are contiguous in memory and have the exact same dtype
+    A = np.ascontiguousarray(A)
+    B = np.ascontiguousarray(B, dtype=A.dtype)
+    
+    # Create a 1D void dtype representing an entire row's bytes
+    row_dtype = np.dtype((np.void, A.dtype.itemsize * A.shape[1]))
+    
+    # View the 2D matrices as 1D arrays of rows
+    A_view = A.view(row_dtype).ravel()
+    B_view = B.view(row_dtype).ravel()
+    
+    # Find rows in A that are NOT in B and return their indices
+    mask = ~np.isin(A_view, B_view)
+    return np.flatnonzero(mask)
+
+# Data statistics (constant across runs and epochs, so calculated once)
+def unique_statistics(train, test):
+	"""Returns (unique in train, unique in test, unique in both, unique in test only), counting identical rows once."""
+	unique_train = np.unique(train, axis=0)
+	unique_test = np.unique(test, axis=0)
+	_, counts = np.unique(np.vstack((unique_train, unique_test)), axis=0, return_counts=True)
+	overlap = int(np.sum(counts > 1))
+	return len(unique_train), len(unique_test), overlap, len(unique_test) - overlap
+
 def default_args(**kwargs):
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--epochs", default=250, type=int)
@@ -155,8 +180,6 @@ else:
 if args.sequence_distribution_drift:
 	test_indices = math.factorial(args.sequence_length) - 1 - test_indices
 
-held_out_test = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
-
 for i in range(args.number_of_examples):
 	for j in range(args.sequence_length):
 		if permutations[test_indices[i]][j] < args.number_of_non_informative_elements:
@@ -180,19 +203,12 @@ for i in range(args.number_of_examples):
 
 	Y_test[i] = Y_unique[test_indices[i]]
 
+permutations_held_out_from_training = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
+synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative) #& ~permutations_held_out_from_training
+
 if args.negate_input:
 	X_train = 1 - X_train
 	X_test = 1 - X_test
-
-# Data statistics (constant across runs and epochs, so calculated once)
-
-def unique_statistics(train, test):
-	"""Returns (unique in train, unique in test, unique in both, unique in test only), counting identical rows once."""
-	unique_train = np.unique(train, axis=0)
-	unique_test = np.unique(test, axis=0)
-	_, counts = np.unique(np.vstack((unique_train, unique_test)), axis=0, return_counts=True)
-	overlap = int(np.sum(counts > 1))
-	return len(unique_train), len(unique_test), overlap, len(unique_test) - overlap
 
 number_of_unique_examples = math.factorial(args.sequence_length) // math.factorial(args.number_of_non_informative_elements) * args.number_of_synonyms**number_of_informative_elements * args.non_informative_vocabulary_size**args.number_of_non_informative_elements
 (
@@ -210,6 +226,11 @@ number_of_unique_patterns = math.perm(args.sequence_length, number_of_informativ
 	number_of_unseen_testing_patterns
 ) = unique_statistics(X_train_informative, X_test_informative)
 
+assert len(np.unique(X_test_informative[synonym_sequences_held_out_from_training], axis=0)) == number_of_unseen_testing_patterns, \
+        "Unseen synonym combination count mismatch: %d unique unseen rows vs %d from unique_statistics" % (
+                len(np.unique(X_test_informative[synonym_sequences_held_out_from_training], axis=0)),
+                number_of_unseen_testing_patterns
+        )
 pattern_frequency_train = np.unique(X_train_informative, axis=0, return_counts=True)[1] / X_train_informative.shape[0]
 pattern_frequency_train_percentiles = 100.0 * np.percentile(pattern_frequency_train, [1, 5, 50, 95, 99])
 
@@ -357,7 +378,8 @@ for r in range(args.runs):
 		stop_testing = time()
 
 		result_test = 100*accuracy_score(Y_test, Y_test_pred)
-		result_test_held_out = 100 * (Y_test_pred[held_out_test] == Y_test[held_out_test]).mean()
+		result_test_held_out_permutations = 100 * (Y_test_pred[permutations_held_out_from_training] == Y_test[permutations_held_out_from_training]).mean()
+		result_test_held_out_synonym_sequences = 100 * (Y_test_pred[synonym_sequences_held_out_from_training] == Y_test[synonym_sequences_held_out_from_training]).mean()
 		result_train = 100*(tsetlin_machine.predict(X_train) == Y_train).mean()
 
 		print("CLAUSES RUN #%d EPOCH #%d\n" % (r+1, e+1))
@@ -389,7 +411,10 @@ for r in range(args.runs):
 		print()
 
 		print("Testing accuracy: %.2f%%" % (result_test,))
-		print("Held out testing accuracy: %.2f%%" % (result_test_held_out,))
+		if args.number_of_missing_training_permutations > 0:
+			print("Testing accuracy on held out permutations: %.2f%%" % (result_test_held_out_permutations,))
+		if len(synonym_sequences_held_out_from_training) > 0:
+			print("Testing accuracy on held out synonym sequences: %.2f%%" % (result_test_held_out_synonym_sequences,))
 		print("Training accuracy: %.2f%%" % (result_train,))
 		
 		print()
@@ -498,12 +523,13 @@ for r in range(args.runs):
 			print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 
 		if args.extended_statistics:
-			f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
+			f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
 				(
 					r,
 					e,
 					result_test,
-					result_test_held_out,
+					result_test_held_out_permutations,
+					result_test_held_out_synonym_sequences,
 					result_train,
 					100.0 * np.percentile(clause_precision_test, 1),
 					100.0 * np.percentile(clause_precision_test, 5),
@@ -533,12 +559,13 @@ for r in range(args.runs):
 				)
 			)
 		else:
-			f.write("%d %d %.2f %.2f %.2f\n" %
+			f.write("%d %d %.2f %.2f %.2f %.2f\n" %
 				(
 					r,
 					e,
 					result_test,
-					result_test_held_out,
+					result_test_held_out_permutations,
+					result_test_held_out_synonym_sequences,
 					result_train
 				)
 			)
