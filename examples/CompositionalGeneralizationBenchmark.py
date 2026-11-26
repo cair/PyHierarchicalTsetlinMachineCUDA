@@ -79,8 +79,8 @@ def default_args(**kwargs):
 	parser.add_argument("--type-ia-ii-ratio-clauses", default=1.0, type=float)
 	parser.add_argument("--type-ia-ii-ratio-weights", default=1.0, type=float)
 	parser.add_argument("--clause-weight-update-ratio", default=1.0, type=float)
-	parser.add_argument("--sequence-length", default=6, type=int)
-	parser.add_argument("--number-of-non-informative-elements", default=0, type=int)
+	parser.add_argument("--number-of-informative-symbols", default=6, type=int)
+	parser.add_argument("--number-of-non-informative-symbols", default=0, type=int)
 	parser.add_argument("--number-of-synonyms", default=3, type=int)
 	parser.add_argument("--non-informative-vocabulary-size", default=3, type=int)
 	parser.add_argument("--number-of-or-alternatives", default=1, type=int)
@@ -132,84 +132,91 @@ rng_data = np.random.default_rng(seed=args.data_seed)
 
 f = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
 
-number_of_informative_elements = args.sequence_length - args.number_of_non_informative_elements
-number_of_features_per_sequence_element = args.non_informative_vocabulary_size + number_of_informative_elements*args.number_of_synonyms
-number_of_features_per_sequence_element_informative = number_of_informative_elements*args.number_of_synonyms
+sequence_length = args.number_of_informative_symbols + args.number_of_non_informative_symbols
+number_of_features_per_sequence_element = args.non_informative_vocabulary_size + args.number_of_informative_symbols*args.number_of_synonyms
+number_of_features_per_sequence_element_informative = args.number_of_informative_symbols*args.number_of_synonyms
 
 if args.relation_range == None:
-	args.relation_range = number_of_informative_elements
+	args.relation_range = args.number_of_informative_symbols
 
 assert args.relation_range >= 1
 
-Y_unique = np.zeros(math.factorial(args.sequence_length), dtype=np.uint32)
-permutations = list(itertools.permutations(range(args.sequence_length)))
+Y_unique = np.zeros(math.factorial(args.number_of_informative_symbols), dtype=np.uint32)
+permutations = list(itertools.permutations(range(args.number_of_informative_symbols)))
 rng_data.shuffle(permutations)
-for i in range(math.factorial(args.sequence_length)):
-	Y_unique[i] = count_inversions([x for x in permutations[i] if x not in range(args.number_of_non_informative_elements)], args.relation_range) % 2
+for i in range(math.factorial(args.number_of_informative_symbols)):
+	Y_unique[i] = count_inversions(permutations[i], args.relation_range) % 2
 
-X_train = np.zeros((args.number_of_examples, args.sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
-X_train_informative = np.zeros((args.number_of_examples, args.sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
+X_train = np.zeros((args.number_of_examples, sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
+X_train_informative = np.zeros((args.number_of_examples, sequence_length * number_of_features_per_sequence_element), dtype=np.uint32)
 Y_train = np.empty(args.number_of_examples, dtype=np.uint32)
 
 if args.sequence_skewedness == 0.0 or args.skewed_test_data_only:
-	train_indices = rng_data.choice(math.factorial(args.sequence_length) - args.number_of_missing_training_permutations, size=args.number_of_examples, replace=True)
+	train_indices = rng_data.choice(math.factorial(args.number_of_informative_symbols) - args.number_of_missing_training_permutations, size=args.number_of_examples, replace=True)
 else:
-	train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length) - args.number_of_missing_training_permutations, size=args.number_of_examples, random_state=rng_data)
+	train_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.number_of_informative_symbols) - args.number_of_missing_training_permutations, size=args.number_of_examples, random_state=rng_data)
 
 non_informative_vocabulary_skewedness = 0.0 if args.skewed_test_data_only else args.non_informative_vocabulary_skewedness
 synonym_skewedness = 0.0 if args.skewed_test_data_only else args.synonym_skewedness
 
 for i in range(args.number_of_examples):
-	for j in range(args.sequence_length):
-		if permutations[train_indices[i]][j] < args.number_of_non_informative_elements:
-			pos = zipfian.rvs(a=non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
-		else:
-			# Finds the slot for the current informative symbol, and then the synonym inside that slot
-			pos = args.non_informative_vocabulary_size + (permutations[train_indices[i]][j] - args.number_of_non_informative_elements)*args.number_of_synonyms + zipfian.rvs(a=synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
-			X_train_informative[i, j*number_of_features_per_sequence_element + pos] = 1
+	position_of_informative_symbols = np.sort(rng_data.choice(np.arange(sequence_length), size=args.number_of_informative_symbols, replace=False))
+	position_of_non_informative_symbol = np.arange(sequence_length)[~np.isin(np.arange(sequence_length), position_of_informative_symbols)]
+	
+	for j in range(args.number_of_informative_symbols):
+		# Finds the slot for the current informative symbol, and then the synonym inside that slot
+		position_inside_sequence_element = args.non_informative_vocabulary_size + permutations[train_indices[i]][j]*args.number_of_synonyms + zipfian.rvs(a=synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
+		X_train_informative[i, position_of_informative_symbols[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
+		X_train[i, position_of_informative_symbols[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
 
-		X_train[i, j*number_of_features_per_sequence_element + pos] = 1
+	for j in range(args.number_of_non_informative_symbols):
+		position_inside_sequence_element = zipfian.rvs(a=non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
+		X_train[i, position_of_non_informative_symbol[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
 
 	Y_train[i] = Y_unique[train_indices[i]]
 
 Y_train = np.where(rng_data.random(args.number_of_examples) <= args.noise, 1 - Y_train, Y_train)  # Adds noise
 
-X_test = np.zeros((args.number_of_examples, args.sequence_length*number_of_features_per_sequence_element), dtype=np.uint32)
-X_test_informative = np.zeros((args.number_of_examples, args.sequence_length*number_of_features_per_sequence_element), dtype=np.uint32)
+X_test = np.zeros((args.number_of_examples, sequence_length*number_of_features_per_sequence_element), dtype=np.uint32)
+X_test_informative = np.zeros((args.number_of_examples, sequence_length*number_of_features_per_sequence_element), dtype=np.uint32)
 Y_test = np.empty(args.number_of_examples, dtype=np.uint32)
 
 if args.sequence_skewedness == 0.0:
-	test_indices = rng_data.choice(math.factorial(args.sequence_length), size=args.number_of_examples, replace=True)
+	test_indices = rng_data.choice(math.factorial(args.number_of_informative_symbols), size=args.number_of_examples, replace=True)
 else:
-	test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.sequence_length), size=args.number_of_examples, random_state=rng_data)
+	test_indices = zipfian.rvs(a=args.sequence_skewedness, loc=-1, n=math.factorial(args.number_of_informative_symbols), size=args.number_of_examples, random_state=rng_data)
 
 if args.sequence_distribution_drift:
-	test_indices = math.factorial(args.sequence_length) - 1 - test_indices
+	test_indices = math.factorial(args.number_of_informative_symbols) - 1 - test_indices
 
 for i in range(args.number_of_examples):
-	for j in range(args.sequence_length):
-		if permutations[test_indices[i]][j] < args.number_of_non_informative_elements:
-			pos = zipfian.rvs(a=args.non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
+	position_of_informative_symbols = np.sort(rng_data.choice(np.arange(sequence_length), size=args.number_of_informative_symbols, replace=False))
+	position_of_non_informative_symbols = np.arange(sequence_length)[~np.isin(np.arange(sequence_length), position_of_informative_symbols)]
+	
+	for j in range(args.number_of_informative_symbols):
+		# Finds the slot for the current informative symbol
+		position_inside_sequence_element = permutations[test_indices[i]][j] * args.number_of_synonyms
+
+		# Finds the synonym inside the slot
+		if args.synonym_distribution_drift:
+			position_inside_sequence_element += args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
 		else:
-			# Finds the slot for the current informative symbol
-			pos = (permutations[test_indices[i]][j] - args.number_of_non_informative_elements) * args.number_of_synonyms
+			position_inside_sequence_element += zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
 
-			# Finds the synonym inside the slot
-			if args.synonym_distribution_drift:
-				pos += args.number_of_synonyms - 1 - zipfian.rvs(args.synonym_skewedness, args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
-			else:
-				pos += zipfian.rvs(a=args.synonym_skewedness, n=args.number_of_synonyms, loc=-1, size=1, random_state=rng_data)[0]
+		position_inside_sequence_element += args.non_informative_vocabulary_size
 
-			pos += args.non_informative_vocabulary_size
+		# Inserts the synonym inside the correct sequence slot
+		X_test_informative[i, position_of_informative_symbols[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
 
-			# Inserts the synonym inside the correct sequence slot
-			X_test_informative[i, j*number_of_features_per_sequence_element + pos] = 1
+		X_test[i, position_of_informative_symbols[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
 
-		X_test[i, j*number_of_features_per_sequence_element + pos] = 1
+	for j in range(args.number_of_non_informative_symbols):
+		position_inside_sequence_element = zipfian.rvs(a=args.non_informative_vocabulary_skewedness, n=args.non_informative_vocabulary_size, loc=-1, size=1, random_state=rng_data)[0]
+		X_test[i, position_of_non_informative_symbols[j]*number_of_features_per_sequence_element + position_inside_sequence_element] = 1
 
 	Y_test[i] = Y_unique[test_indices[i]]
 
-permutations_held_out_from_training = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
+permutations_held_out_from_training = test_indices >= math.factorial(args.number_of_informative_symbols) - args.number_of_missing_training_permutations
 synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative)
 synonym_sequences_held_out_from_training = synonym_sequences_held_out_from_training[~permutations_held_out_from_training[synonym_sequences_held_out_from_training]]
 
@@ -217,7 +224,7 @@ if args.negate_input:
 	X_train = 1 - X_train
 	X_test = 1 - X_test
 
-number_of_unique_examples = math.factorial(args.sequence_length) // math.factorial(args.number_of_non_informative_elements) * args.number_of_synonyms**number_of_informative_elements * args.non_informative_vocabulary_size**args.number_of_non_informative_elements
+number_of_unique_examples = math.factorial(sequence_length) // math.factorial(args.number_of_non_informative_symbols) * args.number_of_synonyms**args.number_of_informative_symbols * args.non_informative_vocabulary_size**args.number_of_non_informative_symbols
 (
 	number_of_unique_training_examples,
 	number_of_unique_testing_examples,
@@ -225,7 +232,7 @@ number_of_unique_examples = math.factorial(args.sequence_length) // math.factori
 	number_of_unseen_testing_examples
 ) = unique_statistics(X_train, X_test)
 
-number_of_unique_patterns = math.perm(args.sequence_length, number_of_informative_elements) * args.number_of_synonyms**number_of_informative_elements
+number_of_unique_patterns = math.perm(sequence_length, args.number_of_informative_symbols) * args.number_of_synonyms**args.number_of_informative_symbols
 (
 	number_of_unique_training_patterns,
 	number_of_unique_testing_patterns,
@@ -280,7 +287,7 @@ for r in range(args.runs):
 			no_clipping=args.no_clipping,
 			append_negated=args.append_negated,
 			hierarchy_structure=(
-				(tm.AND_GROUP, args.sequence_length * number_of_features_per_sequence_element),
+				(tm.AND_GROUP, sequence_length * number_of_features_per_sequence_element),
 				(tm.AND_GROUP, 1)
 			)
 		)
@@ -305,7 +312,7 @@ for r in range(args.runs):
 			hierarchy_structure=(
 				(tm.AND_GROUP, number_of_features_per_sequence_element),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length // 2),
+				(tm.AND_GROUP, sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2)
 			)
@@ -330,7 +337,7 @@ for r in range(args.runs):
 			append_negated=args.append_negated,
 			hierarchy_structure=(
 				(tm.AND_GROUP, number_of_features_per_sequence_element),
-				(tm.AND_GROUP, args.sequence_length // 2),
+				(tm.AND_GROUP, sequence_length // 2),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives_interior),
 				(tm.AND_GROUP, 2),
 				(tm.OR_GROUP_CONVOLUTION, 3)
@@ -357,7 +364,7 @@ for r in range(args.runs):
 			hierarchy_structure=(
 				(tm.AND_GROUP, number_of_features_per_sequence_element),
 				(tm.OR_ALTERNATIVES, args.number_of_or_alternatives),
-				(tm.AND_GROUP, args.sequence_length)
+				(tm.AND_GROUP, sequence_length)
 			)
 		)
 
