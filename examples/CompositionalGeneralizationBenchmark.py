@@ -204,7 +204,7 @@ for i in range(args.number_of_examples):
 	Y_test[i] = Y_unique[test_indices[i]]
 
 permutations_held_out_from_training = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
-synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative) #& ~permutations_held_out_from_training
+synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative) & ~permutations_held_out_from_training
 
 if args.negate_input:
 	X_train = 1 - X_train
