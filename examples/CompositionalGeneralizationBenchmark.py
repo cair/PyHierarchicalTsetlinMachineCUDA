@@ -205,7 +205,7 @@ for i in range(args.number_of_examples):
 
 permutations_held_out_from_training = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
 synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative)
-synonym_sequences_held_out_from_training = synonym_sequences_held_out_from_training[[~np.isin(synonym_sequences_held_out_from_training, permutations_held_out_from_training)]]
+synonym_sequences_held_out_from_training = synonym_sequences_held_out_from_training[~np.isin(synonym_sequences_held_out_from_training, permutations_held_out_from_training)]
 if args.negate_input:
 	X_train = 1 - X_train
 	X_test = 1 - X_test
