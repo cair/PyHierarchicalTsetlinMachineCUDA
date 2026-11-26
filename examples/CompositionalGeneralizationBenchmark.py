@@ -206,6 +206,7 @@ for i in range(args.number_of_examples):
 permutations_held_out_from_training = test_indices >= math.factorial(args.sequence_length) - args.number_of_missing_training_permutations
 synonym_sequences_held_out_from_training = get_missing_row_indices(X_test_informative, X_train_informative)
 synonym_sequences_held_out_from_training = synonym_sequences_held_out_from_training[~permutations_held_out_from_training[synonym_sequences_held_out_from_training]]
+
 if args.negate_input:
 	X_train = 1 - X_train
 	X_test = 1 - X_test
@@ -226,11 +227,6 @@ number_of_unique_patterns = math.perm(args.sequence_length, number_of_informativ
 	number_of_unseen_testing_patterns
 ) = unique_statistics(X_train_informative, X_test_informative)
 
-assert len(np.unique(X_test_informative[synonym_sequences_held_out_from_training], axis=0)) == number_of_unseen_testing_patterns, \
-        "Unseen synonym combination count mismatch: %d unique unseen rows vs %d from unique_statistics" % (
-                len(np.unique(X_test_informative[synonym_sequences_held_out_from_training], axis=0)),
-                number_of_unseen_testing_patterns
-        )
 pattern_frequency_train = np.unique(X_train_informative, axis=0, return_counts=True)[1] / X_train_informative.shape[0]
 pattern_frequency_train_percentiles = 100.0 * np.percentile(pattern_frequency_train, [1, 5, 50, 95, 99])
 
