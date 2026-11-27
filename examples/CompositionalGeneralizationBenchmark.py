@@ -546,7 +546,14 @@ for r in range(args.runs):
 			else:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True)
 			f_hierarchy.write("\n")
-			
+			f_hierarchy.write("%d %d %.2f %.2f %.2f %.2f\n" % (
+					r,
+					e,
+					result_test,
+					result_test_held_out_permutations,
+					result_test_held_out_synonym_sequences,
+					result_train)
+				)
 			f_hierarchy.close()
 			
 			max_held_out_results_combined = result_test_held_out_permutations * result_test_held_out_synonym_sequences
