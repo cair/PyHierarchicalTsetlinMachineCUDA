@@ -347,6 +347,8 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.ta_state_hierarchy_gpu, state[0])
 		cuda.memcpy_htod(self.clause_weights_gpu, state[1])
 
+		self.ta_state_hierarchy = Non
+
 	# Transform input data for processing at next layer
 	def transform(self, X):
 		number_of_examples = X.shape[0]
@@ -814,6 +816,7 @@ class CommonTsetlinMachine():
 		cuda.memcpy_htod(self.clause_weights_gpu, state_dict['clause_weights'])
 
 		self.first = False
+		self.ta_state_hierarchy = None
 
 	
 class MultiOutputTsetlinMachine(CommonTsetlinMachine):
