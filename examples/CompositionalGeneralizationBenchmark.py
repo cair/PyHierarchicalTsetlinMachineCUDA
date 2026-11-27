@@ -541,10 +541,15 @@ for r in range(args.runs):
 			print()
 
 		if args.write_hierarchy_to_file and max_held_out_results_combined < result_test_held_out_permutations * result_test_held_out_synonym_sequences:
+			print("HELLO")
 			if args.extended_statistics:
+				print("HELLO2")
+
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True)
+				print("HELLO3")
+
 			f_hierarchy.write("%d %d %.2f %.2f %.2f %.2f\n" % (
 					r,
 					e,
@@ -555,7 +560,7 @@ for r in range(args.runs):
 				)
 			f_hierarchy.flush()
 			os.fsync(f_hierarchy.fileno())
-			
+
 			max_held_out_results_combined = result_test_held_out_permutations * result_test_held_out_synonym_sequences
 
 		if args.extended_statistics:
