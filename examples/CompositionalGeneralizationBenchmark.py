@@ -393,10 +393,6 @@ for r in range(args.runs):
 
 		print("CLAUSES RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
-		if args.print_hierarchy:
-			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
-			print()
-
 		print("STATISTICS RUN #%d EPOCH #%d\n" % (r+1, e+1))
 
 		print("Number of unique examples: %d" % (number_of_unique_examples,))
@@ -521,15 +517,20 @@ for r in range(args.runs):
 				100.0 * np.percentile(max_example_precision, 99))
 			)
 
-			if args.print_clause_activation_statistics:
-				print()
-				print("Absolute votes per test sample (votes, percentage):", end=' ')
-				for i in range(len(activations[0])):
-					print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
-				print()
-
 			print()
 			print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
+			print()
+
+		if args.print_clause_activation_statistics and args.extended_statistics::
+			print()
+			print("Absolute votes per test sample (votes, percentage):", end=' ')
+			for i in range(len(activations[0])):
+				print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
+			print()
+
+		if args.print_hierarchy and args.extended_statistics:
+			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+			print()
 
 		if args.extended_statistics:
 			f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
