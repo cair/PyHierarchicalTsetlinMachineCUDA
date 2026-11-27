@@ -28,6 +28,7 @@ import math
 from sklearn.metrics import precision_score, recall_score, accuracy_score
 from scipy.stats import zipfian
 import math
+import os
 
 np.set_printoptions(formatter={'float_kind': '{:.2f}'.format})
 
@@ -553,6 +554,7 @@ for r in range(args.runs):
 					result_train)
 				)
 			f_hierarchy.flush()
+			os.fsync(f_hierarchy.fileno())
 			
 			max_held_out_results_combined = result_test_held_out_permutations * result_test_held_out_synonym_sequences
 
