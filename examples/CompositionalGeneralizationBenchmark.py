@@ -544,7 +544,6 @@ for r in range(args.runs):
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True)
-			f_hierarchy.write("\n")
 			f_hierarchy.write("%d %d %.2f %.2f %.2f %.2f\n" % (
 					r,
 					e,
