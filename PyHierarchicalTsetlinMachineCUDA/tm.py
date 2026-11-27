@@ -631,7 +631,7 @@ class CommonTsetlinMachine():
 		class_sum = np.clip(class_sum.reshape((self.number_of_outputs, number_of_examples)), -self.T, self.T)
 		return hierarchy_votes, class_sum
 
-	def print_hierarchy(self, print_ta_state=False, precision_recall=None):
+	def print_hierarchy(self, add_ta_state=False, precision_recall=None):
 		for i in range(self.number_of_clauses):
 			if precision_recall != None:
 				print("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]), end='')
@@ -682,12 +682,12 @@ class CommonTsetlinMachine():
 				for k in range(self.number_of_literals_per_leaf):
 					if self.ta_action(i, j, k):
 						if (not self.append_negated) or k < self.number_of_literals_per_leaf // 2:
-							if print_ta_state:
+							if add_ta_state:
 								l.append("x%d[%d]" % (feature_base + k, self.ta_state(i, j, k)))
 							else:
 								l.append("x%d" % (feature_base + k,))
 						else:
-							if print_ta_state:
+							if add_ta_state:
 								l.append("NOT x%d[%d]" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
 							else:
 								l.append("NOT x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
@@ -699,7 +699,7 @@ class CommonTsetlinMachine():
 
 			print(")" * (self.depth - 1))
 
-	def write_hierarchy_to_file(self, f, print_ta_state=False, precision_recall=None):
+	def write_hierarchy_to_file(self, f, add_ta_state=False, precision_recall=None):
 		for i in range(self.number_of_clauses):
 			if precision_recall != None:
 				f.write("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]))
@@ -750,12 +750,12 @@ class CommonTsetlinMachine():
 				for k in range(self.number_of_literals_per_leaf):
 					if self.ta_action(i, j, k):
 						if (not self.append_negated) or k < self.number_of_literals_per_leaf // 2:
-							if f.write_ta_state:
+							if f.add_ta_state:
 								l.append("x%d[%d]" % (feature_base + k, self.ta_state(i, j, k)))
 							else:
 								l.append("x%d" % (feature_base + k,))
 						else:
-							if f.write_ta_state:
+							if f.add_ta_state:
 								l.append("NOT x%d[%d]" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
 							else:
 								l.append("NOT x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
