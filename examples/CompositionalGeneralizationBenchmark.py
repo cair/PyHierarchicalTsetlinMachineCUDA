@@ -132,6 +132,7 @@ raw_extension = "_".join(ext_parts)
 rng_data = np.random.default_rng(seed=args.data_seed)
 
 f_statistics = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
+f_hierarchy = open(f"compositional_generalization_hierarchy_{raw_extension}.txt", "w")
 
 sequence_length = args.number_of_informative_symbols + args.number_of_non_informative_symbols
 number_of_features_per_sequence_element = args.non_informative_vocabulary_size + args.number_of_informative_symbols*args.number_of_synonyms
@@ -539,8 +540,6 @@ for r in range(args.runs):
 			print()
 
 		if args.write_hierarchy_to_file and max_held_out_results_combined < result_test_held_out_permutations * result_test_held_out_synonym_sequences:
-			f_hierarchy = open(f"compositional_generalization_hierarchy_{raw_extension}.txt", "w")
-
 			if args.extended_statistics:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
@@ -554,7 +553,7 @@ for r in range(args.runs):
 					result_test_held_out_synonym_sequences,
 					result_train)
 				)
-			f_hierarchy.close()
+			f_hierarchy.flush()
 			
 			max_held_out_results_combined = result_test_held_out_permutations * result_test_held_out_synonym_sequences
 
@@ -606,4 +605,7 @@ for r in range(args.runs):
 				)
 			)
 		f_statistics.flush()
+
 f_statistics.close()
+f_hierarchy.close()
+
