@@ -107,6 +107,7 @@ def default_args(**kwargs):
 	parser.add_argument("--sequence-skewedness", default=0.0, type=float)
 	parser.add_argument("--skewed-test-data-only", action='store_true')
 	parser.add_argument("--print-hierarchy", action='store_true')
+	parser.add_argument("--write-hierarchy-to-file", action='store_true')
 	parser.add_argument("--data-seed", default=36, type=int)
 	parser.add_argument("--run-seed", default=37, type=int)
 	parser.add_argument("--resample-seed", default=38, type=int)
@@ -130,7 +131,8 @@ raw_extension = "_".join(ext_parts)
 
 rng_data = np.random.default_rng(seed=args.data_seed)
 
-f = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
+f_statistics = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
+f_hierarchy = open(f"compositional_generalization_hierarchy_{raw_extension}.txt", "w")
 
 sequence_length = args.number_of_informative_symbols + args.number_of_non_informative_symbols
 number_of_features_per_sequence_element = args.non_informative_vocabulary_size + args.number_of_informative_symbols*args.number_of_synonyms
@@ -528,12 +530,24 @@ for r in range(args.runs):
 				print("(%d,%.2f%%)" % (activations[0][i], 100.0*activations[1][i]/transformed_X_test.shape[0]), end=' ')
 			print()
 
-		if args.print_hierarchy and args.extended_statistics:
-			tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+		if args.print_hierarchy:
+			if args.extended_statistics:
+				tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+			else:
+				tsetlin_machine.print_hierarchy(print_ta_state=True)
+
 			print()
 
+		if args.write_hierarchy_to_file:
+			if args.extended_statistics:
+				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+			else:
+				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, print_ta_state=True)
+			f_hierarchy.write("\n")
+			f_hierarchy.flush()
+
 		if args.extended_statistics:
-			f.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
+			f_statistics.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
 				(
 					r,
 					e,
@@ -569,7 +583,7 @@ for r in range(args.runs):
 				)
 			)
 		else:
-			f.write("%d %d %.2f %.2f %.2f %.2f\n" %
+			f_statistics.write("%d %d %.2f %.2f %.2f %.2f\n" %
 				(
 					r,
 					e,
@@ -579,5 +593,6 @@ for r in range(args.runs):
 					result_train
 				)
 			)
-		f.flush()
-f.close()
+		f_statistics.flush()
+f_statistics.close()
+f_hierarchy.close()
