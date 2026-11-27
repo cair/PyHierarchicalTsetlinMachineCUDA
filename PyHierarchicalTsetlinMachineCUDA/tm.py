@@ -702,9 +702,9 @@ class CommonTsetlinMachine():
 	def write_hierarchy_to_file(self, f, print_ta_state=False, precision_recall=None):
 		for i in range(self.number_of_clauses):
 			if precision_recall != None:
-				f.write("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]), end='')
+				f.write("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]))
 			else:
-				f.write("\nCLAUSE #%d (W:%d): " % (i, self.get_clause_weight(i)), end='')
+				f.write("\nCLAUSE #%d (W:%d): " % (i, self.get_clause_weight(i)))
 
 			previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
 			for j in range(self.hierarchy_size[1]):
@@ -738,13 +738,13 @@ class CommonTsetlinMachine():
 					previous_index[d-1] = depth_d_node_index
 
 				for s in right:
-					f.write(s, end='')
+					f.write(s)
 
 				for s in inside:
-					f.write(s, end='')
+					f.write(s)
 
 				for s in left:
-					f.write(s, end='')
+					f.write(s)
 
 				l = []
 				for k in range(self.number_of_literals_per_leaf):
@@ -761,11 +761,12 @@ class CommonTsetlinMachine():
 								l.append("NOT x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
 				
 				if len(l) > 1:
-					f.write("(" + " AND ".join(l) + ")", end = '')
+					f.write("(" + " AND ".join(l) + ")")
 				elif len(l) == 1:
-					f.write(l[0], end = '')
+					f.write(l[0])
 
 			f.write(")" * (self.depth - 1))
+			f.write("\n")
 
 	def save(self) -> dict:
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits, dtype=np.uint32)
