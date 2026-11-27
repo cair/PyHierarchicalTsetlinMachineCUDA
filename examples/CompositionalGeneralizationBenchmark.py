@@ -540,7 +540,7 @@ for r in range(args.runs):
 
 			print()
 
-		if args.write_hierarchy_to_file and max_held_out_results_combined < result_test_held_out_permutations * result_test_held_out_synonym_sequences:
+		if args.write_hierarchy_to_file and max_held_out_results_combined <= result_test_held_out_permutations * result_test_held_out_synonym_sequences:
 			if args.extended_statistics:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
