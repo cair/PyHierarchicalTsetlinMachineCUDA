@@ -532,17 +532,17 @@ for r in range(args.runs):
 
 		if args.print_hierarchy:
 			if args.extended_statistics:
-				tsetlin_machine.print_hierarchy(print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+				tsetlin_machine.print_hierarchy(add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
-				tsetlin_machine.print_hierarchy(print_ta_state=True)
+				tsetlin_machine.print_hierarchy(add_ta_state=True)
 
 			print()
 
 		if args.write_hierarchy_to_file:
 			if args.extended_statistics:
-				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, print_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
+				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
-				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, print_ta_state=True)
+				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True)
 			f_hierarchy.write("\n")
 			f_hierarchy.flush()
 
