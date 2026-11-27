@@ -298,7 +298,7 @@ class CommonTsetlinMachine():
 		self.class_sum = np.ascontiguousarray(np.empty(self.number_of_outputs)).astype(np.float32)
 
 	def ta_action(self, clause, leaf, ta):
-		if self.ta_state_hierarchy == None:
+		if self.ta_state_hierarchy is None:
 			self.ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
 			cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
 			self.ta_state_hierarchy = self.ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
@@ -306,7 +306,7 @@ class CommonTsetlinMachine():
 		return (self.ta_state_hierarchy[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
 	def ta_state(self, clause, leaf, ta):
-		if self.ta_state_hierarchy == None:
+		if self.ta_state_hierarchy is None:
 			self.ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
 			cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
 			self.ta_state_hierarchy = self.ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
@@ -326,10 +326,10 @@ class CommonTsetlinMachine():
 	def get_state(self):
 		# To be updated
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
-		cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
 		clause_weights = np.empty(self.number_of_outputs*self.number_of_clauses).astype(np.int32)
 		cuda.memcpy_dtoh(self.clause_weights, self.clause_weights_gpu)
-		return((self.ta_state_hierarchy, self.clause_weights, self.number_of_outputs, self.number_of_clauses, self.hierarchy_structure, self.boost_true_positive_feedback, self.number_of_state_bits, self.append_negated, self.min_y, self.max_y))
+		return((ta_state_hierarchy, self.clause_weights, self.number_of_outputs, self.number_of_clauses, self.hierarchy_structure, self.boost_true_positive_feedback, self.number_of_state_bits, self.append_negated, self.min_y, self.max_y))
 
 	def set_state(self, state):
 		# To be updated
