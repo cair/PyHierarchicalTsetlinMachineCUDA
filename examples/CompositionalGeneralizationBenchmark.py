@@ -521,7 +521,7 @@ for r in range(args.runs):
 			print("Mean absolute votes per sample: %.1f" % (transformed_X_test.sum() / transformed_X_test.shape[0]))
 			print()
 
-		if args.print_clause_activation_statistics and args.extended_statistics::
+		if args.print_clause_activation_statistics and args.extended_statistics:
 			print()
 			print("Absolute votes per test sample (votes, percentage):", end=' ')
 			for i in range(len(activations[0])):
