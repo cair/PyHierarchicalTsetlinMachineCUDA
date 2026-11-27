@@ -300,20 +300,20 @@ class CommonTsetlinMachine():
 	def ta_action(self, clause, leaf, ta):
 		if self.ta_state_hierarchy == None:
 			self.ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
-			cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
-			ta_state_hierarchy = ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
+			cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+			self.ta_state_hierarchy = self.ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
 
-		return (ta_state_hierarchy[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
+		return (self.ta_state_hierarchy[clause, leaf, ta // 32, self.number_of_state_bits-1] & (1 << (ta % 32))) > 0
 
 	def ta_state(self, clause, leaf, ta):
 		if self.ta_state_hierarchy == None:
-			ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
-			cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
-			ta_state_hierarchy = ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
+			self.ta_state_hierarchy = np.empty(self.number_of_clauses*self.number_of_ta_teams*self.number_of_literal_chunks_per_leaf*self.number_of_state_bits, dtype=np.uint32)
+			cuda.memcpy_dtoh(self.ta_state_hierarchy, self.ta_state_hierarchy_gpu)
+			self.ta_state_hierarchy = self.ta_state_hierarchy.reshape((self.number_of_clauses, self.number_of_ta_teams, self.number_of_literal_chunks_per_leaf, self.number_of_state_bits))
 		
 		state = 0
 		for b in range(self.number_of_state_bits):
-			if (ta_state_hierarchy[clause, leaf, ta // 32, b] & (1 << (ta % 32))) > 0:
+			if (self.ta_state_hierarchy[clause, leaf, ta // 32, b] & (1 << (ta % 32))) > 0:
 				state |= (1 << b)
 		
 		return state
