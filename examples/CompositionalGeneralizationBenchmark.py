@@ -132,7 +132,6 @@ raw_extension = "_".join(ext_parts)
 rng_data = np.random.default_rng(seed=args.data_seed)
 
 f_statistics = open(f"compositional_generalization_statistics_{raw_extension}.txt", "w")
-f_hierarchy = open(f"compositional_generalization_hierarchy_{raw_extension}.txt", "w")
 
 sequence_length = args.number_of_informative_symbols + args.number_of_non_informative_symbols
 number_of_features_per_sequence_element = args.non_informative_vocabulary_size + args.number_of_informative_symbols*args.number_of_synonyms
@@ -372,6 +371,7 @@ for r in range(args.runs):
 
 	print("\nAccuracy over %d epochs:\n" % (args.epochs))
 
+	max_held_out_results_combined = 0.0
 	for e in range(args.epochs):
 		if args.resample:
 			sample_indices = rng_resample.choice(X_train.shape[0], size=X_train.shape[0], replace=True)
@@ -538,13 +538,18 @@ for r in range(args.runs):
 
 			print()
 
-		if args.write_hierarchy_to_file:
+		if args.write_hierarchy_to_file and max_held_out_results_combined < result_test_held_out_permutations * result_test_held_out_synonym_sequences:
+			f_hierarchy = open(f"compositional_generalization_hierarchy_{raw_extension}.txt", "w")
+
 			if args.extended_statistics:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True, precision_recall = (clause_precision_test, clause_recall_test))
 			else:
 				tsetlin_machine.write_hierarchy_to_file(f_hierarchy, add_ta_state=True)
 			f_hierarchy.write("\n")
-			f_hierarchy.flush()
+			
+			f_hierarchy.close()
+			
+			max_held_out_results_combined = result_test_held_out_permutations * result_test_held_out_synonym_sequences
 
 		if args.extended_statistics:
 			f_statistics.write("%d %d %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f\n" %
@@ -595,4 +600,3 @@ for r in range(args.runs):
 			)
 		f_statistics.flush()
 f_statistics.close()
-f_hierarchy.close()
