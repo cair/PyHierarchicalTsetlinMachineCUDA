@@ -699,6 +699,74 @@ class CommonTsetlinMachine():
 
 			print(")" * (self.depth - 1))
 
+	def write_hierarchy_to_file(self, f, print_ta_state=False, precision_recall=None):
+		for i in range(self.number_of_clauses):
+			if precision_recall != None:
+				f.write("\nCLAUSE #%d (W:%d P:%.1f%% R:%.1f%%): " % (i, self.get_clause_weight(i), 100.0*precision_recall[0][i], 100.0*precision_recall[1][i]), end='')
+			else:
+				f.write("\nCLAUSE #%d (W:%d): " % (i, self.get_clause_weight(i)), end='')
+
+			previous_index = np.ones((self.depth-1), dtype=np.int32)*-1
+			for j in range(self.hierarchy_size[1]):
+				component_remainder = j
+				size = 1
+
+				left = []
+				right = []
+				inside = []
+				feature_base = 0
+				size = self.hierarchy_structure[0][1]
+				for d in range(1, self.depth):
+					depth_d_node_index = component_remainder % self.hierarchy_structure[d][1]
+					component_remainder = component_remainder // self.hierarchy_structure[d][1]
+
+					if (self.hierarchy_structure[d][0] != OR_ALTERNATIVES) and (self.hierarchy_structure[d][0] != AND_ALTERNATIVES):
+						feature_base += size * depth_d_node_index 
+						size *= self.hierarchy_structure[d][1];
+
+					if previous_index[d-1] == -1:
+						left.append("(")
+					elif depth_d_node_index == 0 and previous_index[d-1] != depth_d_node_index:
+						right.append(")")
+						left.insert(0, "(")
+					elif previous_index[d-1] != depth_d_node_index:
+						if self.hierarchy_structure[d][0] in [AND_GROUP, AND_ALTERNATIVES]:
+							inside.append(" AND ")
+						elif self.hierarchy_structure[d][0] in [OR_GROUP, OR_GROUP_CONVOLUTION, OR_ALTERNATIVES]:
+							inside.append(" OR ")
+					
+					previous_index[d-1] = depth_d_node_index
+
+				for s in right:
+					f.write(s, end='')
+
+				for s in inside:
+					f.write(s, end='')
+
+				for s in left:
+					f.write(s, end='')
+
+				l = []
+				for k in range(self.number_of_literals_per_leaf):
+					if self.ta_action(i, j, k):
+						if (not self.append_negated) or k < self.number_of_literals_per_leaf // 2:
+							if f.write_ta_state:
+								l.append("x%d[%d]" % (feature_base + k, self.ta_state(i, j, k)))
+							else:
+								l.append("x%d" % (feature_base + k,))
+						else:
+							if f.write_ta_state:
+								l.append("NOT x%d[%d]" % (feature_base + k - self.number_of_literals_per_leaf // 2, self.ta_state(i, j, k)))
+							else:
+								l.append("NOT x%d" % (feature_base + k - self.number_of_literals_per_leaf // 2,))
+				
+				if len(l) > 1:
+					f.write("(" + " AND ".join(l) + ")", end = '')
+				elif len(l) == 1:
+					f.write(l[0], end = '')
+
+			f.write(")" * (self.depth - 1))
+
 	def save(self) -> dict:
 		ta_state_hierarchy = np.empty(self.number_of_clauses*self.hierarchy_size[0]*self.number_of_state_bits, dtype=np.uint32)
 		cuda.memcpy_dtoh(ta_state_hierarchy, self.ta_state_hierarchy_gpu)
